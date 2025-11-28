@@ -153,7 +153,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 43a0360d630325244b33b817819adc18, type: 2}
   - {fileID: 11400000, guid: 0bd46a9e086c79a488c7f15d177af29d, type: 2}
   actionSlots: []
-  playerUnit: {fileID: 0}
+  playerUnit: {fileID: 1784246197}
 --- !u!4 &116985824
 Transform:
   m_ObjectHideFlags: 0
