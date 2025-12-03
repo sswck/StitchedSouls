@@ -1,4 +1,5 @@
 using UnityEngine;
+using DG.Tweening;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
 
@@ -11,6 +12,25 @@ public class BattleManager : MonoBehaviour
     public List<CardData> actionSlots = new List<CardData>();
 
     public Unit playerUnit;
+
+    [Header("Spawn Settings")]
+    public Unit unitPrefab;
+
+    void Start()
+    {
+        SpawnPlayer();
+    }
+
+    void SpawnPlayer()
+    {
+        // 플레이어를 (1, 1) 위치에 소환
+        // Instantiate로 생성 후 playerUnit 변수에 저장
+        playerUnit = Instantiate(unitPrefab);
+        playerUnit.name = "Player Unit";
+        
+        // 유닛 초기화 (1, 1 좌표에 배치)
+        playerUnit.Init(1, 1);
+    }
 
     void Awake()
     {
@@ -34,20 +54,42 @@ public class BattleManager : MonoBehaviour
     // 턴 종료 버튼을 누르면 실행되는 함수: 시퀀스 실행
     public void ExecuteSlots()
     {
+        if (actionSlots.Count == 0) return;
+
         Debug.Log("--- 작전 실행 시작! ---");
-        
-        // 코루틴 등을 사용해 순차적으로 실행해야 하지만, 지금은 로그로 확인
-        for (int i = 0; i < actionSlots.Count; i++)
+
+        // 시퀀스(Sequence)는 DoTween의 기능으로, 애니메이션을 순서대로 실행해줍니다.
+        Sequence seq = DOTween.Sequence();
+
+        foreach (var card in actionSlots)
         {
-            CardData card = actionSlots[i];
-            Debug.Log($"[{i + 1}번 행동] {card.cardName} 발동! (PP 소모: {card.ppCost})");
-            
-            // 여기서 실제 유닛의 행동 함수를 호출 (나중에 구현)
-            // 예: if(card.type == Move) playerUnit.MoveTo(...);
+            // 카드를 하나씩 꺼내서 실행 예약
+            // AppendCallback: 순서대로 함수를 호출하게 함
+            seq.AppendCallback(() => 
+            {
+                Debug.Log($"[{card.cardName}] 실행!");
+
+                // 카드 이름으로 행동 구분 (나중에는 Enum 타입으로 바꿀 예정)
+                if (card.cardName == "이동" || card.cardName == "텔레포트") 
+                {
+                    playerUnit.Move(1); // 1칸 이동
+                }
+                else if (card.cardName == "공격" || card.cardName == "강타")
+                {
+                    // playerUnit.Attack(); // 나중에 구현
+                    playerUnit.transform.DOShakePosition(0.3f, 0.2f); // 공격하는 척 흔들기
+                }
+            });
+
+            // 행동 사이 딜레이 (0.6초 대기) - 이동 애니메이션 끝날 때까지 기다림
+            seq.AppendInterval(0.6f);
         }
 
-        actionSlots.Clear(); // 실행 후 슬롯 비우기
-        Debug.Log("--- 턴 종료 ---");
+        // 모든 행동이 끝나면 슬롯 비우기
+        seq.OnComplete(() => {
+            Debug.Log("--- 턴 종료 ---");
+            actionSlots.Clear();
+        });
     }
 
     // Update is called once per frame

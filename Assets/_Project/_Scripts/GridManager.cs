@@ -49,4 +49,9 @@ public class GridManager : MonoBehaviour
             cam.transform.position = new Vector3(centerX, 10, centerZ); // 높이(Y)는 10
         }
     }
+
+    public Vector3 GetWorldPosition(int x, int y)
+    {
+        return new Vector3(x * cellSize, 0.5f, y * cellSize);   // 높이(y)를 0.5f로 띄워 큐브가 바닥에 안 묻히게 함
+    }
 }
