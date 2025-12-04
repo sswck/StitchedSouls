@@ -16,6 +16,9 @@ public class BattleManager : MonoBehaviour
     [Header("Spawn Settings")]
     public Unit unitPrefab;
 
+    [Header("Units")]
+    public List<Unit> allUnits = new List<Unit>();
+
     void Start()
     {
         SpawnPlayer();
@@ -23,13 +26,36 @@ public class BattleManager : MonoBehaviour
 
     void SpawnPlayer()
     {
-        // 플레이어를 (1, 1) 위치에 소환
-        // Instantiate로 생성 후 playerUnit 변수에 저장
         playerUnit = Instantiate(unitPrefab);
         playerUnit.name = "Player Unit";
-        
-        // 유닛 초기화 (1, 1 좌표에 배치)
         playerUnit.Init(1, 1);
+
+        allUnits.Add(playerUnit);
+
+        SpawnEnemy();
+    }
+
+    void SpawnEnemy()
+    {
+        Unit enemy = Instantiate(unitPrefab);
+        enemy.name = "Sandbag Enemy";
+        // 적은 빨간색으로 표시해서 구분 (MeshRenderer 사용)
+        enemy.GetComponent<MeshRenderer>().material.color = Color.red; 
+        
+        enemy.Init(1, 3);
+        allUnits.Add(enemy);
+    }
+
+    public Unit GetUnitAt(int x, int y)
+    {
+        foreach (var unit in allUnits)
+        {
+            if (unit.gridX == x && unit.gridY == y)
+            {
+                return unit;
+            }
+        }
+        return null;
     }
 
     void Awake()
@@ -76,7 +102,7 @@ public class BattleManager : MonoBehaviour
                 }
                 else if (card.cardName == "공격" || card.cardName == "강타")
                 {
-                    // playerUnit.Attack(); // 나중에 구현
+                    playerUnit.Attack();
                     playerUnit.transform.DOShakePosition(0.3f, 0.2f); // 공격하는 척 흔들기
                 }
             });

@@ -68,4 +68,67 @@ public class Unit : MonoBehaviour
         // 피격 연출 (살짝 흔들리기)
         transform.DOShakePosition(0.2f, 0.5f);
     }
+
+    public void Attack()
+    {
+        // 1. 공격 연출 (앞으로 살짝 찌르기)
+        Vector3 punchPos = transform.position + new Vector3(0, 0, 0.5f);
+        transform.DOMove(punchPos, 0.1f).SetLoops(2, LoopType.Yoyo);
+
+        // 2. 내 앞(gridY + 1)에 누가 있는지 확인
+        int targetX = gridX;
+        int targetY = gridY + 1;
+
+        Unit target = BattleManager.Instance.GetUnitAt(targetX, targetY);
+
+        if (target != null)
+        {
+            Debug.Log($"[타격!] {target.name}을 공격했습니다!");
+            // 타겟을 뒤로 1칸 밀어버림 (넉백)
+            target.GetKnockedBack(0, 1); 
+        }
+        else
+        {
+            Debug.Log("[허공] 공격이 빗나갔습니다.");
+        }
+    }
+
+    public void GetKnockedBack(int pushX, int pushY)
+    {
+        int nextX = gridX + pushX;
+        int nextY = gridY + pushY;
+
+        // 1. 맵 밖으로 나가는지 확인 (벽 충돌 체크)
+        if (nextX < 0 || nextX >= GridManager.Instance.width || 
+            nextY < 0 || nextY >= GridManager.Instance.height)
+        {
+            // 벽 꽝! (Wall Smash)
+            Debug.Log($"<color=red>쾅!! {unitName}이(가) 벽에 부딪혀 기절했습니다!</color>");
+            
+            // 연출: 밀려나려다가 벽에 막혀서 심하게 떨림
+            transform.DOShakePosition(0.5f, 0.5f, 20, 90); 
+            
+            // 데미지 처리 (나중에 추가)
+            TakeDamage(10); 
+            return;
+        }
+
+        // 2. 밀려날 곳에 다른 유닛이 있는지 확인 (연쇄 충돌 체크)
+        Unit obstacle = BattleManager.Instance.GetUnitAt(nextX, nextY);
+        if (obstacle != null)
+        {
+            // 유닛 꽝! (Unit Crash)
+            Debug.Log($"<color=red>쿠당탕! {unitName}이(가) {obstacle.name}와 부딪혔습니다!</color>");
+            transform.DOShakePosition(0.5f, 0.3f, 10, 90);
+            return;
+        }
+
+        // 3. 장애물이 없으면 실제로 밀려남
+        gridX = nextX;
+        gridY = nextY;
+        
+        Vector3 targetPos = GridManager.Instance.GetWorldPosition(gridX, gridY);
+        // 밀려나는 연출 (빠르게 튕겨나감)
+        transform.DOMove(targetPos, 0.2f).SetEase(Ease.OutBack);
+    }
 }
