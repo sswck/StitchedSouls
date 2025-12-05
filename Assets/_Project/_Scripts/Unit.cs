@@ -10,6 +10,8 @@ public class Unit : MonoBehaviour
     public int currentHP;
     public int agility = 10;
     public int currentPP = 2;
+    public int maxMovePoints = 2;
+    public int currentMovePoints;
 
     [Header("Position")]
     public int gridX;
@@ -18,6 +20,7 @@ public class Unit : MonoBehaviour
     public void Init(int startX, int startY)
     {
         currentHP = maxHP;
+        currentMovePoints = maxMovePoints;
         gridX = startX;
         gridY = startY;
 
@@ -25,25 +28,40 @@ public class Unit : MonoBehaviour
         transform.position = GridManager.Instance.GetWorldPosition(startX, startY);
     }
 
-    public void Move(int moveAmount)
+    public void Move(int dirX, int dirY)
     {
-        // 간단한 테스트를 위해 '위쪽(Y+)'으로만 이동하게 해봅시다.
-        // 나중에는 '바라보는 방향'으로 이동하게 수정할 겁니다.
-        
-        int targetY = gridY + moveAmount;
+        int targetX = gridX + dirX;
+        int targetY = gridY + dirY;
 
-        // 맵 밖으로 나가는지 체크 (0 ~ 4 사이여야 함)
-        if (targetY >= GridManager.Instance.height)
+        if (targetX < 0 || targetX >= GridManager.Instance.width ||
+            targetY < 0 || targetY >= GridManager.Instance.height)
         {
-            targetY = GridManager.Instance.height - 1; // 맵 끝에 걸림
             Debug.Log("더 이상 갈 수 없습니다!");
+            // 연출: 벽에 막힌 느낌 (살짝 흔들기)
+            transform.DOShakePosition(0.2f, 0.1f);
+            return;
         }
 
-        gridY = targetY; // 내부 좌표 업데이트
+        if (BattleManager.Instance.GetUnitAt(targetX, targetY) != null)
+        {
+            Debug.Log("다른 유닛이 길을 막고 있습니다!");
+            transform.DOShakePosition(0.2f, 0.1f);
+            return;
+        }
 
-        // 실제 화면상 이동 (DoTween) - 0.5초 동안 점프하듯 이동
+        gridX = targetX;
+        gridY = targetY;
+
+        currentMovePoints--;
+        Debug.Log($"이동 완료! 남은 이동력: {currentMovePoints}");
+
         Vector3 targetPos = GridManager.Instance.GetWorldPosition(gridX, gridY);
-        transform.DOJump(targetPos, 0.5f, 1, 0.5f);
+        transform.DOJump(targetPos, 0.5f, 1, 0.3f);
+    }
+
+    public bool CanMove()
+    {
+        return currentMovePoints > 0;
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -69,7 +87,7 @@ public class Unit : MonoBehaviour
         transform.DOShakePosition(0.2f, 0.5f);
     }
 
-    public void Attack()
+    public void Attack(int pushPower)
     {
         // 1. 공격 연출 (앞으로 살짝 찌르기)
         Vector3 punchPos = transform.position + new Vector3(0, 0, 0.5f);
@@ -77,15 +95,18 @@ public class Unit : MonoBehaviour
 
         // 2. 내 앞(gridY + 1)에 누가 있는지 확인
         int targetX = gridX;
-        int targetY = gridY + 1;
+        int targetY = gridY + 1;    // 임시로 위쪽 공격
 
         Unit target = BattleManager.Instance.GetUnitAt(targetX, targetY);
 
         if (target != null)
         {
             Debug.Log($"[타격!] {target.name}을 공격했습니다!");
-            // 타겟을 뒤로 1칸 밀어버림 (넉백)
-            target.GetKnockedBack(0, 1); 
+
+            if (pushPower > 0)
+            {
+                target.GetKnockedBack(0, pushPower); 
+            }
         }
         else
         {
@@ -130,5 +151,11 @@ public class Unit : MonoBehaviour
         Vector3 targetPos = GridManager.Instance.GetWorldPosition(gridX, gridY);
         // 밀려나는 연출 (빠르게 튕겨나감)
         transform.DOMove(targetPos, 0.2f).SetEase(Ease.OutBack);
+    }
+
+    public void ConsumeMovePoint()
+    {
+        currentMovePoints--;
+        Debug.Log($"남은 이동력: {currentMovePoints}");
     }
 }

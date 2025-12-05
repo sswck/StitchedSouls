@@ -96,13 +96,9 @@ public class BattleManager : MonoBehaviour
                 Debug.Log($"[{card.cardName}] 실행!");
 
                 // 카드 이름으로 행동 구분 (나중에는 Enum 타입으로 바꿀 예정)
-                if (card.cardName == "이동" || card.cardName == "텔레포트") 
+                if (card.cardName == "공격" || card.cardName == "강타")
                 {
-                    playerUnit.Move(1); // 1칸 이동
-                }
-                else if (card.cardName == "공격" || card.cardName == "강타")
-                {
-                    playerUnit.Attack();
+                    playerUnit.Attack(card.pushPower);
                     playerUnit.transform.DOShakePosition(0.3f, 0.2f); // 공격하는 척 흔들기
                 }
             });
@@ -115,6 +111,8 @@ public class BattleManager : MonoBehaviour
         seq.OnComplete(() => {
             Debug.Log("--- 턴 종료 ---");
             actionSlots.Clear();
+
+            playerUnit.currentMovePoints = playerUnit.maxMovePoints;
         });
     }
 
@@ -153,5 +151,19 @@ public class BattleManager : MonoBehaviour
                 AddCardToSlot(handDeck[2]);
             }
         }
+
+        // 데모 버전: 방향키를 누르면 즉시 이동
+        if (playerUnit != null && playerUnit.CanMove())
+        {
+            if (Keyboard.current.upArrowKey.wasPressedThisFrame) MovePlayer(0, 1);
+            if (Keyboard.current.downArrowKey.wasPressedThisFrame) MovePlayer(0, -1);
+            if (Keyboard.current.leftArrowKey.wasPressedThisFrame) MovePlayer(-1, 0);
+            if (Keyboard.current.rightArrowKey.wasPressedThisFrame) MovePlayer(1, 0);
+        }
+    }
+
+    void MovePlayer(int xDir, int yDir)
+    {
+        playerUnit.Move(xDir, yDir);
     }
 }
