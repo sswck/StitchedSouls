@@ -17,6 +17,9 @@ public class Unit : MonoBehaviour
     public int gridX;
     public int gridY;
 
+    [Header("Direction")]
+    public Vector2Int lookDir = new Vector2Int(0, 1);
+
     public void Init(int startX, int startY)
     {
         currentHP = maxHP;
@@ -30,6 +33,12 @@ public class Unit : MonoBehaviour
 
     public void Move(int dirX, int dirY)
     {
+        if (dirX != 0 || dirY != 0)
+        {
+            lookDir = new Vector2Int(dirX, dirY);
+            RotateModel();
+        }
+
         int targetX = gridX + dirX;
         int targetY = gridY + dirY;
 
@@ -89,13 +98,12 @@ public class Unit : MonoBehaviour
 
     public void Attack(int pushPower)
     {
-        // 1. 공격 연출 (앞으로 살짝 찌르기)
-        Vector3 punchPos = transform.position + new Vector3(0, 0, 0.5f);
-        transform.DOMove(punchPos, 0.1f).SetLoops(2, LoopType.Yoyo);
+        int targetX = gridX + lookDir.x;
+        int targetY = gridY + lookDir.y;
 
-        // 2. 내 앞(gridY + 1)에 누가 있는지 확인
-        int targetX = gridX;
-        int targetY = gridY + 1;    // 임시로 위쪽 공격
+        // 1. 공격 연출 (앞으로 살짝 찌르기)
+        Vector3 punchDir = new Vector3(lookDir.x, 0, lookDir.y) * 0.5f;
+        transform.DOMove(transform.position + punchDir, 0.1f).SetLoops(2, LoopType.Yoyo);
 
         Unit target = BattleManager.Instance.GetUnitAt(targetX, targetY);
 
@@ -105,7 +113,9 @@ public class Unit : MonoBehaviour
 
             if (pushPower > 0)
             {
-                target.GetKnockedBack(0, pushPower); 
+                target.GetKnockedBack(lookDir.x, lookDir.y);
+                // pushPower(강도) 개념을 적용하려면, GetKnockedBack을 조금 손봐야 할 수도 있습니다. 
+                // 일단 지금은 '1칸 밀기'로 가정하고 위 코드로 진행합니다.
             }
         }
         else
@@ -157,5 +167,15 @@ public class Unit : MonoBehaviour
     {
         currentMovePoints--;
         Debug.Log($"남은 이동력: {currentMovePoints}");
+    }
+
+    void RotateModel()
+    {
+        Vector3 dirVector = new Vector3(lookDir.x, 0, lookDir.y);
+
+        if (dirVector != Vector3.zero)
+        {
+            transform.DORotateQuaternion(Quaternion.LookRotation(dirVector), 0.2f);
+        }
     }
 }
