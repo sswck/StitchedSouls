@@ -2,10 +2,16 @@ using UnityEngine;
 using DG.Tweening;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
+using System.Collections;
+
+public enum BattleState { Start, PlayerTurn, EnemyTurn, Won, Lost }
 
 public class BattleManager : MonoBehaviour
 {
     public static BattleManager Instance;
+
+    [Header("Game State")]
+    public BattleState state;
 
     [Header("Slot System")]
     public List<CardData> handDeck;
@@ -21,7 +27,51 @@ public class BattleManager : MonoBehaviour
 
     void Start()
     {
+        state = BattleState.Start;
         SpawnPlayer();
+
+        StartCoroutine(SetupBattle());
+    }
+
+    IEnumerator SetupBattle()
+    {
+        yield return new WaitForSeconds(0.5f);
+        StartPlayerTurn();
+    }
+
+    void StartPlayerTurn()
+    {
+        Debug.Log(">>> ⚔️ 플레이어 턴 시작! ⚔️ <<<");
+        state = BattleState.PlayerTurn;
+        
+        // 플레이어 유닛들의 상태 리셋 (이동력 회복 등)
+        if(playerUnit != null) playerUnit.OnTurnStart();
+    }
+
+    public void EndPlayerTurn()
+    {
+        Debug.Log("플레이어 턴 종료...");
+        state = BattleState.EnemyTurn;
+        
+        // 적의 턴으로 넘김
+        StartCoroutine(EnemyTurnRoutine());
+    }
+
+    // AI 로직이 들어갈 곳
+    IEnumerator EnemyTurnRoutine()
+    {
+        Debug.Log(">>> 😈 적 턴 시작! 😈 <<<");
+        
+        // (임시) 적이 뭔가 고민하는 척 대기
+        yield return new WaitForSeconds(0.5f);
+        Debug.Log("(적이 플레이어를 노려봅니다...)");
+        yield return new WaitForSeconds(0.5f);
+
+        // 적 행동 로직은 나중에 여기에 구현 (이동 -> 공격)
+
+        Debug.Log("적 턴 종료!");
+        // 다시 플레이어 턴으로
+        StartPlayerTurn();
     }
 
     void SpawnPlayer()
@@ -80,7 +130,14 @@ public class BattleManager : MonoBehaviour
     // 턴 종료 버튼을 누르면 실행되는 함수: 시퀀스 실행
     public void ExecuteSlots()
     {
-        if (actionSlots.Count == 0) return;
+        if (actionSlots.Count == 0)
+        {
+            Debug.Log("--- 슬롯이 비어있는 상태로 턴 종료 ---");
+            EndPlayerTurn();
+            return;
+        }
+
+        state = BattleState.EnemyTurn;
 
         Debug.Log("--- 작전 실행 시작! ---");
 
@@ -99,7 +156,6 @@ public class BattleManager : MonoBehaviour
                 if (card.cardName == "공격" || card.cardName == "강타")
                 {
                     playerUnit.Attack(card.pushPower);
-                    playerUnit.transform.DOShakePosition(0.3f, 0.2f); // 공격하는 척 흔들기
                 }
             });
 
@@ -112,13 +168,15 @@ public class BattleManager : MonoBehaviour
             Debug.Log("--- 턴 종료 ---");
             actionSlots.Clear();
 
-            playerUnit.currentMovePoints = playerUnit.maxMovePoints;
+            EndPlayerTurn();
         });
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (state != BattleState.PlayerTurn) return;
+        
         if (Keyboard.current.spaceKey.wasPressedThisFrame)
         {
             ExecuteSlots(); // 스페이스바로 실행 테스트

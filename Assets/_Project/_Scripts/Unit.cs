@@ -178,4 +178,13 @@ public class Unit : MonoBehaviour
             transform.DORotateQuaternion(Quaternion.LookRotation(dirVector), 0.2f);
         }
     }
+
+    public void OnTurnStart()
+    {
+        currentMovePoints = maxMovePoints;
+        Debug.Log($"{unitName}: 턴 시작! 이동력 회복됨.");
+        
+        // (나중에 PP 회복 로직도 여기에 추가 가능)
+        // currentPP += 2; 
+    } 
 }
