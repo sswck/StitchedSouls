@@ -186,5 +186,50 @@ public class Unit : MonoBehaviour
         
         // (나중에 PP 회복 로직도 여기에 추가 가능)
         // currentPP += 2; 
-    } 
+    }
+
+    public void AI_TakeAction(Unit target)
+    {
+        if (target == null) return;
+
+        // 1. 거리 계산 (Manhattan Distance: 격자 거리)
+        int dist = Mathf.Abs(target.gridX - gridX) + Mathf.Abs(target.gridY - gridY);
+
+        // 2. 공격 범위(1칸) 안에 있는가?
+        if (dist <= 1)
+        {
+            // 공격! (방향을 타겟 쪽으로 돌리고 공격)
+            int dirX = target.gridX - gridX;
+            int dirY = target.gridY - gridY;
+            
+            // 시선 갱신
+            lookDir = new Vector2Int(dirX, dirY);
+            RotateModel();
+
+            // 공격 (적은 1의 힘으로 넉백 공격한다고 가정)
+            Debug.Log($"🤖 AI {unitName}: 공격 시도!");
+            Attack(1); 
+        }
+        else
+        {
+            // 3. 거리가 멀다면 이동 (추격)
+            // X축 차이가 더 크면 X축 이동, 아니면 Y축 이동 (간단한 길찾기)
+            int moveDirX = 0;
+            int moveDirY = 0;
+
+            if (Mathf.Abs(target.gridX - gridX) > Mathf.Abs(target.gridY - gridY))
+            {
+                // X축 이동 (타겟이 내 오른쪽에 있으면 +1, 왼쪽이면 -1)
+                moveDirX = (target.gridX > gridX) ? 1 : -1;
+            }
+            else
+            {
+                // Y축 이동
+                moveDirY = (target.gridY > gridY) ? 1 : -1;
+            }
+
+            Debug.Log($"🤖 AI {unitName}: 플레이어 추격 이동 ({moveDirX}, {moveDirY})");
+            Move(moveDirX, moveDirY);
+        }
+    }
 }

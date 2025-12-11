@@ -61,16 +61,27 @@ public class BattleManager : MonoBehaviour
     IEnumerator EnemyTurnRoutine()
     {
         Debug.Log(">>> 😈 적 턴 시작! 😈 <<<");
-        
-        // (임시) 적이 뭔가 고민하는 척 대기
-        yield return new WaitForSeconds(0.5f);
-        Debug.Log("(적이 플레이어를 노려봅니다...)");
         yield return new WaitForSeconds(0.5f);
 
-        // 적 행동 로직은 나중에 여기에 구현 (이동 -> 공격)
+        // 1. 모든 적 유닛을 찾아서 행동시키기
+        // (지금은 리스트에 플레이어도 섞여 있으니 구분해야 함. 
+        //  하지만 간단하게 allUnits 중 playerUnit이 아닌 것만 적이라고 가정)
+        
+        foreach (var unit in allUnits)
+        {
+            // 플레이어거나 죽은 유닛은 패스
+            if (unit == playerUnit || unit.currentHP <= 0) continue;
+
+            Debug.Log($"[{unit.name}] 행동 시작...");
+            
+            // AI 행동 실행 (타겟은 무조건 플레이어)
+            unit.AI_TakeAction(playerUnit);
+
+            // 행동 간 딜레이 (애니메이션 볼 시간 줌)
+            yield return new WaitForSeconds(1.0f);
+        }
 
         Debug.Log("적 턴 종료!");
-        // 다시 플레이어 턴으로
         StartPlayerTurn();
     }
 
