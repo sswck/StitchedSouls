@@ -31,6 +31,8 @@ public class BattleManager : MonoBehaviour
         SpawnPlayer();
 
         StartCoroutine(SetupBattle());
+
+        BattleUIManager.Instance.UpdateHandUI(handDeck);
     }
 
     IEnumerator SetupBattle()
@@ -127,10 +129,12 @@ public class BattleManager : MonoBehaviour
     // UI 버튼이나 키보드 입력으로 호출할 함수: 슬롯에 카드 등록
     public void AddCardToSlot(CardData card)
     {
-        if (actionSlots.Count < 3) // 슬롯이 3개라고 가정
+        if (actionSlots.Count < 3) // 슬롯이 3개라고 가정 추후 3을 상수변수로 변경
         {
             actionSlots.Add(card);
             Debug.Log($"슬롯에 카드 등록됨: {card.cardName}");
+
+            BattleUIManager.Instance.UpdateActionSlotUI(actionSlots);
         }
         else
         {
@@ -178,6 +182,8 @@ public class BattleManager : MonoBehaviour
         seq.OnComplete(() => {
             Debug.Log("--- 턴 종료 ---");
             actionSlots.Clear();
+
+            BattleUIManager.Instance.UpdateActionSlotUI(actionSlots);
 
             EndPlayerTurn();
         });
