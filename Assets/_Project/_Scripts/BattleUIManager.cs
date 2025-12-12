@@ -12,6 +12,9 @@ public class BattleUIManager : MonoBehaviour
     public Transform actionSlotPanel;
     public GameObject cardSlotPrefab;
 
+    [Header("Drag Layer")]
+    public Transform dragLayer;
+
     void Awake()
     {
         Instance = this;
