@@ -11,6 +11,7 @@ public class BattleUIManager : MonoBehaviour
     public Transform handPanel;
     public Transform actionSlotPanel;
     public GameObject cardSlotPrefab;
+    public GameObject emptySlotPrefab;
 
     [Header("Drag Layer")]
     public Transform dragLayer;
@@ -57,6 +58,18 @@ public class BattleUIManager : MonoBehaviour
             
             // 액션 슬롯은 색상을 좀 다르게 해서 구분해볼까요? (선택)
             newSlot.GetComponent<Image>().color = Color.yellow; 
+        }
+    }
+
+    public void SetupEmptySlots()
+    {
+        // 기존 슬롯 다 지우고
+        foreach (Transform child in actionSlotPanel) Destroy(child.gameObject);
+
+        // 빈 슬롯 3개 생성
+        for (int i = 0; i < 3; i++)
+        {
+            Instantiate(emptySlotPrefab, actionSlotPanel);
         }
     }
 }

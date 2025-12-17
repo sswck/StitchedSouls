@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class DraggableCard : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    private Transform originalParent;
+    public Transform parentToReturnTo = null;
     private CanvasGroup canvasGroup;
     private RectTransform rectTransform;
 
@@ -18,7 +18,7 @@ public class DraggableCard : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     {
         Debug.Log("드래그 시작!");
         
-        originalParent = transform.parent; // 원래 부모(Panel_Hand) 기억하기
+        parentToReturnTo = transform.parent; // 원래 부모(Panel_Hand) 기억하기
         
         transform.SetParent(BattleUIManager.Instance.dragLayer);
         
@@ -42,6 +42,9 @@ public class DraggableCard : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
         // (나중에 여기에 '슬롯에 넣었나?' 확인하는 로직 추가 예정)
         // 지금은 무조건 원래 자리로 돌아오게 함
-        transform.SetParent(originalParent);
+        transform.SetParent(parentToReturnTo);
+
+        // 위치 초기화 (슬롯 중앙에 예쁘게 맞추기 위함)
+        rectTransform.localPosition = Vector3.zero;
     }
 }

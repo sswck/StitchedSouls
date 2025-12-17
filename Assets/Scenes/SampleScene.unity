@@ -579,6 +579,7 @@ MonoBehaviour:
   handPanel: {fileID: 1106064200}
   actionSlotPanel: {fileID: 83448526}
   cardSlotPrefab: {fileID: 2614687777380634901, guid: 6829f12c6ccc79e48a0fdfc7481e5c69, type: 3}
+  emptySlotPrefab: {fileID: 2614687777380634901, guid: d0f55bf05c0a77d4f91dba23e00e4521, type: 3}
   dragLayer: {fileID: 1842072966}
 --- !u!4 &776667791
 Transform:

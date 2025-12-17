@@ -33,6 +33,7 @@ public class BattleManager : MonoBehaviour
         StartCoroutine(SetupBattle());
 
         BattleUIManager.Instance.UpdateHandUI(handDeck);
+        BattleUIManager.Instance.SetupEmptySlots();
     }
 
     IEnumerator SetupBattle()
