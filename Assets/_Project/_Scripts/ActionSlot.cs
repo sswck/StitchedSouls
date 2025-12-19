@@ -5,17 +5,21 @@ public class ActionSlot : MonoBehaviour, IDropHandler
 {
     public void OnDrop(PointerEventData eventData)
     {
-        // 1. 드래그 중인 물체가 있는지 확인
         if (eventData.pointerDrag != null)
         {
-            Debug.Log("슬롯에 무언가 드롭됨!");
-
             // 드래그 중인 카드 스크립트 가져오기
             DraggableCard d = eventData.pointerDrag.GetComponent<DraggableCard>();
-            if (d != null)
+
+            if (d != null && d.cardData != null)
             {
-                // [핵심] "너 이제 핸드로 돌아가지 말고, 내(슬롯) 자식으로 들어와!"
-                d.parentToReturnTo = this.transform;
+                //Debug.Log($"슬롯에 카드 드롭됨: {d.cardData.cardName}");
+
+                BattleManager.Instance.AddCardToSlot(d.cardData);
+
+                // ※ 참고: 이전 단계의 'Visual Snap' 코드(d.parentToReturnTo = this.transform)는 
+                // BattleManager가 UI를 새로 그려버리면 의미가 없어지므로 없어도 됩니다.
+                // 하지만 부드러운 연출을 위해 남겨둬도 상관은 없습니다.
+                //d.parentToReturnTo = this.transform;
             }
         }
     }

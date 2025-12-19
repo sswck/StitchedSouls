@@ -24,20 +24,22 @@ public class BattleUIManager : MonoBehaviour
     public void UpdateHandUI(List<CardData> handDeck)
     {
         // 1. 기존 UI 싹 지우기 (초기화)
-        foreach (Transform child in handPanel)
-        {
-            Destroy(child.gameObject);
-        }
+        foreach (Transform child in handPanel) Destroy(child.gameObject);
 
         // 2. 카드 개수만큼 새로 생성
         foreach (CardData card in handDeck)
         {
             GameObject newSlot = Instantiate(cardSlotPrefab, handPanel);
+
             // 텍스트 변경 (프리팹 구조에 따라 경로가 다를 수 있음. GetComponentInChildren 사용)
             TextMeshProUGUI text = newSlot.GetComponentInChildren<TextMeshProUGUI>();
             if (text != null) text.text = card.cardName;
             
-            // (나중에 아이콘 변경 로직 등 추가)
+            DraggableCard draggable = newSlot.GetComponent<DraggableCard>();
+            if (draggable != null)
+            {
+                draggable.cardData = card;
+            }
         }
     }
 
@@ -49,27 +51,30 @@ public class BattleUIManager : MonoBehaviour
             Destroy(child.gameObject);
         }
 
-        // 2. 등록된 카드만큼 생성
-        foreach (CardData card in actionSlots)
-        {
-            GameObject newSlot = Instantiate(cardSlotPrefab, actionSlotPanel);
-            TextMeshProUGUI text = newSlot.GetComponentInChildren<TextMeshProUGUI>();
-            if (text != null) text.text = card.cardName;
-            
-            // 액션 슬롯은 색상을 좀 다르게 해서 구분해볼까요? (선택)
-            newSlot.GetComponent<Image>().color = Color.yellow; 
-        }
-    }
+        int maxSlots = 3;   // 나중에 리팩토링할 것
 
-    public void SetupEmptySlots()
-    {
-        // 기존 슬롯 다 지우고
-        foreach (Transform child in actionSlotPanel) Destroy(child.gameObject);
-
-        // 빈 슬롯 3개 생성
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < maxSlots; i++)
         {
-            Instantiate(emptySlotPrefab, actionSlotPanel);
+            if (i < actionSlots.Count)
+            {
+                // [CASE A] 리스트에 카드가 있는 경우 -> 카드 슬롯 생성
+                CardData card = actionSlots[i];
+                GameObject newSlot = Instantiate(cardSlotPrefab, actionSlotPanel);
+                
+                // 텍스트 및 데이터 설정
+                TextMeshProUGUI text = newSlot.GetComponentInChildren<TextMeshProUGUI>();
+                if (text != null) text.text = card.cardName;
+
+                // (중요) 슬롯에 들어간 카드는 더 이상 드롭을 받지 않거나, 
+                // 혹은 클릭해서 뺄 수 있어야 함. 일단은 드래그 기능만 넣어둠.
+                // 이미 장착된 카드는 드래그 불가능하게 하려면 DraggableCard를 꺼도 됨.
+            }
+            else
+            {
+                // [CASE B] 리스트에 카드가 없는 경우 -> 빈 슬롯 생성
+                // 빈 슬롯 프리팹에는 'ActionSlot' 스크립트가 있어서 드롭을 받을 수 있음
+                Instantiate(emptySlotPrefab, actionSlotPanel);
+            }
         }
     }
 }

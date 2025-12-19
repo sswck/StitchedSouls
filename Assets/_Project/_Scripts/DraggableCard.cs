@@ -5,6 +5,7 @@ using UnityEngine.UI;
 public class DraggableCard : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     public Transform parentToReturnTo = null;
+    public CardData cardData;
     private CanvasGroup canvasGroup;
     private RectTransform rectTransform;
 
