@@ -20,6 +20,10 @@ public class Unit : MonoBehaviour
     [Header("Direction")]
     public Vector2Int lookDir = new Vector2Int(0, 1);
 
+    [Header("UI")]
+    public GameObject hpBarPrefab;
+    private UnitHPBar hpBar;
+
     public void Init(int startX, int startY)
     {
         currentHP = maxHP;
@@ -29,6 +33,25 @@ public class Unit : MonoBehaviour
 
         // 시작 위치로 즉시 이동
         transform.position = GridManager.Instance.GetWorldPosition(startX, startY);
+
+        if (hpBarPrefab != null)
+        {
+            // 유닛의 자식으로 생성하지 않고, 월드에 생성 후 따라다니게 하거나
+            // 간단하게 유닛의 자식으로 넣되 위치를 머리 위로 올림
+            GameObject go = Instantiate(hpBarPrefab, transform);
+            go.transform.localPosition = Vector3.up * 1.5f; // 머리 위 1.5 높이
+            hpBar = go.GetComponent<UnitHPBar>();
+            
+            UpdateHPBar(); // 초기 상태 갱신
+        }
+    }
+
+    void UpdateHPBar()
+    {
+        if (hpBar != null)
+        {
+            hpBar.SetHP(currentHP, maxHP);
+        }
     }
 
     public void Move(int dirX, int dirY)
@@ -90,10 +113,15 @@ public class Unit : MonoBehaviour
     public void TakeDamage(int damage)
     {
         currentHP -= damage;
-        Debug.Log($"{unitName}이(가) {damage}의 피해를 입었습니다! 남은 체력: {currentHP}");
+        Debug.Log($"{unitName}이(가) {damage}의 피해를 입었습니다! 체력: {currentHP}/{maxHP}");
         
         // 피격 연출 (살짝 흔들리기)
         transform.DOShakePosition(0.2f, 0.5f);
+
+        // [추가] 맞을 때마다 UI 갱신
+        UpdateHPBar();
+
+        // ... (사망 처리 로직 등)
     }
 
     public void Attack(int pushPower)
@@ -110,6 +138,10 @@ public class Unit : MonoBehaviour
         if (target != null)
         {
             Debug.Log($"[타격!] {target.name}을 공격했습니다!");
+
+            // [추가] 데미지 주기! (일단 기본 데미지 3로 설정)
+            // 나중에 카드 데이터에서 damage 값을 받아오도록 업그레이드할 수 있습니다.
+            target.TakeDamage(3);
 
             if (pushPower > 0)
             {

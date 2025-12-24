@@ -106,7 +106,7 @@ public class BattleManager : MonoBehaviour
         // 적은 빨간색으로 표시해서 구분 (MeshRenderer 사용)
         enemy.GetComponent<MeshRenderer>().material.color = Color.red; 
         
-        enemy.Init(1, 3);
+        enemy.Init(1, 4);
         allUnits.Add(enemy);
     }
 

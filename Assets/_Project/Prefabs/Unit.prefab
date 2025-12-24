@@ -90,6 +90,7 @@ MeshRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
 --- !u!65 &2776787898475966522
 BoxCollider:
@@ -129,5 +130,9 @@ MonoBehaviour:
   currentHP: 0
   agility: 10
   currentPP: 2
+  maxMovePoints: 2
+  currentMovePoints: 0
   gridX: 0
   gridY: 0
+  lookDir: {x: 0, y: 1}
+  hpBarPrefab: {fileID: 98269044502590925, guid: 9250afce0bd9f314c814cd4001ff0db0, type: 3}
