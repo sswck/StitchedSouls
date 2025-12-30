@@ -53,10 +53,13 @@ public class BattleManager : MonoBehaviour
 
     public void EndPlayerTurn()
     {
+        if (state == BattleState.Won || state == BattleState.Lost)
+        {
+            return;
+        }
+
         Debug.Log("플레이어 턴 종료...");
         state = BattleState.EnemyTurn;
-        
-        // 적의 턴으로 넘김
         StartCoroutine(EnemyTurnRoutine());
     }
 
@@ -64,14 +67,18 @@ public class BattleManager : MonoBehaviour
     IEnumerator EnemyTurnRoutine()
     {
         Debug.Log(">>> 😈 적 턴 시작! 😈 <<<");
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(1.0f);
+
+        if (state == BattleState.Won || state == BattleState.Lost) yield break;
 
         // 1. 모든 적 유닛을 찾아서 행동시키기
         // (지금은 리스트에 플레이어도 섞여 있으니 구분해야 함. 
         //  하지만 간단하게 allUnits 중 playerUnit이 아닌 것만 적이라고 가정)
-        
         foreach (var unit in allUnits)
         {
+            // [추가] 행동 루프 도중에도 게임이 끝났다면 즉시 중단 (예: 반격으로 적 사망 등)
+            if (state == BattleState.Won || state == BattleState.Lost) yield break;
+
             // 플레이어거나 죽은 유닛은 패스
             if (unit == playerUnit || unit.currentHP <= 0) continue;
 
@@ -85,6 +92,7 @@ public class BattleManager : MonoBehaviour
         }
 
         Debug.Log("적 턴 종료!");
+        if (state == BattleState.Won || state == BattleState.Lost) yield break;
         StartPlayerTurn();
     }
 
@@ -241,5 +249,49 @@ public class BattleManager : MonoBehaviour
     void MovePlayer(int xDir, int yDir)
     {
         playerUnit.Move(xDir, yDir);
+    }
+
+    public void OnUnitDead(Unit deadUnit)
+    {
+        // 1. 플레이어가 죽었을 때 -> 패배
+        if (deadUnit == playerUnit)
+        {
+            GameOver();
+            return;
+        }
+
+        // 2. 적이 죽었을 때 -> 남은 적이 있는지 확인
+        // (지금은 적 리스트를 따로 관리하지 않고 allUnits에 섞여 있으므로 간단히 체크)
+        bool anyEnemyAlive = false;
+        foreach (var unit in allUnits)
+        {
+            // 플레이어가 아니고, 살아있는(Active) 유닛이 하나라도 있다면 적이 남은 것
+            if (unit != playerUnit && unit.gameObject.activeInHierarchy && unit != deadUnit)
+            {
+                anyEnemyAlive = true;
+                break;
+            }
+        }
+
+        if (!anyEnemyAlive)
+        {
+            Victory();
+        }
+    }
+    
+    void Victory()
+    {
+        state = BattleState.Won;
+        Debug.Log("🎉 승리했습니다! 모든 적을 처치했습니다. 🎉");
+        
+        // (나중에 여기에 '승리 팝업' UI 띄우는 코드 추가)
+    }
+
+    void GameOver()
+    {
+        state = BattleState.Lost;
+        Debug.Log("😭 패배했습니다... 플레이어가 사망했습니다. 😭");
+
+        // (나중에 여기에 '재시작' 버튼 띄우는 코드 추가)
     }
 }

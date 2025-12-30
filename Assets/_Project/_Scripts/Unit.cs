@@ -121,7 +121,29 @@ public class Unit : MonoBehaviour
         // [추가] 맞을 때마다 UI 갱신
         UpdateHPBar();
 
-        // ... (사망 처리 로직 등)
+        if (currentHP <= 0)
+        {
+            Die();
+        }
+    }
+
+    void Die()
+    {
+        Debug.Log($"💀 {unitName} 사망!");
+
+        // 1. 더 이상 공격받거나 충돌하지 않게 콜라이더 끄기 (선택 사항이지만 추천)
+        var col = GetComponent<Collider>();
+        if (col != null) col.enabled = false;
+
+        // 2. 사망 연출 (0.5초 동안 작아지면서 사라지기)
+        transform.DOScale(Vector3.zero, 0.5f).OnComplete(() => 
+        {
+            // 연출이 끝나면 오브젝트 비활성화
+            gameObject.SetActive(false);
+            
+            // 3. 매니저에게 "나 죽었어" 보고
+            BattleManager.Instance.OnUnitDead(this);
+        });
     }
 
     public void Attack(int pushPower)
