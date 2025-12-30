@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class BattleUIManager : MonoBehaviour
 {
@@ -15,6 +16,10 @@ public class BattleUIManager : MonoBehaviour
 
     [Header("Drag Layer")]
     public Transform dragLayer;
+
+    [Header("Result UI")]
+    public GameObject resultPanel;
+    public TextMeshProUGUI resultText;
 
     void Awake()
     {
@@ -76,5 +81,27 @@ public class BattleUIManager : MonoBehaviour
                 Instantiate(emptySlotPrefab, actionSlotPanel);
             }
         }
+    }
+
+    public void ShowResultUI(bool isWin)
+    {
+        resultPanel.SetActive(true); // 패널 켜기
+
+        if (isWin)
+        {
+            resultText.text = "VICTORY!";
+            resultText.color = Color.yellow;
+        }
+        else
+        {
+            resultText.text = "GAME OVER";
+            resultText.color = Color.red;
+        }
+    }
+
+    public void OnRestartButton()
+    {
+        // 현재 씬을 다시 로드 (재시작)
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
     }
 }

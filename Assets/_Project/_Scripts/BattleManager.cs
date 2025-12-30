@@ -284,7 +284,8 @@ public class BattleManager : MonoBehaviour
         state = BattleState.Won;
         Debug.Log("🎉 승리했습니다! 모든 적을 처치했습니다. 🎉");
         
-        // (나중에 여기에 '승리 팝업' UI 띄우는 코드 추가)
+        // [추가] 승리 팝업 호출
+        BattleUIManager.Instance.ShowResultUI(true);
     }
 
     void GameOver()
@@ -292,6 +293,7 @@ public class BattleManager : MonoBehaviour
         state = BattleState.Lost;
         Debug.Log("😭 패배했습니다... 플레이어가 사망했습니다. 😭");
 
-        // (나중에 여기에 '재시작' 버튼 띄우는 코드 추가)
+        // [추가] 패배 팝업 호출
+        BattleUIManager.Instance.ShowResultUI(false);
     }
 }
