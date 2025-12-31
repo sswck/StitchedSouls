@@ -216,7 +216,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a3cf300a43775ed4991b47abecf1786d, type: 2}
   - {fileID: 11400000, guid: 43a0360d630325244b33b817819adc18, type: 2}
   actionSlots: []
-  playerUnit: {fileID: 0}
+  playerUnit: {fileID: 2959414827006216199, guid: 0fdf30c54b9fecf4b9a1babfd0d9cd00, type: 3}
   unitPrefab: {fileID: 2959414827006216199, guid: 0fdf30c54b9fecf4b9a1babfd0d9cd00, type: 3}
   allUnits: []
 --- !u!4 &116985824
