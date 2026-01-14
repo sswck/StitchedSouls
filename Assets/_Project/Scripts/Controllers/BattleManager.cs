@@ -112,7 +112,7 @@ public class BattleManager : MonoBehaviour
         Unit enemy = Instantiate(unitPrefab);
         enemy.name = "Sandbag Enemy";
         // 적은 빨간색으로 표시해서 구분 (MeshRenderer 사용)
-        enemy.GetComponent<MeshRenderer>().material.color = Color.red; 
+        //enemy.GetComponent<MeshRenderer>().material.color = Color.red; // 큐브일때 적을 빨갛게 표시하는 코드
         
         enemy.Init(1, 4);
         allUnits.Add(enemy);

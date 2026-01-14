@@ -1,0 +1,59 @@
+e_5.png
+size:1024,1024
+filter:MipMapLinearLinear,MipMapLinearLinear
+pma:true
+01_metal
+bounds:161,684,115,115
+offsets:204,331,551,588
+02_ear R
+bounds:812,626,199,189
+offsets:139,398,551,588
+rotate:90
+03_neck
+bounds:589,827,297,185
+offsets:42,193,551,588
+04_head
+bounds:2,801,286,211
+offsets:2,256,551,588
+05_ear L
+bounds:161,534,136,158
+offsets:104,429,551,588
+rotate:90
+06_neck
+bounds:812,559,86,65
+offsets:99,252,551,588
+07_arm R
+bounds:471,605,106,206
+offsets:219,122,551,588
+08_mane
+bounds:290,813,297,199
+offsets:139,134,551,588
+09_thigh R
+bounds:290,672,179,139
+offsets:195,58,551,588
+10_foot R
+bounds:579,580,91,36
+offsets:254,1,551,588
+11_ankle R
+bounds:2,587,89,69
+offsets:286,5,551,588
+12_tail
+bounds:321,453,217,182
+offsets:334,19,551,588
+rotate:270
+13_baby
+bounds:588,618,207,222
+offsets:165,83,551,588
+rotate:90
+14_thigh L
+bounds:2,658,157,141
+offsets:136,52,551,588
+15_foot L
+bounds:900,590,100,34
+offsets:118,10,551,588
+16_ankle L
+bounds:888,830,69,53
+offsets:182,15,551,588
+17_arm L
+bounds:888,885,124,127
+offsets:91,128,551,588

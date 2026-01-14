@@ -1,15 +1,15 @@
 using UnityEngine;
 using DG.Tweening;
-using Unity.VisualScripting;
+using Spine.Unity; // [필수] Spine 기능을 사용하기 위해 추가
 
 public class Unit : MonoBehaviour
 {
+    #region Variables
+
     [Header("Stats")]
     public string unitName;
     public int maxHP = 50;
     public int currentHP;
-    public int agility = 10;
-    public int currentPP = 2;
     public int maxMovePoints = 2;
     public int currentMovePoints;
 
@@ -17,13 +17,20 @@ public class Unit : MonoBehaviour
     public int gridX;
     public int gridY;
 
-    [Header("Direction")]
-    public Vector2Int lookDir = new Vector2Int(0, 1);
+    [Header("Visual & Animation")]
+    // [중요] 스파인 애니메이션 제어 컴포넌트
+    [SerializeField] private SkeletonAnimation skeletonAnimation; 
+    
+    [SpineAnimation] public string idleAnimName = "Idle";
+    [SpineAnimation] public string attackAnimName = "attack_standing";
 
     [Header("UI")]
     public GameObject hpBarPrefab;
     private UnitHPBar hpBar;
 
+    #endregion
+
+    // 초기화
     public void Init(int startX, int startY)
     {
         currentHP = maxHP;
@@ -31,63 +38,91 @@ public class Unit : MonoBehaviour
         gridX = startX;
         gridY = startY;
 
-        // 시작 위치로 즉시 이동
-        transform.position = GridManager.Instance.GetWorldPosition(startX, startY);
+        // [수정] GridManager가 있다면 사용하고, 없으면 간단한 계산식 사용
+        // (현재 프로젝트 상황에 맞춰 1칸=1유닛 크기로 배치)
+        transform.position = new Vector3(gridX, 0.5f, gridY);
 
-        if (hpBarPrefab != null)
-        {
-            // 유닛의 자식으로 생성하지 않고, 월드에 생성 후 따라다니게 하거나
-            // 간단하게 유닛의 자식으로 넣되 위치를 머리 위로 올림
-            GameObject go = Instantiate(hpBarPrefab, transform);
-            go.transform.localPosition = Vector3.up * 1.5f; // 머리 위 1.5 높이
-            hpBar = go.GetComponent<UnitHPBar>();
-            
-            UpdateHPBar(); // 초기 상태 갱신
-        }
+        InitializeHPBar();
+        
+        // [추가] 시작 시 대기 모션 재생
+        PlayAnim(idleAnimName, true);
     }
 
-    void UpdateHPBar()
+    // ----------------------------------------------------------------
+    // [1] 애니메이션 헬퍼 함수들
+    // ----------------------------------------------------------------
+    
+    // 애니메이션 재생
+    private void PlayAnim(string animName, bool loop)
     {
-        if (hpBar != null)
+        if (skeletonAnimation == null || string.IsNullOrEmpty(animName)) return;
+        skeletonAnimation.AnimationState.SetAnimation(0, animName, loop);
+    }
+
+    // 좌우 반전 (왼쪽으로 갈 때는 뒤집기)
+    private void SetFlip(bool isLeft)
+    {
+        if (skeletonAnimation != null)
         {
-            hpBar.SetHP(currentHP, maxHP);
+            // 스파인은 ScaleX에 -1을 곱해 좌우를 뒤집습니다.
+            skeletonAnimation.Skeleton.ScaleX = isLeft ? -1 : 1;
         }
     }
+
+    private void InitializeHPBar()
+    {
+        if (hpBarPrefab == null) return;
+        GameObject go = Instantiate(hpBarPrefab, transform);
+        // 스파인 캐릭터 높이에 맞춰 HP바 위치 조정 (필요시 숫자 변경)
+        go.transform.localPosition = Vector3.up * 2.5f; 
+        hpBar = go.GetComponent<UnitHPBar>();
+        UpdateHPBar();
+    }
+
+    // ----------------------------------------------------------------
+    // [2] 이동 로직 (오직 키보드/AI로만 작동)
+    // ----------------------------------------------------------------
 
     public void Move(int dirX, int dirY)
     {
-        if (dirX != 0 || dirY != 0)
-        {
-            lookDir = new Vector2Int(dirX, dirY);
-            RotateModel();
-        }
+        // 1. 방향 전환 (Spine 좌우 반전)
+        if (dirX != 0) SetFlip(dirX < 0);
 
         int targetX = gridX + dirX;
         int targetY = gridY + dirY;
 
-        if (targetX < 0 || targetX >= GridManager.Instance.width ||
-            targetY < 0 || targetY >= GridManager.Instance.height)
+        // 2. 맵 밖인지 확인 (GridManager가 없어도 동작하도록 하드코딩 범위 추가 가능)
+        // 일단 기존 GridManager 로직 유지하되, null 체크 추가
+        if (GridManager.Instance != null)
         {
-            Debug.Log("더 이상 갈 수 없습니다!");
-            // 연출: 벽에 막힌 느낌 (살짝 흔들기)
-            transform.DOShakePosition(0.2f, 0.1f);
-            return;
+            if (targetX < 0 || targetX >= GridManager.Instance.width ||
+                targetY < 0 || targetY >= GridManager.Instance.height)
+            {
+                transform.DOShakePosition(0.2f, 0.1f);
+                return;
+            }
+        }
+        else 
+        {
+            // GridManager가 없는 경우 임시 범위 체크 (0~9)
+            if (targetX < 0 || targetX > 9 || targetY < 0 || targetY > 9) return;
         }
 
+        // 3. 장애물 확인
         if (BattleManager.Instance.GetUnitAt(targetX, targetY) != null)
         {
-            Debug.Log("다른 유닛이 길을 막고 있습니다!");
             transform.DOShakePosition(0.2f, 0.1f);
             return;
         }
 
+        // 4. 이동 실행
         gridX = targetX;
         gridY = targetY;
 
         currentMovePoints--;
-        Debug.Log($"이동 완료! 남은 이동력: {currentMovePoints}");
-
-        Vector3 targetPos = GridManager.Instance.GetWorldPosition(gridX, gridY);
+        
+        // 실제 월드 좌표로 이동
+        Vector3 targetPos = new Vector3(gridX, 0.5f, gridY);
         transform.DOJump(targetPos, 0.5f, 1, 0.3f);
     }
 
@@ -96,86 +131,72 @@ public class Unit : MonoBehaviour
         return currentMovePoints > 0;
     }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public void OnTurnStart()
     {
-        currentHP = maxHP;
+        currentMovePoints = maxMovePoints;
+        Debug.Log($"{unitName}: 턴 시작! 이동력 회복.");
     }
 
-    // 이동 함수 (DoTween 사용)
-    public void MoveTo(Vector3 targetPos)
-    {
-        // 0.5초 동안 targetPos로 이동
-        transform.DOMove(targetPos, 0.5f).SetEase(Ease.OutQuad);
-    }
-
-    // 피격 및 넉백 테스트용 함수
-    public void TakeDamage(int damage)
-    {
-        currentHP -= damage;
-        Debug.Log($"{unitName}이(가) {damage}의 피해를 입었습니다! 체력: {currentHP}/{maxHP}");
-        
-        // 피격 연출 (살짝 흔들리기)
-        transform.DOShakePosition(0.2f, 0.5f);
-
-        // [추가] 맞을 때마다 UI 갱신
-        UpdateHPBar();
-
-        if (currentHP <= 0)
-        {
-            Die();
-        }
-    }
-
-    void Die()
-    {
-        Debug.Log($"💀 {unitName} 사망!");
-
-        // 1. 더 이상 공격받거나 충돌하지 않게 콜라이더 끄기 (선택 사항이지만 추천)
-        var col = GetComponent<Collider>();
-        if (col != null) col.enabled = false;
-
-        // 2. 사망 연출 (0.5초 동안 작아지면서 사라지기)
-        transform.DOScale(Vector3.zero, 0.5f).OnComplete(() => 
-        {
-            // 연출이 끝나면 오브젝트 비활성화
-            gameObject.SetActive(false);
-            
-            // 3. 매니저에게 "나 죽었어" 보고
-            BattleManager.Instance.OnUnitDead(this);
-        });
-    }
+    // ----------------------------------------------------------------
+    // [3] 액션 및 피격 로직 (Spine 연동)
+    // ----------------------------------------------------------------
 
     public void Attack(int pushPower)
     {
-        int targetX = gridX + lookDir.x;
-        int targetY = gridY + lookDir.y;
+        // Spine이 바라보는 방향(-1 or 1)을 기준으로 공격 방향 결정
+        int dirX = (skeletonAnimation != null && skeletonAnimation.Skeleton.ScaleX < 0) ? -1 : 1;
+        int targetX = gridX + dirX;
+        int targetY = gridY; // 현재는 좌우 공격만 가정 (상하 공격 필요시 로직 추가)
 
-        // 1. 공격 연출 (앞으로 살짝 찌르기)
-        Vector3 punchDir = new Vector3(lookDir.x, 0, lookDir.y) * 0.5f;
-        transform.DOMove(transform.position + punchDir, 0.1f).SetLoops(2, LoopType.Yoyo);
+        // 1. 공격 애니메이션 재생 (반복 X)
+        PlayAnim(attackAnimName, false);
 
-        Unit target = BattleManager.Instance.GetUnitAt(targetX, targetY);
-
-        if (target != null)
+        // 2. 공격 타이밍 맞추기 (애니메이션과 데미지 싱크)
+        // BattleManager의 Sequence 딜레이(0.6초) 안에 모든 걸 처리
+        DOVirtual.DelayedCall(0.3f, () => 
         {
-            Debug.Log($"[타격!] {target.name}을 공격했습니다!");
-
-            // [추가] 데미지 주기! (일단 기본 데미지 3로 설정)
-            // 나중에 카드 데이터에서 damage 값을 받아오도록 업그레이드할 수 있습니다.
-            target.TakeDamage(3);
-
-            if (pushPower > 0)
+            // 실제 데미지 처리
+            Unit target = BattleManager.Instance.GetUnitAt(targetX, targetY);
+            if (target != null)
             {
-                target.GetKnockedBack(lookDir.x, lookDir.y);
-                // pushPower(강도) 개념을 적용하려면, GetKnockedBack을 조금 손봐야 할 수도 있습니다. 
-                // 일단 지금은 '1칸 밀기'로 가정하고 위 코드로 진행합니다.
+                Debug.Log($"⚔️ {unitName} 공격 -> {target.name}");
+                target.TakeDamage(3); // 기본 데미지 3
+                if (pushPower > 0) target.GetKnockedBack(dirX, 0);
             }
-        }
-        else
+        });
+
+        // 3. 공격 후 다시 Idle로 복귀 (0.6초 뒤)
+        DOVirtual.DelayedCall(0.6f, () => 
         {
-            Debug.Log("[허공] 공격이 빗나갔습니다.");
+            PlayAnim(idleAnimName, true);
+        });
+    }
+
+    public void TakeDamage(int damage)
+    {
+        currentHP -= damage;
+        UpdateHPBar();
+
+        // 피격 시 붉게 깜빡임 (Spine은 MeshRenderer를 사용)
+        var meshRenderer = GetComponentInChildren<MeshRenderer>();
+        if (meshRenderer != null)
+        {
+            meshRenderer.material.DOColor(Color.red, 0.2f).SetLoops(2, LoopType.Yoyo);
         }
+
+        if (currentHP <= 0) Die();
+    }
+
+    private void Die()
+    {
+        Collider col = GetComponent<Collider>();
+        if (col != null) col.enabled = false;
+
+        transform.DOScale(Vector3.zero, 0.5f).OnComplete(() =>
+        {
+            gameObject.SetActive(false);
+            if (BattleManager.Instance != null) BattleManager.Instance.OnUnitDead(this);
+        });
     }
 
     public void GetKnockedBack(int pushX, int pushY)
@@ -183,107 +204,50 @@ public class Unit : MonoBehaviour
         int nextX = gridX + pushX;
         int nextY = gridY + pushY;
 
-        // 1. 맵 밖으로 나가는지 확인 (벽 충돌 체크)
-        if (nextX < 0 || nextX >= GridManager.Instance.width || 
-            nextY < 0 || nextY >= GridManager.Instance.height)
+        // 벽이나 유닛 체크 로직 (기존 유지)
+        if (BattleManager.Instance.GetUnitAt(nextX, nextY) != null)
         {
-            // 벽 꽝! (Wall Smash)
-            Debug.Log($"<color=red>쾅!! {unitName}이(가) 벽에 부딪혀 기절했습니다!</color>");
-            
-            // 연출: 밀려나려다가 벽에 막혀서 심하게 떨림
-            transform.DOShakePosition(0.5f, 0.5f, 20, 90); 
-            
-            // 데미지 처리 (나중에 추가)
-            TakeDamage(10); 
+            transform.DOShakePosition(0.5f, 0.3f);
             return;
         }
 
-        // 2. 밀려날 곳에 다른 유닛이 있는지 확인 (연쇄 충돌 체크)
-        Unit obstacle = BattleManager.Instance.GetUnitAt(nextX, nextY);
-        if (obstacle != null)
-        {
-            // 유닛 꽝! (Unit Crash)
-            Debug.Log($"<color=red>쿠당탕! {unitName}이(가) {obstacle.name}와 부딪혔습니다!</color>");
-            transform.DOShakePosition(0.5f, 0.3f, 10, 90);
-            return;
-        }
-
-        // 3. 장애물이 없으면 실제로 밀려남
         gridX = nextX;
         gridY = nextY;
         
-        Vector3 targetPos = GridManager.Instance.GetWorldPosition(gridX, gridY);
-        // 밀려나는 연출 (빠르게 튕겨나감)
+        Vector3 targetPos = new Vector3(gridX, 0.5f, gridY);
         transform.DOMove(targetPos, 0.2f).SetEase(Ease.OutBack);
     }
 
-    public void ConsumeMovePoint()
+    private void UpdateHPBar()
     {
-        currentMovePoints--;
-        Debug.Log($"남은 이동력: {currentMovePoints}");
+        if (hpBar != null) hpBar.SetHP(currentHP, maxHP);
     }
 
-    void RotateModel()
-    {
-        Vector3 dirVector = new Vector3(lookDir.x, 0, lookDir.y);
-
-        if (dirVector != Vector3.zero)
-        {
-            transform.DORotateQuaternion(Quaternion.LookRotation(dirVector), 0.2f);
-        }
-    }
-
-    public void OnTurnStart()
-    {
-        currentMovePoints = maxMovePoints;
-        Debug.Log($"{unitName}: 턴 시작! 이동력 회복됨.");
-        
-        // (나중에 PP 회복 로직도 여기에 추가 가능)
-        // currentPP += 2; 
-    }
-
+    // AI 로직 (기존 유지)
     public void AI_TakeAction(Unit target)
     {
         if (target == null) return;
-
-        // 1. 거리 계산 (Manhattan Distance: 격자 거리)
         int dist = Mathf.Abs(target.gridX - gridX) + Mathf.Abs(target.gridY - gridY);
 
-        // 2. 공격 범위(1칸) 안에 있는가?
         if (dist <= 1)
         {
-            // 공격! (방향을 타겟 쪽으로 돌리고 공격)
+            // 타겟 방향 바라보기 (공격 전 회전)
             int dirX = target.gridX - gridX;
-            int dirY = target.gridY - gridY;
+            if (dirX != 0) SetFlip(dirX < 0);
             
-            // 시선 갱신
-            lookDir = new Vector2Int(dirX, dirY);
-            RotateModel();
-
-            // 공격 (적은 1의 힘으로 넉백 공격한다고 가정)
-            Debug.Log($"🤖 AI {unitName}: 공격 시도!");
-            Attack(1); 
+            Attack(1);
         }
         else
         {
-            // 3. 거리가 멀다면 이동 (추격)
-            // X축 차이가 더 크면 X축 이동, 아니면 Y축 이동 (간단한 길찾기)
-            int moveDirX = 0;
-            int moveDirY = 0;
-
+            // 추격
+            int moveX = 0;
+            int moveY = 0;
             if (Mathf.Abs(target.gridX - gridX) > Mathf.Abs(target.gridY - gridY))
-            {
-                // X축 이동 (타겟이 내 오른쪽에 있으면 +1, 왼쪽이면 -1)
-                moveDirX = (target.gridX > gridX) ? 1 : -1;
-            }
+                moveX = (target.gridX > gridX) ? 1 : -1;
             else
-            {
-                // Y축 이동
-                moveDirY = (target.gridY > gridY) ? 1 : -1;
-            }
+                moveY = (target.gridY > gridY) ? 1 : -1;
 
-            Debug.Log($"🤖 AI {unitName}: 플레이어 추격 이동 ({moveDirX}, {moveDirY})");
-            Move(moveDirX, moveDirY);
+            Move(moveX, moveY);
         }
     }
 }

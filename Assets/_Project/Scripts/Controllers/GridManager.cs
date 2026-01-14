@@ -7,11 +7,15 @@ public class GridManager : MonoBehaviour
     [Header("Map Settings")]
     public int width = 5;
     public int height = 5;
-    public float cellSize = 1.1f; // 타일 간격
+    public float cellSize = 1.1f;
+
+    [Header("Camera Settings")]
+    public Transform cam;
+    public Vector3 cameraOffset = new Vector3(0, 7, -6); 
+    public Vector3 cameraRotation = new Vector3(50, 0, 0);
 
     [Header("References")]
-    public Tile tilePrefab; // 생성할 타일의 원본 프리팹
-    public Transform cam;   // 메인 카메라 (위치 자동 정렬용)
+    public Tile tilePrefab;
 
     void Awake()
     {
@@ -25,28 +29,21 @@ public class GridManager : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
-                // 3D 공간이므로 (x, 0, y) 좌표에 생성
                 Vector3 spawnPos = new Vector3(x * cellSize, 0, y * cellSize);
-                
-                // 타일 생성 (Instantiate)
                 Tile spawnedTile = Instantiate(tilePrefab, spawnPos, Quaternion.identity);
-                
-                // 생성된 타일 초기화
                 spawnedTile.Init(x, y);
-                
-                // 하이어라키 정리: GridManager의 자식으로 넣기
                 spawnedTile.transform.SetParent(this.transform);
             }
         }
 
-        // 카메라를 맵의 정중앙으로 이동시키기
         if (cam != null)
         {
-            // 중앙 좌표 계산
             float centerX = (width * cellSize) / 2 - (cellSize / 2);
             float centerZ = (height * cellSize) / 2 - (cellSize / 2);
-            
-            cam.transform.position = new Vector3(centerX, 10, centerZ); // 높이(Y)는 10
+            Vector3 centerPos = new Vector3(centerX, 0, centerZ);
+
+            cam.transform.position = centerPos + cameraOffset;
+            cam.transform.rotation = Quaternion.Euler(cameraRotation);
         }
     }
 
