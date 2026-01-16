@@ -1,6 +1,7 @@
 using UnityEngine;
 using DG.Tweening;
-using Spine.Unity; // [필수] Spine 기능을 사용하기 위해 추가
+using Spine.Unity;
+using System.Collections.Generic;
 
 public class Unit : MonoBehaviour
 {
@@ -18,7 +19,6 @@ public class Unit : MonoBehaviour
     public int gridY;
 
     [Header("Visual & Animation")]
-    // [중요] 스파인 애니메이션 제어 컴포넌트
     [SerializeField] private SkeletonAnimation skeletonAnimation; 
     
     [SpineAnimation] public string idleAnimName = "Idle";
@@ -30,7 +30,6 @@ public class Unit : MonoBehaviour
 
     #endregion
 
-    // 초기화
     public void Init(int startX, int startY)
     {
         currentHP = maxHP;
@@ -38,33 +37,29 @@ public class Unit : MonoBehaviour
         gridX = startX;
         gridY = startY;
 
-        // [수정] GridManager가 있다면 사용하고, 없으면 간단한 계산식 사용
-        // (현재 프로젝트 상황에 맞춰 1칸=1유닛 크기로 배치)
-        transform.position = new Vector3(gridX, 0.5f, gridY);
+        // GridManager가 없어도 동작하도록 안전장치
+        if (GridManager.Instance != null)
+            transform.position = GridManager.Instance.GetWorldPosition(gridX, gridY);
+        else
+            transform.position = new Vector3(gridX * 1.1f, 0.5f, gridY * 1.1f);
 
         InitializeHPBar();
-        
-        // [추가] 시작 시 대기 모션 재생
         PlayAnim(idleAnimName, true);
     }
 
     // ----------------------------------------------------------------
-    // [1] 애니메이션 헬퍼 함수들
+    // [1] 애니메이션 & 비주얼
     // ----------------------------------------------------------------
-    
-    // 애니메이션 재생
     private void PlayAnim(string animName, bool loop)
     {
         if (skeletonAnimation == null || string.IsNullOrEmpty(animName)) return;
         skeletonAnimation.AnimationState.SetAnimation(0, animName, loop);
     }
 
-    // 좌우 반전 (왼쪽으로 갈 때는 뒤집기)
     private void SetFlip(bool isLeft)
     {
         if (skeletonAnimation != null)
         {
-            // 스파인은 ScaleX에 -1을 곱해 좌우를 뒤집습니다.
             skeletonAnimation.Skeleton.ScaleX = isLeft ? -1 : 1;
         }
     }
@@ -73,26 +68,28 @@ public class Unit : MonoBehaviour
     {
         if (hpBarPrefab == null) return;
         GameObject go = Instantiate(hpBarPrefab, transform);
-        // 스파인 캐릭터 높이에 맞춰 HP바 위치 조정 (필요시 숫자 변경)
-        go.transform.localPosition = Vector3.up * 2.5f; 
+        go.transform.localPosition = Vector3.up * 2.5f; // 필요시 숫자변경으로 체력바와 유닛과의 높이조절
         hpBar = go.GetComponent<UnitHPBar>();
         UpdateHPBar();
     }
 
+    private void UpdateHPBar()
+    {
+        if (hpBar != null) hpBar.SetHP(currentHP, maxHP);
+    }
+
     // ----------------------------------------------------------------
-    // [2] 이동 로직 (오직 키보드/AI로만 작동)
+    // [2] 이동 로직 (키보드/AI 전용)
     // ----------------------------------------------------------------
+    public bool CanMove() => currentMovePoints > 0;
 
     public void Move(int dirX, int dirY)
     {
-        // 1. 방향 전환 (Spine 좌우 반전)
         if (dirX != 0) SetFlip(dirX < 0);
 
         int targetX = gridX + dirX;
         int targetY = gridY + dirY;
 
-        // 2. 맵 밖인지 확인 (GridManager가 없어도 동작하도록 하드코딩 범위 추가 가능)
-        // 일단 기존 GridManager 로직 유지하되, null 체크 추가
         if (GridManager.Instance != null)
         {
             if (targetX < 0 || targetX >= GridManager.Instance.width ||
@@ -102,89 +99,226 @@ public class Unit : MonoBehaviour
                 return;
             }
         }
-        else 
-        {
-            // GridManager가 없는 경우 임시 범위 체크 (0~9)
-            if (targetX < 0 || targetX > 9 || targetY < 0 || targetY > 9) return;
-        }
 
-        // 3. 장애물 확인
         if (BattleManager.Instance.GetUnitAt(targetX, targetY) != null)
         {
             transform.DOShakePosition(0.2f, 0.1f);
             return;
         }
 
-        // 4. 이동 실행
         gridX = targetX;
         gridY = targetY;
-
         currentMovePoints--;
-        
-        // 실제 월드 좌표로 이동
-        Vector3 targetPos = new Vector3(gridX, 0.5f, gridY);
-        transform.DOJump(targetPos, 0.5f, 1, 0.3f);
-    }
 
-    public bool CanMove()
-    {
-        return currentMovePoints > 0;
+        Vector3 targetPos = GridManager.Instance != null 
+            ? GridManager.Instance.GetWorldPosition(gridX, gridY) 
+            : new Vector3(gridX * 1.1f, 0.5f, gridY * 1.1f);
+
+        transform.DOJump(targetPos, 0.5f, 1, 0.3f);
     }
 
     public void OnTurnStart()
     {
         currentMovePoints = maxMovePoints;
-        Debug.Log($"{unitName}: 턴 시작! 이동력 회복.");
     }
 
     // ----------------------------------------------------------------
-    // [3] 액션 및 피격 로직 (Spine 연동)
+    // [3] 카드 액션 로직
     // ----------------------------------------------------------------
-
-    public void Attack(int pushPower)
+    public void PerformAction(CardData card, Sequence seq)
     {
-        // Spine이 바라보는 방향(-1 or 1)을 기준으로 공격 방향 결정
-        int dirX = (skeletonAnimation != null && skeletonAnimation.Skeleton.ScaleX < 0) ? -1 : 1;
-        int targetX = gridX + dirX;
-        int targetY = gridY; // 현재는 좌우 공격만 가정 (상하 공격 필요시 로직 추가)
+        Debug.Log($"[{unitName}] 카드 실행: {card.cardName} (Type: {card.targetType})");
 
-        // 1. 공격 애니메이션 재생 (반복 X)
-        PlayAnim(attackAnimName, false);
-
-        // 2. 공격 타이밍 맞추기 (애니메이션과 데미지 싱크)
-        // BattleManager의 Sequence 딜레이(0.6초) 안에 모든 걸 처리
-        DOVirtual.DelayedCall(0.3f, () => 
+        switch (card.targetType)
         {
-            // 실제 데미지 처리
-            Unit target = BattleManager.Instance.GetUnitAt(targetX, targetY);
-            if (target != null)
-            {
-                Debug.Log($"⚔️ {unitName} 공격 -> {target.name}");
-                target.TakeDamage(3); // 기본 데미지 3
-                if (pushPower > 0) target.GetKnockedBack(dirX, 0);
-            }
-        });
+            case TargetType.Pattern:
+                AttackPattern(card, seq);
+                break;
 
-        // 3. 공격 후 다시 Idle로 복귀 (0.6초 뒤)
-        DOVirtual.DelayedCall(0.6f, () => 
-        {
-            PlayAnim(idleAnimName, true);
-        });
+            case TargetType.Self:
+                if (seq != null)
+                {
+                    // 버프 쓰는 시늉 (공격 모션 재활용하거나 별도 모션 사용)
+                    seq.AppendCallback(() => ApplyEffect(this, card));
+                    seq.AppendInterval(0.2f);
+                }
+                else ApplyEffect(this, card);
+                break;
+
+            case TargetType.AllEnemies:
+                AttackAllEnemies(card, seq);
+                break;
+
+            case TargetType.AllAllies:
+                // 구현 예정
+                break;
+        }
     }
 
+    public void AttackPattern(CardData card, Sequence seq)
+    {
+        // 현재 바라보는 방향 확인 (왼쪽을 보고 있으면 패턴도 좌우 반전)
+        int direction = (skeletonAnimation != null && skeletonAnimation.Skeleton.ScaleX < 0) ? -1 : 1;
+
+        List<Unit> validTargets = new List<Unit>();
+
+        if (card.targetPattern != null)
+        {
+            foreach (Vector2Int offset in card.targetPattern)
+            {
+                int checkX = gridX + (offset.x * direction);
+                int checkY = gridY + offset.y; 
+
+                Unit target = BattleManager.Instance.GetUnitAt(checkX, checkY);
+                if (target != null && target != this)
+                {
+                    validTargets.Add(target);
+                }
+            }
+        }
+
+        if (seq != null)
+        {
+            seq.AppendCallback(() => PlayAnim(attackAnimName, false));
+            seq.AppendInterval(0.3f);
+
+            seq.AppendCallback(() => 
+            {
+                if (validTargets.Count > 0)
+                {
+                    foreach (var target in validTargets)
+                    {
+                        ApplyEffect(target, card);
+                        
+                        // 넉백 (선택 사항: 바로 앞 1칸 공격일 때만 넉백)
+                        if (card.targetPattern.Count == 1 && card.targetPattern[0].x == 1)
+                        {
+                            target.GetKnockedBack(direction, 0);
+                        }
+                    }
+                }
+                else
+                {
+                    Debug.Log("허공을 공격했습니다.");
+                }
+            });
+
+            // 복귀
+            seq.AppendInterval(0.5f);
+            seq.AppendCallback(() => PlayAnim(idleAnimName, true));
+        }
+    }
+
+    public void AttackAllEnemies(CardData card, Sequence seq)
+    {
+        if (seq != null)
+        {
+            seq.AppendCallback(() => PlayAnim(attackAnimName, false));
+            seq.AppendInterval(0.3f);
+            seq.AppendCallback(() => 
+            {
+                foreach (var unit in BattleManager.Instance.allUnits)
+                {
+                    // 플레이어가 아니면 모두 적이라고 가정 (나중에 태그나 팀 구분 필요)
+                    if (unit != this && unit.gameObject.activeInHierarchy)
+                    {
+                        ApplyEffect(unit, card);
+                    }
+                }
+                Debug.Log("⚡ 적 전체 공격!");
+            });
+            seq.AppendInterval(0.5f);
+            seq.AppendCallback(() => PlayAnim(idleAnimName, true));
+        }
+    }
+
+    private void ApplyEffect(Unit target, CardData card)
+    {
+        if (target == null) return;
+
+        if (card.cardType == CardType.Attack)
+        {
+            target.TakeDamage(card.value);
+        }
+        else if (card.cardType == CardType.Defense)
+        {
+            // 일단은 체력 회복으로 대체 (나중에 방어도 추가)
+            Debug.Log($"🛡️ {target.unitName} 방어/회복 (+{card.value})");
+            // target.Heal(card.value); 
+        }
+        else if (card.cardType == CardType.Skill)
+        {
+            Debug.Log($"✨ {target.unitName}에게 스킬 효과!");
+        }
+    }
+    
+    // ----------------------------------------------------------------
+    // [4] 피격 및 기타
+    // ----------------------------------------------------------------
     public void TakeDamage(int damage)
     {
         currentHP -= damage;
+        Debug.Log($"{unitName} 피격! 남은 체력: {currentHP}");
         UpdateHPBar();
 
-        // 피격 시 붉게 깜빡임 (Spine은 MeshRenderer를 사용)
-        var meshRenderer = GetComponentInChildren<MeshRenderer>();
-        if (meshRenderer != null)
+        if (skeletonAnimation != null)
         {
-            meshRenderer.material.DOColor(Color.red, 0.2f).SetLoops(2, LoopType.Yoyo);
+            Color originalColor = skeletonAnimation.skeleton.GetColor();
+            
+            // 빨간색으로 변경 후 원래대로 복구 (DOTween.To 사용)
+            // Spine은 Material이 아니라 Skeleton 자체의 색을 바꿔야 합니다.
+            DOTween.To(() => skeletonAnimation.skeleton.GetColor(), 
+                       x => skeletonAnimation.skeleton.SetColor(x), 
+                       Color.red, 0.1f)
+                   .SetLoops(2, LoopType.Yoyo)
+                   .OnComplete(() => skeletonAnimation.skeleton.SetColor(Color.white));
         }
 
+        transform.DOShakePosition(0.3f, 0.2f);
+
         if (currentHP <= 0) Die();
+    }
+
+    public void GetKnockedBack(int pushX, int pushY)
+    {
+        int nextX = gridX + pushX;
+        int nextY = gridY + pushY;
+        bool isWallHit = false;
+        bool isUnitHit = false;
+
+        if (GridManager.Instance != null)
+        {
+            if (nextX < 0 || nextX >= GridManager.Instance.width ||
+                nextY < 0 || nextY >= GridManager.Instance.height)
+            {
+                isWallHit = true;
+            }
+        }
+
+        Unit obstacle = BattleManager.Instance.GetUnitAt(nextX, nextY);
+        if (obstacle != null)
+        {
+            isUnitHit = true;
+        }
+
+        if (isWallHit || isUnitHit)
+        {
+            Debug.Log($"💥 {unitName} 넉백 충돌! (벽/유닛)");
+
+            transform.DOShakePosition(0.5f, 0.5f, 20, 90);
+
+            TakeDamage(10); 
+            return;
+        }
+
+        gridX = nextX;
+        gridY = nextY;
+
+        Vector3 targetPos = GridManager.Instance != null 
+            ? GridManager.Instance.GetWorldPosition(gridX, gridY)
+            : new Vector3(gridX * 1.1f, 0.5f, gridY * 1.1f);
+
+        transform.DOMove(targetPos, 0.2f).SetEase(Ease.OutBack);
     }
 
     private void Die()
@@ -199,31 +333,6 @@ public class Unit : MonoBehaviour
         });
     }
 
-    public void GetKnockedBack(int pushX, int pushY)
-    {
-        int nextX = gridX + pushX;
-        int nextY = gridY + pushY;
-
-        // 벽이나 유닛 체크 로직 (기존 유지)
-        if (BattleManager.Instance.GetUnitAt(nextX, nextY) != null)
-        {
-            transform.DOShakePosition(0.5f, 0.3f);
-            return;
-        }
-
-        gridX = nextX;
-        gridY = nextY;
-        
-        Vector3 targetPos = new Vector3(gridX, 0.5f, gridY);
-        transform.DOMove(targetPos, 0.2f).SetEase(Ease.OutBack);
-    }
-
-    private void UpdateHPBar()
-    {
-        if (hpBar != null) hpBar.SetHP(currentHP, maxHP);
-    }
-
-    // AI 로직 (기존 유지)
     public void AI_TakeAction(Unit target)
     {
         if (target == null) return;
@@ -231,11 +340,23 @@ public class Unit : MonoBehaviour
 
         if (dist <= 1)
         {
-            // 타겟 방향 바라보기 (공격 전 회전)
+            // 방향 전환 후 공격
             int dirX = target.gridX - gridX;
             if (dirX != 0) SetFlip(dirX < 0);
             
-            Attack(1);
+            // AI는 단순하게 기본 공격(1칸 앞)을 한다고 가정하여 가짜 카드 데이터 생성 후 실행
+            // (실제로는 AI도 CardData를 가지고 있어야 함)
+            // 여기선 간단히 AttackPattern 메서드를 모방하여 직접 처리
+            Debug.Log($"🤖 AI {unitName} 공격!");
+            
+            // 임시 공격 연출
+            PlayAnim(attackAnimName, false);
+            // 0.3초 뒤 데미지
+            DOVirtual.DelayedCall(0.3f, () => {
+                if(target != null) target.TakeDamage(7);
+            });
+            // 0.8초 뒤 복귀
+            DOVirtual.DelayedCall(0.8f, () => PlayAnim(idleAnimName, true));
         }
         else
         {

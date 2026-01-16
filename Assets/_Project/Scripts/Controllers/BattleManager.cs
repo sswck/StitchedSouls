@@ -151,7 +151,9 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    // 턴 종료 버튼을 누르면 실행되는 함수: 시퀀스 실행
+    // -----------------------------------------------------------------------
+    // 턴 종료 버튼(스페이스바)을 누르면 실행되는 함수
+    // -----------------------------------------------------------------------
     public void ExecuteSlots()
     {
         if (actionSlots.Count == 0)
@@ -162,38 +164,20 @@ public class BattleManager : MonoBehaviour
         }
 
         state = BattleState.EnemyTurn;
-
         Debug.Log("--- 작전 실행 시작! ---");
 
-        // 시퀀스(Sequence)는 DoTween의 기능으로, 애니메이션을 순서대로 실행해줍니다.
         Sequence seq = DOTween.Sequence();
 
         foreach (var card in actionSlots)
         {
-            // 카드를 하나씩 꺼내서 실행 예약
-            // AppendCallback: 순서대로 함수를 호출하게 함
-            seq.AppendCallback(() => 
-            {
-                Debug.Log($"[{card.cardName}] 실행!");
-
-                // 카드 이름으로 행동 구분 (나중에는 Enum 타입으로 바꿀 예정)
-                if (card.cardName == "공격" || card.cardName == "강타")
-                {
-                    playerUnit.Attack(card.pushPower);
-                }
-            });
-
-            // 행동 사이 딜레이 (0.6초 대기) - 이동 애니메이션 끝날 때까지 기다림
+            playerUnit.PerformAction(card, seq);
             seq.AppendInterval(0.6f);
         }
 
-        // 모든 행동이 끝나면 슬롯 비우기
         seq.OnComplete(() => {
             Debug.Log("--- 턴 종료 ---");
             actionSlots.Clear();
-
             BattleUIManager.Instance.UpdateActionSlotUI(actionSlots);
-
             EndPlayerTurn();
         });
     }

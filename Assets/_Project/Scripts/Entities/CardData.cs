@@ -1,10 +1,19 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public enum CardType
 {
     Attack,
     Defense,
     Skill
+}
+
+public enum TargetType
+{
+    Pattern,    // 그리드 패턴 (일반적인 행동 범위)
+    Self,       // 나 자신 (방어도 등)
+    AllEnemies, // 적 전체 (광역기, 실명 등)
+    AllAllies   // 아군 전체 (힐, PP 회복)
 }
 
 [CreateAssetMenu(fileName = "New Card", menuName = "StitchedSouls/Card Data")]
@@ -17,10 +26,11 @@ public class CardData : ScriptableObject
 
     [Header("Logic")]
     public CardType cardType;
-    public int ppCost;
-    public int range;
+    public TargetType targetType;
 
+    public int ppCost;
     public int value;
 
-    public int pushPower = 0;
+    [Header("Pattern Attack Settings")]
+    public List<Vector2Int> targetPattern;
 }
