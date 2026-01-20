@@ -189,36 +189,15 @@ public class BattleManager : MonoBehaviour
         
         if (Keyboard.current.spaceKey.wasPressedThisFrame)
         {
-            ExecuteSlots(); // 스페이스바로 실행 테스트
+            ExecuteSlots();
         }
 
-        if (Keyboard.current.digit1Key.wasPressedThisFrame)
-        {
-            if (handDeck.Count > 0) // 카드가 있는지 확인
-            {
-                AddCardToSlot(handDeck[0]);
-            }
-            else
-            {
-                Debug.Log("핸드에 1번 카드가 없습니다! (Inspector에서 Hand Deck을 채워주세요)");
-            }
-        }
-
-        if (Keyboard.current.digit2Key.wasPressedThisFrame)
-        {
-            if (handDeck.Count > 1)
-            {
-                AddCardToSlot(handDeck[1]);
-            }
-        }
-
-        if (Keyboard.current.digit3Key.wasPressedThisFrame)
-        {
-            if (handDeck.Count > 2)
-            {
-                AddCardToSlot(handDeck[2]);
-            }
-        }
+        // [추가] 카드 범위 미리보기 테스트 (UI 드래그 대용)
+        // 숫자키(1, 2, 3)를 누르고 있으면 범위를 보여주고, 떼면 끈다.
+        
+        CheckCardPreview(Keyboard.current.digit1Key, 0);
+        CheckCardPreview(Keyboard.current.digit2Key, 1);
+        CheckCardPreview(Keyboard.current.digit3Key, 2);
 
         // 데모 버전: 방향키를 누르면 즉시 이동
         if (playerUnit != null && playerUnit.CanMove())
@@ -227,6 +206,38 @@ public class BattleManager : MonoBehaviour
             if (Keyboard.current.downArrowKey.wasPressedThisFrame) MovePlayer(0, -1);
             if (Keyboard.current.leftArrowKey.wasPressedThisFrame) MovePlayer(-1, 0);
             if (Keyboard.current.rightArrowKey.wasPressedThisFrame) MovePlayer(1, 0);
+        }
+    }
+
+    void CheckCardPreview(UnityEngine.InputSystem.Controls.KeyControl key, int handIndex)
+    {
+        if (handDeck.Count <= handIndex) return;
+
+        // 키를 막 눌렀을 때 (하이라이트 ON)
+        if (key.wasPressedThisFrame)
+        {
+            CardData card = handDeck[handIndex];
+            
+            // 유닛이 왼쪽을 보고 있는지 확인 (Spine ScaleX가 음수면 왼쪽)
+            // (Unit 클래스에 IsFacingLeft 프로퍼티를 만들면 더 좋지만, 일단 접근)
+            bool isLeft = playerUnit.GetComponentInChildren<Spine.Unity.SkeletonAnimation>().Skeleton.ScaleX < 0;
+
+            if (card.targetType == TargetType.Pattern)
+            {
+                GridManager.Instance.HighlightAttackRange(playerUnit.gridX, playerUnit.gridY, card.targetPattern, isLeft);
+            }
+            else if (card.targetType == TargetType.Self)
+            {
+                // 자기 자신 타일만 초록색으로
+                GridManager.Instance.ResetAllTiles();
+                // (GridManager에 단일 타일 색칠 기능이 필요하지만, 일단 생략하거나 로직 추가 가능)
+            }
+        }
+
+        // 키를 뗐을 때 (하이라이트 OFF)
+        if (key.wasReleasedThisFrame)
+        {
+            GridManager.Instance.ResetAllTiles();
         }
     }
 

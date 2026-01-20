@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 public class GridManager : MonoBehaviour
 {
@@ -17,6 +18,8 @@ public class GridManager : MonoBehaviour
     [Header("References")]
     public Tile tilePrefab;
 
+    private Tile[,] tiles;
+
     void Awake()
     {
         Instance = this;
@@ -25,6 +28,8 @@ public class GridManager : MonoBehaviour
 
     void GenerateGrid()
     {
+        tiles = new Tile[width, height];
+
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)
@@ -33,6 +38,8 @@ public class GridManager : MonoBehaviour
                 Tile spawnedTile = Instantiate(tilePrefab, spawnPos, Quaternion.identity);
                 spawnedTile.Init(x, y);
                 spawnedTile.transform.SetParent(this.transform);
+
+                tiles[x, y] = spawnedTile;
             }
         }
 
@@ -50,5 +57,42 @@ public class GridManager : MonoBehaviour
     public Vector3 GetWorldPosition(int x, int y)
     {
         return new Vector3(x * cellSize, 0.5f, y * cellSize);   // 높이(y)를 0.5f로 띄워 큐브가 바닥에 안 묻히게 함
+    }
+
+    // --------------------------------------------------------
+    // 공격 범위 하이라이트 기능
+    // --------------------------------------------------------
+    public void ResetAllTiles()
+    {
+        if (tiles == null) return;
+        foreach (var tile in tiles)
+        {
+            if (tile != null) tile.SetHighlight(false, Color.white);
+        }
+    }
+
+    public void HighlightAttackRange(int centerX, int centerY, List<Vector2Int> pattern, bool lookLeft)
+    {
+        ResetAllTiles();
+
+        if (pattern == null) return;
+
+        int direction = lookLeft ? -1 : 1;
+
+        foreach (Vector2Int offset in pattern)
+        {
+            int targetX = centerX + (offset.x * direction);
+            int targetY = centerY + offset.y;
+
+            if (IsValidCoord(targetX, targetY))
+            {
+                tiles[targetX, targetY].SetHighlight(true, new Color(1f, 0.3f, 0.3f)); // 연한 빨강
+            }
+        }
+    }
+
+    private bool IsValidCoord(int x, int y)
+    {
+        return x >= 0 && x < width && y >= 0 && y < height;
     }
 }
