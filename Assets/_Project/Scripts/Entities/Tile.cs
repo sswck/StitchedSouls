@@ -5,8 +5,8 @@ public class Tile : MonoBehaviour
 {
     public int x, y;
 
+    private SpriteRenderer spriteRenderer;
     private Color originalColor;
-    private MeshRenderer meshRenderer;
 
     public void Init(int x, int y)
     {
@@ -14,28 +14,27 @@ public class Tile : MonoBehaviour
         this.y = y;
         name = $"Tile {x},{y}";
 
-        bool isOffset = (x + y) % 2 == 1;
-        meshRenderer = GetComponent<MeshRenderer>();
+        spriteRenderer = GetComponent<SpriteRenderer>();
 
-        originalColor = isOffset ? new Color(0.8f, 0.8f, 0.8f) : Color.white;
+        originalColor = Color.white;
 
-        if(meshRenderer != null) 
-            meshRenderer.material.color = originalColor;
+        if (spriteRenderer != null) 
+            spriteRenderer.color = originalColor;
     }
 
     public void SetHighlight(bool isOn, Color color)
     {
-        if (meshRenderer == null) return;
+        if (spriteRenderer == null) return;
 
         if (isOn)
         {
-            meshRenderer.material.DOKill();
-            meshRenderer.material.color = color;
+            spriteRenderer.DOKill();
+            spriteRenderer.color = color;
         }
         else
         {
-            meshRenderer.material.DOKill();
-            meshRenderer.material.color = originalColor;
+            spriteRenderer.DOKill();
+            spriteRenderer.color = originalColor;
         }
     }
 }

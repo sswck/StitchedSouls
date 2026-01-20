@@ -35,7 +35,8 @@ public class GridManager : MonoBehaviour
             for (int y = 0; y < height; y++)
             {
                 Vector3 spawnPos = new Vector3(x * cellSize, 0, y * cellSize);
-                Tile spawnedTile = Instantiate(tilePrefab, spawnPos, Quaternion.identity);
+                Tile spawnedTile = Instantiate(tilePrefab, spawnPos, tilePrefab.transform.rotation);
+                
                 spawnedTile.Init(x, y);
                 spawnedTile.transform.SetParent(this.transform);
 
@@ -56,7 +57,7 @@ public class GridManager : MonoBehaviour
 
     public Vector3 GetWorldPosition(int x, int y)
     {
-        return new Vector3(x * cellSize, 0.5f, y * cellSize);   // 높이(y)를 0.5f로 띄워 큐브가 바닥에 안 묻히게 함
+        return new Vector3(x * cellSize, 0.1f, y * cellSize);   // 높이(y)를 0.5f로 띄워 큐브가 바닥에 안 묻히게 함
     }
 
     // --------------------------------------------------------
