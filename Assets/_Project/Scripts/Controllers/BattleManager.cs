@@ -192,14 +192,7 @@ public class BattleManager : MonoBehaviour
             ExecuteSlots();
         }
 
-        // [추가] 카드 범위 미리보기 테스트 (UI 드래그 대용)
-        // 숫자키(1, 2, 3)를 누르고 있으면 범위를 보여주고, 떼면 끈다.
-        
-        CheckCardPreview(Keyboard.current.digit1Key, 0);
-        CheckCardPreview(Keyboard.current.digit2Key, 1);
-        CheckCardPreview(Keyboard.current.digit3Key, 2);
-
-        // 데모 버전: 방향키를 누르면 즉시 이동
+        // 데모 버전: 방향키를 누르면 즉시 이동 ?추후 어떻게 고도화할 건지...
         if (playerUnit != null && playerUnit.CanMove())
         {
             if (Keyboard.current.upArrowKey.wasPressedThisFrame) MovePlayer(0, 1);
@@ -209,36 +202,28 @@ public class BattleManager : MonoBehaviour
         }
     }
 
-    void CheckCardPreview(UnityEngine.InputSystem.Controls.KeyControl key, int handIndex)
+    public void PreviewCardRange(CardData card)
     {
-        if (handDeck.Count <= handIndex) return;
+        if (playerUnit == null || card == null) return;
 
-        // 키를 막 눌렀을 때 (하이라이트 ON)
-        if (key.wasPressedThisFrame)
+        // 플레이어가 왼쪽을 보고 있는지 확인 (Spine ScaleX 기준)
+        bool isLeft = playerUnit.GetComponentInChildren<Spine.Unity.SkeletonAnimation>().Skeleton.ScaleX < 0;
+
+        if (card.targetType == TargetType.Pattern)
         {
-            CardData card = handDeck[handIndex];
-            
-            // 유닛이 왼쪽을 보고 있는지 확인 (Spine ScaleX가 음수면 왼쪽)
-            // (Unit 클래스에 IsFacingLeft 프로퍼티를 만들면 더 좋지만, 일단 접근)
-            bool isLeft = playerUnit.GetComponentInChildren<Spine.Unity.SkeletonAnimation>().Skeleton.ScaleX < 0;
-
-            if (card.targetType == TargetType.Pattern)
-            {
-                GridManager.Instance.HighlightAttackRange(playerUnit.gridX, playerUnit.gridY, card.targetPattern, isLeft);
-            }
-            else if (card.targetType == TargetType.Self)
-            {
-                // 자기 자신 타일만 초록색으로
-                GridManager.Instance.ResetAllTiles();
-                // (GridManager에 단일 타일 색칠 기능이 필요하지만, 일단 생략하거나 로직 추가 가능)
-            }
+            // GridManager에게 범위 표시 요청
+            GridManager.Instance.HighlightAttackRange(playerUnit.gridX, playerUnit.gridY, card.targetPattern, isLeft);
         }
-
-        // 키를 뗐을 때 (하이라이트 OFF)
-        if (key.wasReleasedThisFrame)
+        else if (card.targetType == TargetType.Self)
         {
-            GridManager.Instance.ResetAllTiles();
+            // (선택 사항) 버프 카드는 내 위치만 표시하거나 다른 색으로 표시
+            GridManager.Instance.HighlightAttackRange(playerUnit.gridX, playerUnit.gridY, new List<Vector2Int>{ Vector2Int.zero }, isLeft);
         }
+    }
+
+    public void StopPreviewRange()
+    {
+        GridManager.Instance.ResetAllTiles();
     }
 
     void MovePlayer(int xDir, int yDir)
