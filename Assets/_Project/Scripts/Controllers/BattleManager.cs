@@ -211,19 +211,18 @@ public class BattleManager : MonoBehaviour
 
         if (card.targetType == TargetType.Pattern)
         {
-            // GridManager에게 범위 표시 요청
-            GridManager.Instance.HighlightAttackRange(playerUnit.gridX, playerUnit.gridY, card.targetPattern, isLeft);
+            AnchorGridManager.Instance.HighlightAttackRange(playerUnit.gridX, playerUnit.gridY, card.targetPattern, isLeft);
         }
         else if (card.targetType == TargetType.Self)
         {
             // (선택 사항) 버프 카드는 내 위치만 표시하거나 다른 색으로 표시
-            GridManager.Instance.HighlightAttackRange(playerUnit.gridX, playerUnit.gridY, new List<Vector2Int>{ Vector2Int.zero }, isLeft);
+            AnchorGridManager.Instance.HighlightAttackRange(playerUnit.gridX, playerUnit.gridY, new List<Vector2Int>{ Vector2Int.zero }, isLeft);
         }
     }
 
     public void StopPreviewRange()
     {
-        GridManager.Instance.ResetAllTiles();
+        AnchorGridManager.Instance.ResetAllTiles();
     }
 
     void MovePlayer(int xDir, int yDir)

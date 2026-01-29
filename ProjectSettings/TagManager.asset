@@ -2,7 +2,7 @@
 %TAG !u! tag:unity3d.com,2011:
 --- !u!78 &1
 TagManager:
-  serializedVersion: 2
+  serializedVersion: 3
   tags: []
   layers:
   - Default
@@ -38,6 +38,21 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: Background
+    uniqueID: 1516698467
+    locked: 0
+  - name: Floor
+    uniqueID: 3826514397
+    locked: 0
+  - name: Unit
+    uniqueID: 763718861
+    locked: 0
+  - name: Foreground
+    uniqueID: 1259212867
+    locked: 0
+  - name: UI
+    uniqueID: 2039071657
+    locked: 0
   - name: Default
     uniqueID: 0
     locked: 0
@@ -50,27 +65,3 @@ TagManager:
   - Light Layer 5
   - Light Layer 6
   - Light Layer 7
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 

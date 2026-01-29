@@ -37,9 +37,8 @@ public class Unit : MonoBehaviour
         gridX = startX;
         gridY = startY;
 
-        // GridManager가 없어도 동작하도록 안전장치
-        if (GridManager.Instance != null)
-            transform.position = GridManager.Instance.GetWorldPosition(gridX, gridY);
+        if (AnchorGridManager.Instance != null)
+            transform.position = AnchorGridManager.Instance.GetWorldPosition(gridX, gridY);
         else
             transform.position = new Vector3(gridX * 1.1f, 0.5f, gridY * 1.1f);
 
@@ -90,10 +89,10 @@ public class Unit : MonoBehaviour
         int targetX = gridX + dirX;
         int targetY = gridY + dirY;
 
-        if (GridManager.Instance != null)
+        if (AnchorGridManager.Instance != null)
         {
-            if (targetX < 0 || targetX >= GridManager.Instance.width ||
-                targetY < 0 || targetY >= GridManager.Instance.height)
+            if (targetX < 0 || targetX >= AnchorGridManager.Instance.width ||
+                targetY < 0 || targetY >= AnchorGridManager.Instance.height)
             {
                 transform.DOShakePosition(0.2f, 0.1f);
                 return;
@@ -110,8 +109,8 @@ public class Unit : MonoBehaviour
         gridY = targetY;
         currentMovePoints--;
 
-        Vector3 targetPos = GridManager.Instance != null 
-            ? GridManager.Instance.GetWorldPosition(gridX, gridY) 
+        Vector3 targetPos = AnchorGridManager.Instance != null 
+            ? AnchorGridManager.Instance.GetWorldPosition(gridX, gridY) 
             : new Vector3(gridX * 1.1f, 0.5f, gridY * 1.1f);
 
         transform.DOJump(targetPos, 0.5f, 1, 0.3f);
@@ -286,10 +285,10 @@ public class Unit : MonoBehaviour
         bool isWallHit = false;
         bool isUnitHit = false;
 
-        if (GridManager.Instance != null)
+        if (AnchorGridManager.Instance != null)
         {
-            if (nextX < 0 || nextX >= GridManager.Instance.width ||
-                nextY < 0 || nextY >= GridManager.Instance.height)
+            if (nextX < 0 || nextX >= AnchorGridManager.Instance.width ||
+                nextY < 0 || nextY >= AnchorGridManager.Instance.height)
             {
                 isWallHit = true;
             }
@@ -314,8 +313,8 @@ public class Unit : MonoBehaviour
         gridX = nextX;
         gridY = nextY;
 
-        Vector3 targetPos = GridManager.Instance != null 
-            ? GridManager.Instance.GetWorldPosition(gridX, gridY)
+        Vector3 targetPos = AnchorGridManager.Instance != null 
+            ? AnchorGridManager.Instance.GetWorldPosition(gridX, gridY)
             : new Vector3(gridX * 1.1f, 0.5f, gridY * 1.1f);
 
         transform.DOMove(targetPos, 0.2f).SetEase(Ease.OutBack);
