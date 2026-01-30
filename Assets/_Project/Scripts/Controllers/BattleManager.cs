@@ -114,7 +114,7 @@ public class BattleManager : MonoBehaviour
         // 적은 빨간색으로 표시해서 구분 (MeshRenderer 사용)
         //enemy.GetComponent<MeshRenderer>().material.color = Color.red; // 큐브일때 적을 빨갛게 표시하는 코드
         
-        enemy.Init(1, 4);
+        enemy.Init(1, 3);
         allUnits.Add(enemy);
     }
 

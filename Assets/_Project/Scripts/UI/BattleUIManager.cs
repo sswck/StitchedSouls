@@ -101,7 +101,13 @@ public class BattleUIManager : MonoBehaviour
 
     public void OnRestartButton()
     {
-        // 현재 씬을 다시 로드 (재시작)
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        // GameManager를 통해 현재 씬(BattleScene)을 다시 로드?
+        /*string currentSceneName = SceneManager.GetActiveScene().name;
+        GameManager.Instance.LoadScene(currentSceneName);*/
+
+        // 일단은 처음 타이틀로 돌아가는 걸로 두기
+        //GameManager.Instance.LoadScene("TitleScene");
+
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name); // 에러로 일단 다시 처음코드로 사용
     }
 }
