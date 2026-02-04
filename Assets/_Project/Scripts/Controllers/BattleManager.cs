@@ -25,6 +25,8 @@ public class BattleManager : MonoBehaviour
     [Header("Units")]
     public List<Unit> allUnits = new List<Unit>();
 
+    private bool isBattleEnded = false;
+
     void Start()
     {
         state = BattleState.Start;
@@ -230,49 +232,52 @@ public class BattleManager : MonoBehaviour
         playerUnit.Move(xDir, yDir);
     }
 
-    public void OnUnitDead(Unit deadUnit)
+    public void OnUnitDead(Unit unit)
     {
-        // 1. 플레이어가 죽었을 때 -> 패배
-        if (deadUnit == playerUnit)
-        {
-            GameOver();
-            return;
-        }
+        allUnits.Remove(unit);
 
-        // 2. 적이 죽었을 때 -> 남은 적이 있는지 확인
-        // (지금은 적 리스트를 따로 관리하지 않고 allUnits에 섞여 있으므로 간단히 체크)
-        bool anyEnemyAlive = false;
+        if (unit == playerUnit)
+        {
+            OnGameOver();
+        }
+        else
+        {
+            CheckWinCondition();
+        }
+    }
+
+    private void CheckWinCondition()
+    {
+        if (isBattleEnded) return;
+
+        int enemyCount = 0;
         foreach (var unit in allUnits)
         {
-            // 플레이어가 아니고, 살아있는(Active) 유닛이 하나라도 있다면 적이 남은 것
-            if (unit != playerUnit && unit.gameObject.activeInHierarchy && unit != deadUnit)
-            {
-                anyEnemyAlive = true;
-                break;
-            }
+            // (임시) 플레이어가 아닌 유닛은 모두 적으로 간주
+            if (unit != playerUnit) enemyCount++;
         }
 
-        if (!anyEnemyAlive)
+        if (enemyCount <= 0)
         {
-            Victory();
+            OnVictory();
         }
     }
     
-    void Victory()
+    private void OnVictory()
     {
+        isBattleEnded = true;
         state = BattleState.Won;
-        Debug.Log("🎉 승리했습니다! 모든 적을 처치했습니다. 🎉");
-        
-        // [추가] 승리 팝업 호출
+        Debug.Log("🎉 VICTORY! 모든 적을 처치했습니다.");
+
         BattleUIManager.Instance.ShowResultUI(true);
     }
 
-    void GameOver()
+    private void OnGameOver()
     {
+        isBattleEnded = true;
         state = BattleState.Lost;
-        Debug.Log("😭 패배했습니다... 플레이어가 사망했습니다. 😭");
+        Debug.Log("💀 GAME OVER... 플레이어가 사망했습니다.");
 
-        // [추가] 패배 팝업 호출
         BattleUIManager.Instance.ShowResultUI(false);
     }
 }

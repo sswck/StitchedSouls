@@ -20,6 +20,17 @@ public class BattleUIManager : MonoBehaviour
     [Header("Result UI")]
     public GameObject resultPanel;
     public TextMeshProUGUI resultText;
+    public Button restartButton;
+    public Button titleButton;
+
+    void Start()
+    {
+        if (restartButton != null)
+            restartButton.onClick.AddListener(OnRestartButton);
+            
+        // 시작할 땐 결과창 끄기
+        if (resultPanel != null) resultPanel.SetActive(false);
+    }
 
     void Awake()
     {
@@ -85,12 +96,15 @@ public class BattleUIManager : MonoBehaviour
 
     public void ShowResultUI(bool isWin)
     {
+        if (resultPanel == null) return;
+
         resultPanel.SetActive(true); // 패널 켜기
 
         if (isWin)
         {
             resultText.text = "VICTORY!";
             resultText.color = Color.yellow;
+            // 승리 시 효과음 재생 (나중에 SoundManager 연결)
         }
         else
         {
@@ -101,13 +115,7 @@ public class BattleUIManager : MonoBehaviour
 
     public void OnRestartButton()
     {
-        // GameManager를 통해 현재 씬(BattleScene)을 다시 로드?
-        /*string currentSceneName = SceneManager.GetActiveScene().name;
-        GameManager.Instance.LoadScene(currentSceneName);*/
-
-        // 일단은 처음 타이틀로 돌아가는 걸로 두기
-        //GameManager.Instance.LoadScene("TitleScene");
-
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name); // 에러로 일단 다시 처음코드로 사용
+        if (GameManager.Instance != null)
+            GameManager.Instance.LoadScene("TitleScene");
     }
 }
