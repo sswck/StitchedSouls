@@ -48,7 +48,7 @@ public class AnchorGridManager : MonoBehaviour
         return GetPoint(xRatio, yRatio);
     }
 
-    void GenerateGrid()
+    public void GenerateGrid()
     {
         if (tiles != null)
         {

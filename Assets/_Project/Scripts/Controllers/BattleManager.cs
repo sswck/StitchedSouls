@@ -14,6 +14,7 @@ public class BattleManager : MonoBehaviour
     public BattleState state;
 
     [Header("Slot System")]
+    public List<CardData> deck = new List<CardData>();
     public List<CardData> handDeck;
     public List<CardData> actionSlots = new List<CardData>();
 
@@ -30,12 +31,49 @@ public class BattleManager : MonoBehaviour
     void Start()
     {
         state = BattleState.Start;
+
+        if (AnchorGridManager.Instance != null)
+            AnchorGridManager.Instance.GenerateGrid();
+        
         SpawnPlayer();
+
+        LoadPlayerData();
 
         StartCoroutine(SetupBattle());
 
+        // (지금은 드로우 기능이 없으므로, 가져온 덱을 전부 손패로 보여줌)
+        handDeck = new List<CardData>(deck);
+
         BattleUIManager.Instance.UpdateHandUI(handDeck);
         BattleUIManager.Instance.UpdateActionSlotUI(new List<CardData>());
+    }
+
+    void LoadPlayerData()
+    {
+        // GameManager가 있고 데이터가 존재하면 가져오기
+        if (GameManager.Instance != null && GameManager.Instance.masterDeck.Count > 0)
+        {
+            Debug.Log("📂 GameManager에서 데이터 로드 중...");
+
+            // 1. 덱 복사 (MasterDeck -> BattleDeck)
+            deck = new List<CardData>(GameManager.Instance.masterDeck);
+
+            // 2. 체력 동기화 (SpawnPlayer에서 초기화된 체력을 현재 체력으로 덮어씀)
+            if (playerUnit != null)
+            {
+                playerUnit.maxHP = GameManager.Instance.maxHP;
+                playerUnit.currentHP = GameManager.Instance.currentHP;
+                
+                // (선택) 체력바 UI 즉시 갱신 필요 시 호출
+                // playerUnit.UpdateHPBar(); 
+            }
+        }
+        else
+        {
+            // 데이터가 없으면(테스트 실행) Inspector에 넣어둔 handDeck을 그대로 사용
+            Debug.Log("⚠️ 저장된 데이터가 없어 Inspector의 HandDeck을 사용합니다.");
+            deck = new List<CardData>(handDeck);
+        }
     }
 
     IEnumerator SetupBattle()
@@ -267,8 +305,14 @@ public class BattleManager : MonoBehaviour
     {
         isBattleEnded = true;
         state = BattleState.Won;
-        Debug.Log("🎉 VICTORY! 모든 적을 처치했습니다.");
 
+        if (GameManager.Instance != null && playerUnit != null)
+        {
+            GameManager.Instance.currentHP = playerUnit.currentHP;
+            Debug.Log($"💾 체력 저장 완료: {GameManager.Instance.currentHP}");
+        }
+        
+        Debug.Log("🎉 VICTORY! 모든 적을 처치했습니다.");
         BattleUIManager.Instance.ShowResultUI(true);
     }
 

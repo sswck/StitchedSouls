@@ -16,8 +16,7 @@ public class TitleUIManager : MonoBehaviour
     void OnStartClick()
     {
         Debug.Log("게임 시작!");
-        // 지금은 바로 전투씬으로 가지만, 나중에 'MapScene'으로 연결하면 됩니다.
-        GameManager.Instance.LoadScene("BattleScene"); 
+        GameManager.Instance.StartNewRun();
     }
 
     void OnExitClick()
