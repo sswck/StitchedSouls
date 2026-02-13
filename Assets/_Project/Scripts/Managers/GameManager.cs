@@ -15,6 +15,10 @@ public class GameManager : MonoBehaviour
     public int currentHP;
     public List<CardData> masterDeck = new List<CardData>();
 
+    [Header("Map Progress")]
+    public int currentStageIndex = 0;
+    public int lastClearedStageIndex = -1;
+
     private void Awake()
     {
         if (Instance == null)
@@ -43,9 +47,18 @@ public class GameManager : MonoBehaviour
         }
 
         Debug.Log($"🚀 새 게임 시작! 체력: {currentHP}, 카드: {masterDeck.Count}장");
+
+        currentStageIndex = 0;
+        lastClearedStageIndex = -1;
         
-        // 맵 씬으로 이동 (지금은 MapScene이 없으니 바로 BattleScene으로)
-        LoadScene("BattleScene"); 
+        LoadScene("MapScene");
+    }
+
+    public void CompleteStage()
+    {
+        lastClearedStageIndex = currentStageIndex;
+        currentStageIndex++;
+        LoadScene("MapScene");
     }
 
     public void LoadScene(string sceneName)

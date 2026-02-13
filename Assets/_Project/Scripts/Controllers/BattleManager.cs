@@ -314,6 +314,9 @@ public class BattleManager : MonoBehaviour
         
         Debug.Log("🎉 VICTORY! 모든 적을 처치했습니다.");
         BattleUIManager.Instance.ShowResultUI(true);
+
+        // [수정] 결과창의 '확인/다음' 버튼이 누를 때 CompleteStage가 실행되도록 해야 함.
+        // BattleUIManager의 OnRestartButton(또는 OnNextButton)을 수정해야 합니다.
     }
 
     private void OnGameOver()

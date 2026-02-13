@@ -26,7 +26,7 @@ public class BattleUIManager : MonoBehaviour
     void Start()
     {
         if (restartButton != null)
-            restartButton.onClick.AddListener(OnRestartButton);
+            restartButton.onClick.AddListener(OnNextStageButton);
             
         // 시작할 땐 결과창 끄기
         if (resultPanel != null) resultPanel.SetActive(false);
@@ -113,9 +113,11 @@ public class BattleUIManager : MonoBehaviour
         }
     }
 
-    public void OnRestartButton()
+    public void OnNextStageButton()
     {
         if (GameManager.Instance != null)
-            GameManager.Instance.LoadScene("TitleScene");
+        {
+             GameManager.Instance.CompleteStage(); // 체력 저장 + 스테이지Index 증가 + 맵 로드
+        }
     }
 }
