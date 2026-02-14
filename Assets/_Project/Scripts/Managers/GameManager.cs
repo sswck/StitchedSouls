@@ -20,6 +20,9 @@ public class GameManager : MonoBehaviour
     public int currentStageIndex = 0;
     public int lastClearedStageIndex = -1;
 
+    [Header("Current Battle Info")]
+    public NodeType currentNodeType;
+
     private void Awake()
     {
         if (Instance == null)

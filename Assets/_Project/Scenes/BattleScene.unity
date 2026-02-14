@@ -464,6 +464,7 @@ MonoBehaviour:
   actionSlots: []
   playerUnit: {fileID: 2959414827006216199, guid: 0fdf30c54b9fecf4b9a1babfd0d9cd00, type: 3}
   unitPrefab: {fileID: 2959414827006216199, guid: 0fdf30c54b9fecf4b9a1babfd0d9cd00, type: 3}
+  eliteEnemyPrefab: {fileID: 2959414827006216199, guid: 35bcc3810b973bc47802b4d224ef2c76, type: 3}
   allUnits: []
 --- !u!4 &116985824
 Transform:
@@ -1685,9 +1686,11 @@ MonoBehaviour:
   defaultMaxHP: 50
   maxHP: 0
   currentHP: 0
+  gold: 100
   masterDeck: []
   currentStageIndex: 0
   lastClearedStageIndex: -1
+  currentNodeType: 0
 --- !u!4 &1712935757
 Transform:
   m_ObjectHideFlags: 0

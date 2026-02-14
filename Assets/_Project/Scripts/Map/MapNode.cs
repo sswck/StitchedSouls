@@ -52,7 +52,10 @@ public class MapNode : MonoBehaviour
 
     void OnNodeClick()
     {
-        Debug.Log($"노드 선택: {nodeType} (Index: {nodeIndex})");
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.currentNodeType = this.nodeType;
+        }
 
         // 노드 타입에 따라 다른 씬 로드
         switch (nodeType)
@@ -60,7 +63,13 @@ public class MapNode : MonoBehaviour
             case NodeType.Battle:
             case NodeType.Elite:
             case NodeType.Boss:
+                Debug.Log($"⚔️ {nodeType} 전투 진입!");
                 GameManager.Instance.LoadScene("BattleScene");
+                break;
+            
+            case NodeType.Shop:
+                Debug.Log("💰 상점 입장!");
+                GameManager.Instance.LoadScene("ShopScene");
                 break;
             
             case NodeType.Rest:
@@ -68,11 +77,6 @@ public class MapNode : MonoBehaviour
                 Debug.Log("휴식 씬으로 이동 (구현 필요)");
                 // 일단은 그냥 통과 처리 (테스트용)
                 GameManager.Instance.CompleteStage();
-                break;
-                
-            case NodeType.Shop:
-                Debug.Log("💰 상점 입장!");
-                GameManager.Instance.LoadScene("ShopScene");
                 break;
         }
     }

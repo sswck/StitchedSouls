@@ -67,7 +67,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 735a78e2e7bfadc47bcef62da75505dc, type: 2}
+  - {fileID: 2100000, guid: 86c816f0d0afdb940915f5408bf0c37f, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -103,7 +103,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d247ba06193faa74d9335f5481b2b56c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: spine-unity::Spine.Unity.SkeletonAnimation
-  skeletonDataAsset: {fileID: 11400000, guid: 1a252164102f8e744b0d66ee8354571c, type: 2}
+  skeletonDataAsset: {fileID: 11400000, guid: 17fb4ca75e8d195418309bed34b92516, type: 2}
   initialSkinName: 
   fixPrefabOverrideViaMeshFilter: 2
   initialFlipX: 0
@@ -131,7 +131,7 @@ MonoBehaviour:
   physicsMovementRelativeTo: {fileID: 0}
   updateTiming: 1
   unscaledTime: 0
-  _animationName: E_03_attack_standing
+  _animationName: Idle
   loop: 1
   timeScale: 1
 --- !u!1 &7845065335772201069
@@ -178,7 +178,7 @@ GameObject:
   - component: {fileID: 2776787898475966522}
   - component: {fileID: 2959414827006216199}
   m_Layer: 0
-  m_Name: Unit
+  m_Name: EliteEnemyPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -234,13 +234,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Unit
   unitName: 
-  maxHP: 50
+  maxHP: 100
   currentHP: 0
   maxMovePoints: 2
   currentMovePoints: 0
   gridX: 0
   gridY: 0
   skeletonAnimation: {fileID: 7524962045035121095}
-  idleAnimName: E_03_attack_standing
-  attackAnimName: E_03_attack
+  idleAnimName: Idle
+  attackAnimName: attack_standing
   hpBarPrefab: {fileID: 98269044502590925, guid: 9250afce0bd9f314c814cd4001ff0db0, type: 3}

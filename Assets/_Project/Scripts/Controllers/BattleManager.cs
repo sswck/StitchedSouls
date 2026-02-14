@@ -22,6 +22,7 @@ public class BattleManager : MonoBehaviour
 
     [Header("Spawn Settings")]
     public Unit unitPrefab;
+    public Unit eliteEnemyPrefab;
 
     [Header("Units")]
     public List<Unit> allUnits = new List<Unit>();
@@ -148,12 +149,31 @@ public class BattleManager : MonoBehaviour
 
     void SpawnEnemy()
     {
-        Unit enemy = Instantiate(unitPrefab);
-        enemy.name = "Sandbag Enemy";
-        // 적은 빨간색으로 표시해서 구분 (MeshRenderer 사용)
-        //enemy.GetComponent<MeshRenderer>().material.color = Color.red; // 큐브일때 적을 빨갛게 표시하는 코드
-        
+        Unit enemyToSpawn = unitPrefab; // 기본값
+
+        if (GameManager.Instance != null)
+        {
+            switch (GameManager.Instance.currentNodeType)
+            {
+                case NodeType.Elite:
+                    if (eliteEnemyPrefab != null) enemyToSpawn = eliteEnemyPrefab;
+                    Debug.Log("⚠️ 경고: 엘리트 몬스터 출현!");
+                    break;
+                case NodeType.Boss:
+                    // if (bossEnemyPrefab != null) enemyToSpawn = bossEnemyPrefab;
+                    Debug.Log("디버그 보스 스폰 지점");
+                    break;
+                // 일반 Battle, Boss은 기본값 유지
+            }
+        }
+
+        Unit enemy = Instantiate(enemyToSpawn);
+        enemy.name = (GameManager.Instance.currentNodeType == NodeType.Elite) ? "Elite Enemy" : "Normal Enemy";
+
+        // (선택 사항) 엘리트는 좀 더 뒤쪽에 배치하고 싶다면?
+        // int spawnX = (GameManager.Instance.currentNodeType == NodeType.Elite) ? 2 : 1;
         enemy.Init(1, 3);
+        
         allUnits.Add(enemy);
     }
 
