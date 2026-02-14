@@ -72,7 +72,7 @@ public class Unit : MonoBehaviour
         UpdateHPBar();
     }
 
-    private void UpdateHPBar()
+    public void UpdateHPBar()
     {
         if (hpBar != null) hpBar.SetHP(currentHP, maxHP);
     }

@@ -71,8 +71,8 @@ public class MapNode : MonoBehaviour
                 break;
                 
             case NodeType.Shop:
-                Debug.Log("상점 씬으로 이동 (구현 필요)");
-                GameManager.Instance.CompleteStage();
+                Debug.Log("💰 상점 입장!");
+                GameManager.Instance.LoadScene("ShopScene");
                 break;
         }
     }

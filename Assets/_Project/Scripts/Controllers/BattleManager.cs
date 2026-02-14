@@ -64,8 +64,7 @@ public class BattleManager : MonoBehaviour
                 playerUnit.maxHP = GameManager.Instance.maxHP;
                 playerUnit.currentHP = GameManager.Instance.currentHP;
                 
-                // (선택) 체력바 UI 즉시 갱신 필요 시 호출
-                // playerUnit.UpdateHPBar(); 
+                playerUnit.UpdateHPBar();
             }
         }
         else

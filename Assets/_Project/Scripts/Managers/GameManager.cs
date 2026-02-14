@@ -10,9 +10,10 @@ public class GameManager : MonoBehaviour
     public List<CardData> startingDeck;
     public int defaultMaxHP = 50;
 
-    [Header("Current Run Data")]
+    [Header("Player Resources")]
     public int maxHP;
     public int currentHP;
+    public int gold = 100;
     public List<CardData> masterDeck = new List<CardData>();
 
     [Header("Map Progress")]
