@@ -19,6 +19,9 @@ public class MapManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        if (SoundManager.Instance != null)
+        SoundManager.Instance.PlayBGM(SoundManager.Instance.mapBGM);
+
         if (GameManager.Instance.currentStageIndex >= fixedMapPath.Count)
         {
             Debug.Log("🎉 축하합니다! 모든 스테이지를 클리어했습니다! 타이틀로 돌아갑니다...");

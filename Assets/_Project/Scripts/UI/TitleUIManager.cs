@@ -9,6 +9,9 @@ public class TitleUIManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        if (SoundManager.Instance != null)
+        SoundManager.Instance.PlayBGM(SoundManager.Instance.titleBGM);
+
         startButton.onClick.AddListener(OnStartClick);
         exitButton.onClick.AddListener(OnExitClick);
     }

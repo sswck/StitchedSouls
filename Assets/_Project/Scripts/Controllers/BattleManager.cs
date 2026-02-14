@@ -47,6 +47,24 @@ public class BattleManager : MonoBehaviour
 
         BattleUIManager.Instance.UpdateHandUI(handDeck);
         BattleUIManager.Instance.UpdateActionSlotUI(new List<CardData>());
+
+        // BGM 재생 로직 추가
+        if (SoundManager.Instance != null && GameManager.Instance != null)
+        {
+            if (GameManager.Instance.currentNodeType == NodeType.Elite)
+            {
+                SoundManager.Instance.PlayBGM(SoundManager.Instance.eliteBattleBGM);
+            }
+            else if (GameManager.Instance.currentNodeType == NodeType.Boss)
+            {
+                // 보스곡이 있다면 여기에 (지금은 엘리트 곡 사용하거나 비워둠)
+                SoundManager.Instance.PlayBGM(SoundManager.Instance.eliteBattleBGM);
+            }
+            else
+            {
+                SoundManager.Instance.PlayBGM(SoundManager.Instance.normalBattleBGM);
+            }
+        }
     }
 
     void LoadPlayerData()
