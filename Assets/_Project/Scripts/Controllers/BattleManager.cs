@@ -27,11 +27,18 @@ public class BattleManager : MonoBehaviour
     [Header("Units")]
     public List<Unit> allUnits = new List<Unit>();
 
+    // TODO_juwan: 배틀 통계 기능 추가
+    // [Header("Battle Statistics")]
+    // public int totalDamageDeal;
+    // public int totalDamageTaken;
+    // public int totalDamageBlocked;
+
     private bool isBattleEnded = false;
 
     void Start()
     {
         state = BattleState.Start;
+        // ResetBattleStatistics();
 
         if (AnchorGridManager.Instance != null)
             AnchorGridManager.Instance.GenerateGrid();
@@ -364,4 +371,27 @@ public class BattleManager : MonoBehaviour
 
         BattleUIManager.Instance.ShowResultUI(false);
     }
+
+    // TODO_juwan: 배틀 통계 기능 추가
+    // public void RecordDamageDeal(int amount)
+    // {
+    //     totalDamageDeal += amount;
+    // }
+
+    // public void RecordDamageTaken(int amount)
+    // {
+    //     totalDamageTaken += amount;
+    // }
+
+    // public void RecordDamageBlocked(int amount)
+    // {
+    //     totalDamageBlocked += amount;
+    // }
+
+    // private void ResetBattleStatistics()
+    // {
+    //     totalDamageDeal = 0;
+    //     totalDamageTaken = 0;
+    //     totalDamageBlocked = 0;
+    // }
 }

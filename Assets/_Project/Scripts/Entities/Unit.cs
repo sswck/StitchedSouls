@@ -237,6 +237,11 @@ public class Unit : MonoBehaviour
 
         if (card.cardType == CardType.Attack)
         {
+            // TODO_juwan: 배틀 통계 기능 추가(플레이어 데미지 기록)
+            // if (BattleManager.Instance != null && this == BattleManager.Instance.playerUnit && target != BattleManager.Instance.playerUnit)
+            // {
+            //     BattleManager.Instance.RecordDamageDeal(card.value);
+            // }
             target.TakeDamage(card.value);
         }
         else if (card.cardType == CardType.Defense)
@@ -256,6 +261,12 @@ public class Unit : MonoBehaviour
     // ----------------------------------------------------------------
     public void TakeDamage(int damage)
     {
+        // TODO_juwan: 배틀 통계 기능 추가(유닛 데미지 기록)
+        // if (BattleManager.Instance != null && this == BattleManager.Instance.playerUnit)
+        // {
+        //     BattleManager.Instance.RecordDamageTaken(damage);
+        // }
+
         currentHP -= damage;
         Debug.Log($"{unitName} 피격! 남은 체력: {currentHP}");
         UpdateHPBar();
