@@ -28,10 +28,10 @@ public class BattleManager : MonoBehaviour
     public List<Unit> allUnits = new List<Unit>();
 
     // TODO_juwan: 배틀 통계 기능 추가
-    // [Header("Battle Statistics")]
-    // public int totalDamageDeal;
-    // public int totalDamageTaken;
-    // public int totalDamageBlocked;
+    [Header("Battle Statistics")]
+    public int totalDamageDeal;
+    public int totalDamageTaken;
+    public int totalDamageBlocked;
 
     private bool isBattleEnded = false;
 
@@ -139,7 +139,8 @@ public class BattleManager : MonoBehaviour
         // 1. 모든 적 유닛을 찾아서 행동시키기
         // (지금은 리스트에 플레이어도 섞여 있으니 구분해야 함. 
         //  하지만 간단하게 allUnits 중 playerUnit이 아닌 것만 적이라고 가정)
-        foreach (var unit in allUnits)
+        // 복사본으로 순회 → AI_TakeAction 중 allUnits가 수정되어도 열거자 오류 방지
+        foreach (var unit in new List<Unit>(allUnits))
         {
             // [추가] 행동 루프 도중에도 게임이 끝났다면 즉시 중단 (예: 반격으로 적 사망 등)
             if (state == BattleState.Won || state == BattleState.Lost) yield break;
@@ -373,25 +374,25 @@ public class BattleManager : MonoBehaviour
     }
 
     // TODO_juwan: 배틀 통계 기능 추가
-    // public void RecordDamageDeal(int amount)
-    // {
-    //     totalDamageDeal += amount;
-    // }
+    public void RecordDamageDeal(int amount)
+    {
+        totalDamageDeal += amount;
+    }
 
-    // public void RecordDamageTaken(int amount)
-    // {
-    //     totalDamageTaken += amount;
-    // }
+    public void RecordDamageTaken(int amount)
+    {
+        totalDamageTaken += amount;
+    }
 
-    // public void RecordDamageBlocked(int amount)
-    // {
-    //     totalDamageBlocked += amount;
-    // }
+    public void RecordDamageBlocked(int amount)
+    {
+        totalDamageBlocked += amount;
+    }
 
-    // private void ResetBattleStatistics()
-    // {
-    //     totalDamageDeal = 0;
-    //     totalDamageTaken = 0;
-    //     totalDamageBlocked = 0;
-    // }
+    private void ResetBattleStatistics()
+    {
+        totalDamageDeal = 0;
+        totalDamageTaken = 0;
+        totalDamageBlocked = 0;
+    }
 }
