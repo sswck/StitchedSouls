@@ -20,9 +20,9 @@ public class BattleUIManager : MonoBehaviour
     [Header("Result UI")]
     public GameObject resultPanel;
     public TextMeshProUGUI resultText;
-    //public TextMeshProUGUI damageDealText;
-    // public TextMeshProUGUI damageTakenText;
-    // public TextMeshProUGUI goldText;
+    public TextMeshProUGUI damageDealText;
+    public TextMeshProUGUI damageTakenText;
+    public TextMeshProUGUI goldText;
     public Button restartButton;
     public Button titleButton;
 
@@ -31,8 +31,8 @@ public class BattleUIManager : MonoBehaviour
         if (restartButton != null)
             restartButton.onClick.AddListener(OnNextStageButton);
 
-        // if (titleButton != null)
-        //     titleButton.onClick.AddListener(OnTitleButtonClick);
+        if (titleButton != null)
+            titleButton.onClick.AddListener(OnTitleButtonClick);
             
         // 시작할 땐 결과창 끄기
         if (resultPanel != null) resultPanel.SetActive(false);
@@ -114,44 +114,46 @@ public class BattleUIManager : MonoBehaviour
             // 승리 시 효과음 재생 (나중에 SoundManager 연결)
 
             // TODO_juwan: 승리 시 집계된 데이터 표시
-            // if(GameManager.Instance.currentNodeType == NodeType.Elite)
-            // {
-            //     damageDealText.gameObject.SetActive(true);
-            //     damageTakenText.gameObject.SetActive(true);
-            //     damageBlockedText.gameObject.SetActive(true);
-            //     goldText.gameObject.SetActive(true);
-            //     titleButton.gameObject.SetActive(true);
-            //     damageDealText.text = $"입힌 피해량: {BattleManager.Instance.totalDamageDealt}";
-            //     damageTakenText.text = $"입은 피해량: {BattleManager.Instance.totalDamageTaken}";
-            //     damageBlockedText.text = $"방어한 수치: {BattleManager.Instance.totalDamageBlocked}";
-            //     goldText.text = $"골드: {GameManager.Instance.gold}";
-            // }
-            // else
-            // {
-            //     damageDealText.gameObject.SetActive(false);
-            //     damageTakenText.gameObject.SetActive(false);
-            //     damageBlockedText.gameObject.SetActive(false);
-            //     goldText.gameObject.SetActive(false);
-            //     titleButton.gameObject.SetActive(false);
-            // }
+            if(GameManager.Instance.currentNodeType == NodeType.Elite)
+            {
+                damageDealText.gameObject.SetActive(true);
+                damageTakenText.gameObject.SetActive(true);
+              
+                goldText.gameObject.SetActive(true);
+                titleButton.gameObject.SetActive(true);
+                restartButton.gameObject.SetActive(false);
+                damageDealText.text = $"입힌 피해량: {BattleManager.Instance.totalDamageDeal}";
+                damageTakenText.text = $"입은 피해량: {BattleManager.Instance.totalDamageTaken}";
+                
+                goldText.text = $"골드: {GameManager.Instance.gold}";
+            }
+            else
+            {
+                damageDealText.gameObject.SetActive(false);
+                damageTakenText.gameObject.SetActive(false);
+              
+                goldText.gameObject.SetActive(false);
+                titleButton.gameObject.SetActive(false);
+            }
         }
         else
         {
             resultText.text = "GAME OVER";
             resultText.color = Color.red;
 
-            // TODO_juwan: 게임 오버 시 집계된 데이터 표시
-            // damageDealtText.gameObject.SetActive(true);
-            // damageTakenText.gameObject.SetActive(true);
-            // damageBlockedText.gameObject.SetActive(true);
-            // goldText.gameObject.SetActive(true);
-            // titleButton.gameObject.SetActive(true);
-            // damageDealtText.text = $"입힌 피해량: {BattleManager.Instance.totalDamageDeal}";
+            //TODO_juwan: 게임 오버 시 집계된 데이터 표시
+            damageDealText.gameObject.SetActive(true);
+            damageTakenText.gameObject.SetActive(true);
+            
+            goldText.gameObject.SetActive(true);
+            titleButton.gameObject.SetActive(true);
+            restartButton.gameObject.SetActive(false);
+            damageDealText.text = $"입힌 피해량: {BattleManager.Instance.totalDamageDeal}";
         
-            // damageTakenText.text = $"입은 피해량: {BattleManager.Instance.totalDamageTaken}";
+            damageTakenText.text = $"입은 피해량: {BattleManager.Instance.totalDamageTaken}";
 
-            // damageBlockedText.text = $"방어한 수치: {BattleManager.Instance.totalDamageBlocked}";
-            // goldText.text = $"골드: {GameManager.Instance.gold}";
+            
+            goldText.text = $"골드: {GameManager.Instance.gold}";
         }
     }
 
@@ -163,11 +165,11 @@ public class BattleUIManager : MonoBehaviour
         }
     }
 
-    // public void OnTitleButtonClick()
-    // {
-    //     if (GameManager.Instance != null)
-    //     {
-    //         GameManager.Instance.LoadScene("TitleScene");
-    //     }
-    // }
+    public void OnTitleButtonClick()
+    {
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.LoadScene("TitleScene");
+        }
+    }
 }
