@@ -26,6 +26,9 @@ public class BattleUIManager : MonoBehaviour
     public Button restartButton;
     public Button titleButton;
 
+    [Header("Reward UI")]
+    public RewardUIManager rewardUI;
+
     void Start()
     {
         if (restartButton != null)
@@ -159,9 +162,17 @@ public class BattleUIManager : MonoBehaviour
 
     public void OnNextStageButton()
     {
-        if (GameManager.Instance != null)
+        if (GameManager.Instance == null) return;
+
+        if (BattleManager.Instance.state == BattleState.Won)
         {
-             GameManager.Instance.CompleteStage(); // 체력 저장 + 스테이지Index 증가 + 맵 로드
+            if (resultPanel != null) resultPanel.SetActive(false); // 결과창 끄기
+            if (rewardUI != null) rewardUI.ShowReward();           // 보상창 켜기
+        }
+        else
+        {
+            // 패배했을 때는 타이틀로 돌아가거나 게임 오버 처리
+            GameManager.Instance.LoadScene("TitleScene");
         }
     }
 
