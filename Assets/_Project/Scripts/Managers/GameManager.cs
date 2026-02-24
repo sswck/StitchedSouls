@@ -23,6 +23,9 @@ public class GameManager : MonoBehaviour
     [Header("Current Battle Info")]
     public NodeType currentNodeType;
 
+    [Header("Reward System")]
+    public List<CardData> allAvailableCards;
+
     private void Awake()
     {
         if (Instance == null)

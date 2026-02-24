@@ -62,3 +62,10 @@ MonoBehaviour:
   currentStageIndex: 0
   lastClearedStageIndex: -1
   currentNodeType: 0
+  allAvailableCards:
+  - {fileID: 11400000, guid: 7f59f9ff3fd875349b45c23cc1f7262f, type: 2}
+  - {fileID: 11400000, guid: 90ff38affc085db48b5d1015334ef22e, type: 2}
+  - {fileID: 11400000, guid: eae614913cd490e4fb66b3503d666b32, type: 2}
+  - {fileID: 11400000, guid: 274886ebfa7138f4f8e8647a21781ac4, type: 2}
+  - {fileID: 11400000, guid: 5f8b9284b78f87443896f8fb6f26367d, type: 2}
+  - {fileID: 11400000, guid: c68829235d6fe36448d317e0d806ef70, type: 2}
