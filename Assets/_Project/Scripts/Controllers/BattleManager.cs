@@ -89,7 +89,9 @@ public class BattleManager : MonoBehaviour
             {
                 playerUnit.maxHP = GameManager.Instance.maxHP;
                 playerUnit.currentHP = GameManager.Instance.currentHP;
-                
+                // spd: 전투 시 플레이어 턴 최대 이동 횟수 = 기본 2 + spd
+                playerUnit.maxMovePoints = 2 + GameManager.Instance.spd;
+
                 playerUnit.UpdateHPBar();
             }
         }
@@ -359,7 +361,15 @@ public class BattleManager : MonoBehaviour
         
         Debug.Log("🎉 VICTORY! 모든 적을 처치했습니다.");
         BattleUIManager.Instance.ShowResultUI(true);
+        
+        // sp 획득 로직
+        //일반: +1, 엘리트: +2, 보스: +3
+        if(GameManager.Instance.currentNodeType == NodeType.Elite)
+            GameManager.Instance.currentSp += 2;
+        else
+            GameManager.Instance.currentSp += 1;
 
+        GameManager.Instance.currentSp = Mathf.Min(GameManager.Instance.currentSp, GameManager.Instance.maxSp);
         // [수정] 결과창의 '확인/다음' 버튼이 누를 때 CompleteStage가 실행되도록 해야 함.
         // BattleUIManager의 OnRestartButton(또는 OnNextButton)을 수정해야 합니다.
     }
