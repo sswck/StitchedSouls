@@ -237,12 +237,17 @@ public class Unit : MonoBehaviour
 
         if (card.cardType == CardType.Attack)
         {
-            // TODO_juwan: 배틀 통계 기능 추가(플레이어 데미지 기록)
+            // str: 플레이어의 공격/강타 카드 value 보정 (포인트 1당 +3)
+            int strBonus = (BattleManager.Instance != null && this == BattleManager.Instance.playerUnit
+                && (card.cardType == CardType.Attack || card.cardName == "강타") && GameManager.Instance != null)
+                ? GameManager.Instance.str * 3 : 0;
+            int effectiveValue = card.value + strBonus;
+
             if (BattleManager.Instance != null && this == BattleManager.Instance.playerUnit && target != BattleManager.Instance.playerUnit)
             {
-                BattleManager.Instance.RecordDamageDeal(card.value);
+                BattleManager.Instance.RecordDamageDeal(effectiveValue);
             }
-            target.TakeDamage(card.value);
+            target.TakeDamage(effectiveValue);
         }
         else if (card.cardType == CardType.Defense)
         {
@@ -261,13 +266,19 @@ public class Unit : MonoBehaviour
     // ----------------------------------------------------------------
     public void TakeDamage(int damage)
     {
-        // TODO_juwan: 배틀 통계 기능 추가(유닛 데미지 기록)
-        if (BattleManager.Instance != null && this == BattleManager.Instance.playerUnit)
+        // def: 플레이어가 피격 시 받는 피해량 감소 (포인트 1당 -1)
+        int finalDamage = damage;
+        if (BattleManager.Instance != null && this == BattleManager.Instance.playerUnit && GameManager.Instance != null)
         {
-            BattleManager.Instance.RecordDamageTaken(damage);
+            finalDamage = Mathf.Max(0, damage - GameManager.Instance.def);
         }
 
-        currentHP -= damage;
+        if (BattleManager.Instance != null && this == BattleManager.Instance.playerUnit)
+        {
+            BattleManager.Instance.RecordDamageTaken(finalDamage);
+        }
+
+        currentHP -= finalDamage;
         Debug.Log($"{unitName} 피격! 남은 체력: {currentHP}");
         UpdateHPBar();
 
