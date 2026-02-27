@@ -8,6 +8,7 @@ public class TitleUIManager : MonoBehaviour
     public Button startButton;
     public Button exitButton;
     public Button StatusButton;
+    
 
     [Header("Status Panel")]
     public GameObject statusPanel;
@@ -30,6 +31,7 @@ public class TitleUIManager : MonoBehaviour
         startButton.onClick.AddListener(OnStartClick);
         exitButton.onClick.AddListener(OnExitClick);
         StatusButton.onClick.AddListener(OnStatusClick);
+        
 
         if (statusPanel != null)
         {
@@ -120,4 +122,6 @@ public class TitleUIManager : MonoBehaviour
         }
         RefreshStatusPanel();
     }
+
+    
 }

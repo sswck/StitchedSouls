@@ -168,7 +168,7 @@ public class BattleManager : MonoBehaviour
     {
         playerUnit = Instantiate(unitPrefab);
         playerUnit.name = "Player Unit";
-        playerUnit.Init(1, 1);
+        playerUnit.Init(0, 3);
 
         allUnits.Add(playerUnit);
 
@@ -200,7 +200,7 @@ public class BattleManager : MonoBehaviour
 
         // (선택 사항) 엘리트는 좀 더 뒤쪽에 배치하고 싶다면?
         // int spawnX = (GameManager.Instance.currentNodeType == NodeType.Elite) ? 2 : 1;
-        enemy.Init(1, 3);
+        enemy.Init(2, 3);
         
         allUnits.Add(enemy);
     }
