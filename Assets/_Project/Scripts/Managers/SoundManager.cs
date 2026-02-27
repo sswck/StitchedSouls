@@ -27,6 +27,11 @@ public class SoundManager : MonoBehaviour
         }
     }
 
+    public void SetBGMVolume(float volume)
+    {
+        bgmPlayer.volume = volume;
+    }
+
     public void PlayBGM(AudioClip clip)
     {
         if (clip == null) return;
