@@ -26,6 +26,8 @@ public class Unit : MonoBehaviour
 
     [Header("UI")]
     public GameObject hpBarPrefab;
+    public Vector3 hpBarOffset = new Vector3(0f, 2.5f, 0f);
+    public Vector3 playerHpBarOffset = new Vector3(0f, 3.2f, 0f);
     private UnitHPBar hpBar;
 
     #endregion
@@ -67,7 +69,11 @@ public class Unit : MonoBehaviour
     {
         if (hpBarPrefab == null) return;
         GameObject go = Instantiate(hpBarPrefab, transform);
-        go.transform.localPosition = Vector3.up * 2.5f; // 필요시 숫자변경으로 체력바와 유닛과의 높이조절
+
+        //작업자:김주완- 플레이어, 적의 체력바 위치 조절절
+        bool isPlayer = BattleManager.Instance != null && BattleManager.Instance.playerUnit == this;
+        go.transform.localPosition = isPlayer ? playerHpBarOffset : hpBarOffset;
+
         hpBar = go.GetComponent<UnitHPBar>();
         UpdateHPBar();
     }
