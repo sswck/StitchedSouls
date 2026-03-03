@@ -170,39 +170,76 @@ public class BattleManager : MonoBehaviour
         playerUnit = Instantiate(unitPrefab);
         playerUnit.name = "Player Unit";
         playerUnit.Init(0, 2);
-
+        
         allUnits.Add(playerUnit);
-
+        
         SpawnEnemy();
     }
-
+    
     void SpawnEnemy()
     {
-        Unit enemyToSpawn = normalEnemyPrefab; // 기본값
-
-        if (GameManager.Instance != null)
+        // GameManager 정보가 없다면 기본 1마리만 중앙에 소환
+        if (GameManager.Instance == null)
         {
-            switch (GameManager.Instance.currentNodeType)
-            {
-                case NodeType.Elite:
-                    if (eliteEnemyPrefab != null) enemyToSpawn = eliteEnemyPrefab;
-                    Debug.Log("⚠️ 경고: 엘리트 몬스터 출현!");
-                    break;
-                case NodeType.Boss:
-                    // if (bossEnemyPrefab != null) enemyToSpawn = bossEnemyPrefab;
-                    Debug.Log("디버그 보스 스폰 지점");
-                    break;
-                // 일반 Battle, Boss은 기본값 유지
-            }
+            SpawnNormalEnemyAt(3, 3);
+            return;
         }
 
-        Unit enemy = Instantiate(enemyToSpawn);
-        enemy.name = (GameManager.Instance.currentNodeType == NodeType.Elite) ? "Elite Enemy" : "Normal Enemy";
+        switch (GameManager.Instance.currentNodeType)
+        {
+            case NodeType.Battle:
+                // 일반 전투: 노말 적 2마리 (3,4), (3,2)
+                SpawnNormalEnemyAt(3, 4);
+                SpawnNormalEnemyAt(3, 1);
+                break;
 
-        // (선택 사항) 엘리트는 좀 더 뒤쪽에 배치하고 싶다면?
-        // int spawnX = (GameManager.Instance.currentNodeType == NodeType.Elite) ? 2 : 1;
-        enemy.Init(3, 3);
-        
+            case NodeType.Elite:
+                // 엘리트 전투: 노말 2마리 + 엘리트 1마리
+                SpawnNormalEnemyAt(3, 4);
+                SpawnNormalEnemyAt(3, 1);
+                SpawnEliteEnemyAt(8, 3);
+                Debug.Log("⚠️ 경고: 엘리트 몬스터 출현! (노말 x2 + 엘리트 x1)");
+                break;
+
+            case NodeType.Boss:
+                // 보스 전투는 아직 구현 전이므로 임시로 노말 1마리만 소환
+                // 이후 보스 프리팹이 생기면 여기서 교체
+                Debug.Log("디버그 보스 스폰 지점 (임시로 노말 1마리 소환)");
+                SpawnNormalEnemyAt(3, 3);
+                break;
+
+            default:
+                // 그 외 타입은 안전하게 기본 1마리
+                SpawnNormalEnemyAt(3, 3);
+                break;
+        }
+    }
+
+    void SpawnNormalEnemyAt(int x, int y)
+    {
+        if (normalEnemyPrefab == null)
+        {
+            Debug.LogWarning("normalEnemyPrefab 이 설정되지 않았습니다.");
+            return;
+        }
+
+        Unit enemy = Instantiate(normalEnemyPrefab);
+        enemy.name = "Normal Enemy";
+        enemy.Init(x, y);
+        allUnits.Add(enemy);
+    }
+
+    void SpawnEliteEnemyAt(int x, int y)
+    {
+        if (eliteEnemyPrefab == null)
+        {
+            Debug.LogWarning("eliteEnemyPrefab 이 설정되지 않았습니다.");
+            return;
+        }
+
+        Unit enemy = Instantiate(eliteEnemyPrefab);
+        enemy.name = "Elite Enemy";
+        enemy.Init(x, y);
         allUnits.Add(enemy);
     }
 
