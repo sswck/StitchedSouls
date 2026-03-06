@@ -22,8 +22,6 @@ public class BattleManager : MonoBehaviour
     public BattleState state;
 
     [Header("Slot System")]
-    public List<CardData> deck = new List<CardData>();
-    public List<CardData> handDeck;
     public List<CardData> actionSlots = new List<CardData>();
 
     public Unit playerUnit;
@@ -55,18 +53,17 @@ public class BattleManager : MonoBehaviour
             AnchorGridManager.Instance.GenerateGrid();
         
         SpawnPlayer();
-
         LoadPlayerData();
+
+        if (GameManager.Instance != null && DeckManager.Instance != null)
+        {
+             DeckManager.Instance.InitializeDeck(GameManager.Instance.masterDeck);
+        }
 
         StartCoroutine(SetupBattle());
 
-        // (지금은 드로우 기능이 없으므로, 가져온 덱을 전부 손패로 보여줌)
-        handDeck = new List<CardData>(deck);
-
-        BattleUIManager.Instance.UpdateHandUI(handDeck);
         BattleUIManager.Instance.UpdateActionSlotUI(new List<CardData>());
 
-        // BGM 재생 로직 추가
         if (SoundManager.Instance != null && GameManager.Instance != null)
         {
             if (GameManager.Instance.currentNodeType == NodeType.Elite)
@@ -92,10 +89,6 @@ public class BattleManager : MonoBehaviour
         {
             Debug.Log("📂 GameManager에서 데이터 로드 중...");
 
-            // 1. 덱 복사 (MasterDeck -> BattleDeck)
-            deck = new List<CardData>(GameManager.Instance.masterDeck);
-
-            // 2. 체력 동기화 (SpawnPlayer에서 초기화된 체력을 현재 체력으로 덮어씀)
             if (playerUnit != null)
             {
                 playerUnit.maxHP = GameManager.Instance.maxHP;
@@ -105,12 +98,6 @@ public class BattleManager : MonoBehaviour
 
                 playerUnit.UpdateHPBar();
             }
-        }
-        else
-        {
-            // 데이터가 없으면(테스트 실행) Inspector에 넣어둔 handDeck을 그대로 사용
-            Debug.Log("⚠️ 저장된 데이터가 없어 Inspector의 HandDeck을 사용합니다.");
-            deck = new List<CardData>(handDeck);
         }
     }
 
@@ -125,18 +112,25 @@ public class BattleManager : MonoBehaviour
         Debug.Log(">>> ⚔️ 플레이어 턴 시작! ⚔️ <<<");
         state = BattleState.PlayerTurn;
         
-        // 플레이어 유닛들의 상태 리셋 (이동력 회복 등)
         if(playerUnit != null) playerUnit.OnTurnStart();
+
+        if (DeckManager.Instance != null)
+        {
+            DeckManager.Instance.DrawCards(DeckManager.Instance.drawCountPerTurn);
+        }
     }
 
     public void EndPlayerTurn()
     {
-        if (state == BattleState.Won || state == BattleState.Lost)
-        {
-            return;
-        }
+        if (state == BattleState.Won || state == BattleState.Lost) return;
 
         Debug.Log("플레이어 턴 종료...");
+
+        if (DeckManager.Instance != null)
+        {
+            DeckManager.Instance.DiscardHand();
+        }
+        
         state = BattleState.EnemyTurn;
         StartCoroutine(EnemyTurnRoutine());
     }
@@ -286,13 +280,17 @@ public class BattleManager : MonoBehaviour
         Instance = this;
     }
 
-    // UI 버튼이나 키보드 입력으로 호출할 함수: 슬롯에 카드 등록
     public void AddCardToSlot(CardData card)
     {
         if (actionSlots.Count < 3) // 슬롯이 3개라고 가정 추후 3을 상수변수로 변경
         {
             actionSlots.Add(card);
             Debug.Log($"슬롯에 카드 등록됨: {card.cardName}");
+
+            if (DeckManager.Instance != null)
+            {
+                DeckManager.Instance.RemoveCardFromHand(card);
+            }
 
             BattleUIManager.Instance.UpdateActionSlotUI(actionSlots);
         }
@@ -327,6 +325,12 @@ public class BattleManager : MonoBehaviour
 
         seq.OnComplete(() => {
             Debug.Log("--- 턴 종료 ---");
+
+            if (DeckManager.Instance != null)
+            {
+                DeckManager.Instance.DiscardUsedCards(actionSlots);
+            }
+            
             actionSlots.Clear();
             BattleUIManager.Instance.UpdateActionSlotUI(actionSlots);
             EndPlayerTurn();
