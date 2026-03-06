@@ -17,7 +17,7 @@ public class MapNode : MonoBehaviour
     public TextMeshProUGUI label;
     public Image lineToNext;
 
-    public void Init(int index, NodeType type, NodeStatus status)
+    public void Init(int index, NodeType type, NodeStatus status, MapNodeSpriteConfig config)
     {
         this.nodeIndex = index;
         this.nodeType = type;
@@ -26,21 +26,27 @@ public class MapNode : MonoBehaviour
         // 텍스트 설정
         label.text = $"{type}";
 
-        // 상태에 따른 UI 변경
+        // 상태에 따른 UI 변경 - 스프라이트 기반
+        if (config != null)
+        {
+            Sprite sprite = config.GetSprite(type, status);
+            if (sprite != null)
+            {
+                iconImage.sprite = sprite;
+            }
+        }
+        iconImage.color = Color.white; // 스프라이트 원본 색상 유지
+
         switch (status)
         {
             case NodeStatus.Locked:
                 button.interactable = false;
-                iconImage.color = Color.gray;
                 break;
             case NodeStatus.Available:
                 button.interactable = true;
-                iconImage.color = Color.white;
-                // 강조 효과 (애니메이션 등) 추가 가능
                 break;
             case NodeStatus.Completed:
                 button.interactable = false;
-                iconImage.color = new Color(0.5f, 1f, 0.5f); // 초록색 (완료됨)
                 label.text += " (V)";
                 break;
         }
@@ -80,4 +86,24 @@ public class MapNode : MonoBehaviour
                 break;
         }
     }
+
+    public void SetLine(Vector2 targetPosition)
+{
+    if (lineToNext == null) return;
+
+    RectTransform myRect = GetComponent<RectTransform>();
+    RectTransform lineRect = lineToNext.GetComponent<RectTransform>();
+
+    Vector2 startPos = myRect.anchoredPosition;
+    Vector2 dir = targetPosition - startPos;
+    float distance = dir.magnitude;
+
+    // 선의 길이와 각도 조절
+    lineRect.sizeDelta = new Vector2(distance, lineRect.sizeDelta.y);
+    float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+    lineRect.rotation = Quaternion.Euler(0, 0, angle);
+    
+    // 선 활성화 (마지막 노드는 선이 없음)
+    lineToNext.gameObject.SetActive(true);
+}
 }
