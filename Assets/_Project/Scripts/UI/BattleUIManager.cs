@@ -48,10 +48,16 @@ public class BattleUIManager : MonoBehaviour
 
     public void UpdateHandUI(List<CardData> handDeck)
     {
-        // 1. 기존 UI 싹 지우기 (초기화)
         foreach (Transform child in handPanel) Destroy(child.gameObject);
 
-        // 2. 카드 개수만큼 새로 생성
+        if (dragLayer != null)
+        {
+            foreach (Transform child in dragLayer) 
+            {
+                Destroy(child.gameObject);
+            }
+        }
+
         foreach (CardData card in handDeck)
         {
             GameObject newSlot = Instantiate(cardSlotPrefab, handPanel);

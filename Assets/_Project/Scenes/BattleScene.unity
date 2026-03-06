@@ -456,11 +456,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BattleManager
   state: 0
-  deck: []
-  handDeck:
-  - {fileID: 11400000, guid: 5b52136a35dcb2a428147aeb8ac3e205, type: 2}
-  - {fileID: 11400000, guid: a3cf300a43775ed4991b47abecf1786d, type: 2}
-  - {fileID: 11400000, guid: 43a0360d630325244b33b817819adc18, type: 2}
   actionSlots: []
   playerUnit: {fileID: 2959414827006216199, guid: 0fdf30c54b9fecf4b9a1babfd0d9cd00, type: 3}
   unitPrefab: {fileID: 1861007442363727230, guid: a2f66d9186df50240a6abd056c63e193, type: 3}
@@ -4115,6 +4110,54 @@ Transform:
   - {fileID: 2005339987}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1985296701
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1985296703}
+  - component: {fileID: 1985296702}
+  m_Layer: 0
+  m_Name: DeckManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1985296702
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1985296701}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb1ff7b870ce3d54b9a79cd60d0cceec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DeckManager
+  drawPile: []
+  handDeck: []
+  discardPile: []
+  drawCountPerTurn: 4
+--- !u!4 &1985296703
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1985296701}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 951.4607, y: 568.8357, z: 17.59415}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2005339986
 GameObject:
   m_ObjectHideFlags: 0
@@ -4341,3 +4384,4 @@ SceneRoots:
   - {fileID: 1712935757}
   - {fileID: 1193794540}
   - {fileID: 2132860235}
+  - {fileID: 1985296703}
