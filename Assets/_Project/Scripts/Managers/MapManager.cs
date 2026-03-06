@@ -3,28 +3,30 @@ using System.Collections.Generic;
 
 public class MapManager : MonoBehaviour
 {
+    [System.Serializable]
+    public struct NodeData
+    {
+        public NodeType type;
+        public Vector2 position; // 인스펙터에서 설정할 UI 좌표
+    }
+
     [Header("Map Settings")]
     public Transform contentParent;
     public MapNode nodePrefab;
+    public MapNodeSpriteConfig spriteConfig;
     
-    // [중요] 데모에서 사용할 임시 맵 패턴 정의
-    private List<NodeType> fixedMapPath = new List<NodeType>()
-    {
-        NodeType.Battle,
-        NodeType.Battle,
-        NodeType.Shop,
-        NodeType.Elite
-    };
+    [Header("Path Design")]
+    // [중요] 이제 인스펙터에서 NodeType과 Position을 함께 설정하세요.
+    public List<NodeData> fixedMapPath = new List<NodeData>();
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         if (SoundManager.Instance != null)
-        SoundManager.Instance.PlayBGM(SoundManager.Instance.mapBGM);
+            SoundManager.Instance.PlayBGM(SoundManager.Instance.mapBGM);
 
         if (GameManager.Instance.currentStageIndex >= fixedMapPath.Count)
         {
-            Debug.Log("🎉 축하합니다! 모든 스테이지를 클리어했습니다! 타이틀로 돌아갑니다...");
+            Debug.Log("🎉 모든 스테이지 클리어! 타이틀로 이동.");
             GameManager.Instance.LoadScene("TitleScene");
             return;
         }
@@ -34,24 +36,47 @@ public class MapManager : MonoBehaviour
 
     void GenerateMap()
     {
+        // 기존 노드 제거
         foreach (Transform child in contentParent)
         {
             Destroy(child.gameObject);
         }
 
         int currentStage = GameManager.Instance.currentStageIndex;
+        List<MapNode> spawnedNodes = new List<MapNode>();
         
+        // 1. 노드 생성 및 배치
         for (int i = 0; i < fixedMapPath.Count; i++)
         {
-            NodeType type = fixedMapPath[i];
-            NodeStatus status = NodeStatus.Locked;
-
-            if (i < currentStage) status = NodeStatus.Completed;
-            else if (i == currentStage) status = NodeStatus.Available;
-            else status = NodeStatus.Locked;
+            NodeData data = fixedMapPath[i];
+            NodeStatus status = GetNodeStatus(i, currentStage);
 
             MapNode newNode = Instantiate(nodePrefab, contentParent);
-            newNode.Init(i, type, status);
+            
+            // 좌표 설정 (RectTransform 사용)
+            RectTransform rect = newNode.GetComponent<RectTransform>();
+            if (rect != null)
+            {
+                rect.anchoredPosition = data.position;
+            }
+
+            newNode.Init(i, data.type, status, spriteConfig);
+            spawnedNodes.Add(newNode);
         }
+
+        // 2. 노드 간 선 연결 (이미지의 점선 효과)
+        for (int i = 0; i < spawnedNodes.Count - 1; i++)
+        {
+            // 다음 노드의 위치를 전달하여 선을 그리게 함
+            Vector2 nextPos = fixedMapPath[i + 1].position;
+            spawnedNodes[i].SetLine(nextPos);
+        }
+    }
+
+    NodeStatus GetNodeStatus(int index, int currentStage)
+    {
+        if (index < currentStage) return NodeStatus.Completed;
+        if (index == currentStage) return NodeStatus.Available;
+        return NodeStatus.Locked;
     }
 }

@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eba492415030c574a88f78d568238b1a, type: 3}
+  m_Name: MapNodeSpriteConfig
+  m_EditorClassIdentifier: Assembly-CSharp::MapNodeSpriteConfig
+  normal:
+    active: {fileID: 2100538090, guid: b10b7c9675b8aeb4392105b61dd6178f, type: 3}
+    inactive01: {fileID: 2038226897, guid: 74eafa97670bcfc4ba4b2ee4543d10f7, type: 3}
+    inactive02: {fileID: -551449160, guid: 5e8cfec5a19f36e4a8926539431c9ca5, type: 3}
+  elite:
+    active: {fileID: 1875646523, guid: 888af32db0a073f4b82b9dd6628d66cc, type: 3}
+    inactive01: {fileID: 784301594, guid: d1952197d5efccc49abcc22f26c58389, type: 3}
+    inactive02: {fileID: -8799926, guid: a5ecf9b2903ebac48810aaaedfed691b, type: 3}
+  shop:
+    active: {fileID: -1434256050, guid: e8deb2a131c72fb4cb0c90987ca6fe1b, type: 3}
+    inactive01: {fileID: -1040916420, guid: 6cc6332ca30e6134b9a29f627f82f82e, type: 3}
+    inactive02: {fileID: -868138527, guid: f661bdff0f6cc174abd2af144d17a929, type: 3}
