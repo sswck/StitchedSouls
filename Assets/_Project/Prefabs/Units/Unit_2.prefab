@@ -162,7 +162,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.3, y: 0.4, z: 1}
+  m_LocalScale: {x: 0.25, y: 0.35, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8861015546896156605}
@@ -208,10 +208,14 @@ MonoBehaviour:
   currentMovePoints: 0
   gridX: 0
   gridY: 0
+  tilePositionOffset: {x: 0, y: 0, z: 0}
+  smallerZInFront: 1
   skeletonAnimation: {fileID: 2767940222178672164}
   idleAnimName: E_02_attack_standing
   attackAnimName: E_02_attack
   hpBarPrefab: {fileID: 98269044502590925, guid: 9250afce0bd9f314c814cd4001ff0db0, type: 3}
+  hpBarOffset: {x: 0, y: 2.5, z: 0}
+  playerHpBarOffset: {x: 0, y: 3.2, z: 0}
 --- !u!1 &7250430457669874228
 GameObject:
   m_ObjectHideFlags: 0

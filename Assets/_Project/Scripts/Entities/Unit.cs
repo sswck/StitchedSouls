@@ -17,6 +17,12 @@ public class Unit : MonoBehaviour
     [Header("Position")]
     public int gridX;
     public int gridY;
+    [Tooltip("타일 중심에서 유닛 위치를 보정합니다. (예: 발이 타일 위에 오도록 Y를 낮추려면 (0, -0.3, 0) 등)")]
+    public Vector3 tilePositionOffset = Vector3.zero;
+    [Tooltip("2D 레이어 정렬 기준값. gridY가 작을수록 이 값에 더해져 앞에 그려집니다.")]
+    [SerializeField] private int sortingOrderBase = 10;
+    [Tooltip("3D 프로젝트: gridY가 작을수록(앞줄) Z를 보정해 카메라에 가깝게 그려지게 합니다. 0이면 미적용.")]
+    [SerializeField] private float layerDepthStep = 0.1f;
 
     [Header("Visual & Animation")]
     [SerializeField] private SkeletonAnimation skeletonAnimation; 
@@ -39,13 +45,44 @@ public class Unit : MonoBehaviour
         gridX = startX;
         gridY = startY;
 
+        Vector3 pos;
         if (AnchorGridManager.Instance != null)
-            transform.position = AnchorGridManager.Instance.GetWorldPosition(gridX, gridY);
+            pos = AnchorGridManager.Instance.GetTileCenterPosition(gridX, gridY);
         else
-            transform.position = new Vector3(gridX * 1.1f, 0.5f, gridY * 1.1f);
+            pos = new Vector3(gridX * 1.1f, 0.5f, gridY * 1.1f);
+        pos += tilePositionOffset;
+        ApplyLayerDepth(ref pos, gridY);
+        transform.position = pos;
+
+        UpdateSortingOrder();
 
         InitializeHPBar();
         PlayAnim(idleAnimName, true);
+    }
+
+    /// <summary>
+    /// 3D 프로젝트: gridY가 작을수록(앞줄) Z를 키워 카메라에 가깝게 그려지게 합니다.
+    /// </summary>
+    private void ApplyLayerDepth(ref Vector3 pos, int gridY)
+    {
+        if (layerDepthStep <= 0f || AnchorGridManager.Instance == null) return;
+        int h = AnchorGridManager.Instance.height;
+        pos.z += (h - 1 - gridY) * layerDepthStep;
+    }
+
+    /// <summary>
+    /// 2D: gridY가 작을수록(앞줄) sortingOrder를 높여 앞에 그려지게 합니다.
+    /// </summary>
+    private void UpdateSortingOrder()
+    {
+        int order = sortingOrderBase;
+        if (AnchorGridManager.Instance != null)
+            order += (AnchorGridManager.Instance.height - 1 - gridY);
+
+        foreach (var r in GetComponentsInChildren<Renderer>(true))
+        {
+            r.sortingOrder = order;
+        }
     }
 
     // ----------------------------------------------------------------
@@ -116,9 +153,12 @@ public class Unit : MonoBehaviour
         currentMovePoints--;
 
         Vector3 targetPos = AnchorGridManager.Instance != null 
-            ? AnchorGridManager.Instance.GetWorldPosition(gridX, gridY) 
+            ? AnchorGridManager.Instance.GetTileCenterPosition(gridX, gridY) 
             : new Vector3(gridX * 1.1f, 0.5f, gridY * 1.1f);
+        targetPos += tilePositionOffset;
+        ApplyLayerDepth(ref targetPos, gridY);
 
+        UpdateSortingOrder();
         transform.DOJump(targetPos, 0.5f, 1, 0.3f);
     }
 
@@ -342,9 +382,12 @@ public class Unit : MonoBehaviour
         gridY = nextY;
 
         Vector3 targetPos = AnchorGridManager.Instance != null 
-            ? AnchorGridManager.Instance.GetWorldPosition(gridX, gridY)
+            ? AnchorGridManager.Instance.GetTileCenterPosition(gridX, gridY)
             : new Vector3(gridX * 1.1f, 0.5f, gridY * 1.1f);
+        targetPos += tilePositionOffset;
+        ApplyLayerDepth(ref targetPos, gridY);
 
+        UpdateSortingOrder();
         transform.DOMove(targetPos, 0.2f).SetEase(Ease.OutBack);
     }
 
