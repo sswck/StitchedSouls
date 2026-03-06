@@ -6,6 +6,14 @@ using System.Collections;
 
 public enum BattleState { Start, PlayerTurn, EnemyTurn, Won, Lost }
 
+[System.Serializable]
+public class SpawnOffsetConfig
+{
+    public int gridX;
+    public int gridY;
+    public Vector3 offset = Vector3.zero;
+}
+
 public class BattleManager : MonoBehaviour
 {
     public static BattleManager Instance;
@@ -24,6 +32,8 @@ public class BattleManager : MonoBehaviour
     public Unit unitPrefab;
     public Unit normalEnemyPrefab;
     public Unit eliteEnemyPrefab;
+    [Tooltip("스폰 위치별 Tile Position Offset. (3,3), (3,0), (4,2) 등 각 타일마다 다른 오프셋을 Inspector에서 지정할 수 있습니다.")]
+    public List<SpawnOffsetConfig> spawnPositionOffsets = new List<SpawnOffsetConfig>();
 
     [Header("Units")]
     public List<Unit> allUnits = new List<Unit>();
@@ -169,6 +179,7 @@ public class BattleManager : MonoBehaviour
     {
         playerUnit = Instantiate(unitPrefab);
         playerUnit.name = "Player Unit";
+        ApplySpawnOffset(playerUnit, 0, 2);
         playerUnit.Init(0, 2);
         
         allUnits.Add(playerUnit);
@@ -188,16 +199,16 @@ public class BattleManager : MonoBehaviour
         switch (GameManager.Instance.currentNodeType)
         {
             case NodeType.Battle:
-                // 일반 전투: 노말 적 2마리 (3,4), (3,2)
-                SpawnNormalEnemyAt(3, 4);
-                SpawnNormalEnemyAt(3, 1);
+                // 일반 전투: 노말 적 2마리 Tile_3_3, Tile_3_0
+                SpawnNormalEnemyAt(3, 3);
+                SpawnNormalEnemyAt(3, 0);
                 break;
 
             case NodeType.Elite:
-                // 엘리트 전투: 노말 2마리 + 엘리트 1마리
-                SpawnNormalEnemyAt(3, 4);
-                SpawnNormalEnemyAt(3, 1);
-                SpawnEliteEnemyAt(8, 3);
+                // 엘리트 전투: 노말 2마리 (Tile_3_3, Tile_3_0) + 엘리트 1마리 (Tile_4_2)
+                SpawnNormalEnemyAt(3, 3);
+                SpawnNormalEnemyAt(3, 0);
+                SpawnEliteEnemyAt(4, 2);
                 Debug.Log("⚠️ 경고: 엘리트 몬스터 출현! (노말 x2 + 엘리트 x1)");
                 break;
 
@@ -225,6 +236,7 @@ public class BattleManager : MonoBehaviour
 
         Unit enemy = Instantiate(normalEnemyPrefab);
         enemy.name = "Normal Enemy";
+        ApplySpawnOffset(enemy, x, y);
         enemy.Init(x, y);
         allUnits.Add(enemy);
     }
@@ -239,8 +251,22 @@ public class BattleManager : MonoBehaviour
 
         Unit enemy = Instantiate(eliteEnemyPrefab);
         enemy.name = "Elite Enemy";
+        ApplySpawnOffset(enemy, x, y);
         enemy.Init(x, y);
         allUnits.Add(enemy);
+    }
+
+    void ApplySpawnOffset(Unit unit, int x, int y)
+    {
+        if (spawnPositionOffsets == null) return;
+        foreach (var config in spawnPositionOffsets)
+        {
+            if (config.gridX == x && config.gridY == y)
+            {
+                unit.tilePositionOffset = config.offset;
+                break;
+            }
+        }
     }
 
     public Unit GetUnitAt(int x, int y)

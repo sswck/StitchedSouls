@@ -24,11 +24,10 @@ public class AnchorGridManager : MonoBehaviour
         Instance = this;
     }
 
-    void Start()
-    {
-        GenerateGrid();
-    }
-
+    /// <summary>
+    /// 그리드 생성은 BattleManager.Start()에서 한 번만 호출합니다.
+    /// (3D 프로젝트 2D 게임에서 스크립트 실행 순서로 인한 중복 호출 방지)
+    /// </summary>
     public Vector3 GetPoint(float xRatio, float yRatio)
     {
         // 1. 위쪽 변과 아래쪽 변의 X지점 보간
@@ -46,6 +45,19 @@ public class AnchorGridManager : MonoBehaviour
         float yRatio = (y + 0.5f) / height;
 
         return GetPoint(xRatio, yRatio);
+    }
+
+    /// <summary>
+    /// 해당 (x, y) 타일 오브젝트의 실제 중심 월드 좌표를 반환합니다.
+    /// 그리드가 원근/사다리꼴일 때도 타일 정중앙에 맞춰 배치할 수 있습니다.
+    /// </summary>
+    public Vector3 GetTileCenterPosition(int x, int y)
+    {
+        if (tiles == null || x < 0 || x >= width || y < 0 || y >= height)
+            return GetWorldPosition(x, y);
+        if (tiles[x, y] == null)
+            return GetWorldPosition(x, y);
+        return tiles[x, y].transform.position;
     }
 
     public void GenerateGrid()

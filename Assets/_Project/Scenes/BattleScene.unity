@@ -466,6 +466,16 @@ MonoBehaviour:
   unitPrefab: {fileID: 1861007442363727230, guid: a2f66d9186df50240a6abd056c63e193, type: 3}
   normalEnemyPrefab: {fileID: 2959414827006216199, guid: 0fdf30c54b9fecf4b9a1babfd0d9cd00, type: 3}
   eliteEnemyPrefab: {fileID: 2959414827006216199, guid: 35bcc3810b973bc47802b4d224ef2c76, type: 3}
+  spawnPositionOffsets:
+  - gridX: 3
+    gridY: 0
+    offset: {x: 0, y: 0, z: 0.125}
+  - gridX: 3
+    gridY: 3
+    offset: {x: 0, y: 0, z: 0.3}
+  - gridX: 4
+    gridY: 2
+    offset: {x: 0.6, y: 0, z: 1.1}
   allUnits: []
   totalDamageDeal: 0
   totalDamageTaken: 0
