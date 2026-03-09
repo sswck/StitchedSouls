@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be0c67d8f3cbf814b9a261fbcc8529d2, type: 3}
+  m_Name: potion_powder
+  m_EditorClassIdentifier: Assembly-CSharp::ItemData
+  itemName: "\uD608\uC11D \uAC00\uB8E8"
+  itemDescription: "\"\uC601\uD63C \uBD09\uC81C \uC758\uC2DD\uC5D0 \uC4F0\uC774\uB294
+    \uBD89\uC740 \uAC00\uB8E8. \uC678\uD53C\uB97C \uAC15\uD654\uD558\uC9C0\uB9CC
+    \uBD88\uC548\uC815\uD558\uB2E4.\""
+  itemEffectText: "\uC0AC\uC6A9 \uC2DC 3\uD134 \uB3D9\uC548 \uBAA8\uB4E0 \uACF5\uACA9
+    \uCE74\uB4DC \uB370\uBBF8\uC9C0 +3"
+  itemIcon: {fileID: -153275981, guid: ee1d707d099b1df4d9a417d5adceadfa, type: 3}
+  itemPrice: 30
