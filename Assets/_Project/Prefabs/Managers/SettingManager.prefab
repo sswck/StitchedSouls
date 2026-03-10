@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c0fa6c63e9b7f0741b725c8acbd0f4a8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SettingManager
-  settingPanel: {fileID: 0}
+  settingPanel: {fileID: 4672221620396746714, guid: 4d61353e612e29449b4d86317329836f, type: 3}
   BGMVolumeSlider: {fileID: 0}
-  openSettingPanel: {fileID: 0}
-  closeSettingPanel: {fileID: 0}
+  openSettingButton: {fileID: 6044602241987677900, guid: 993b046b57292ee4598f8abf624d4262, type: 3}
+  closeSettingButton: {fileID: 0}
