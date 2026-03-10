@@ -79,10 +79,10 @@ public class ShopManager : MonoBehaviour
             descriptionBoxTweener.Kill();
         }
 
-        itemImage.sprite = data.itemIcon;
+        itemImage.sprite = data.icon;
         itemTitle.text = data.itemName;
-        itemDescription.text = data.itemDescription;
-        itemEffect.text = data.itemEffectText;
+        itemDescription.text = data.description;
+        itemEffect.text = GetItemEffectText(data);
 
         // 아이템 정보를 표시한 후, 구매 버튼 상태 업데이트
         UpdatePurchaseButtonState(data);
@@ -90,27 +90,45 @@ public class ShopManager : MonoBehaviour
         descriptionBoxTweener = itemDescriptionBox.DOAnchorPos(descriptionBoxOnScreenPos, 0.5f)
             .SetEase(Ease.OutCubic);
     }
+
+    private string GetItemEffectText(ItemData data)
+    {
+        switch (data.effectType)
+        {
+            case ItemEffectType.HealHP:
+                return itemEffect.text;
+            case ItemEffectType.HealSP:
+                return itemEffect.text;
+            case ItemEffectType.DamageBuff:
+                return itemEffect.text;
+            case ItemEffectType.MaxMovePoints:
+                return itemEffect.text;
+            default:
+                return "특별한 효과가 없는 아이템입니다.";
+        }
+    }
+    
     
     /// <summary>
     /// 아이템 가격과 플레이어 골드를 비교하여 구매 버튼의 상태(Sprite, interactable)를 업데이트합니다.
     /// </summary>
     private void UpdatePurchaseButtonState(ItemData data)
     {
-        bool hasEnoughGold = GameManager.Instance.gold >= data.itemPrice;
+        bool hasEnoughGold = GameManager.Instance.gold >= data.price;
+        bool hasSpace = InventoryManager.Instance.inventory.Count < InventoryManager.MAX_SLOTS;
 
         // 디버깅 로그 추가
-        Debug.Log($"[ShopManager] Checking gold for item '{data.itemName}'. Player Gold: {GameManager.Instance.gold}, Item Price: {data.itemPrice}, HasEnoughGold: {hasEnoughGold}");
+        Debug.Log($"[ShopManager] Checking gold for item '{data.itemName}'. Player Gold: {GameManager.Instance.gold}, Item Price: {data.price}, HasEnoughGold: {hasEnoughGold}, HasSpace: {hasSpace}");
 
-        if (hasEnoughGold)
+        if (hasEnoughGold && hasSpace)
         {
-            // 골드 충분
+            // 골드 충분하고 공간 있음
             purchaseButtonImage.sprite = activePurchaseSprite;
             purchaseButton.interactable = true;
         }
         else
         {
-            // 골드 부족
-            Debug.Log($"[ShopManager] Not enough gold. Setting button to inactive state.");
+            // 골드 부족하거나 공간 없음
             purchaseButtonImage.sprite = inactivePurchaseSprite;
             purchaseButton.interactable = false;
         }
@@ -124,25 +142,24 @@ public class ShopManager : MonoBehaviour
         if (currentSelectedItem == null || GameManager.Instance == null) return;
 
         // 골드가 충분한지 한번 더 확인
-        if (GameManager.Instance.gold >= currentSelectedItem.itemPrice)
+        if (GameManager.Instance.gold >= currentSelectedItem.price)
         {
-            // 골드 차감
-            GameManager.Instance.gold -= currentSelectedItem.itemPrice;
-            
-            Debug.Log($"{currentSelectedItem.itemName} 을(를) 구매했습니다! 남은 골드: {GameManager.Instance.gold}");
+            // 먼저 인벤토리에 공간이 있는지 확인
+            if (InventoryManager.Instance.AddItem(currentSelectedItem))
+            {
+                // 인벤토리에 추가 성공 시 골드 차감
+                GameManager.Instance.gold -= currentSelectedItem.price;
+                Debug.Log($"{currentSelectedItem.itemName} 을(를) 구매했습니다! 남은 골드: {GameManager.Instance.gold}");
 
-            // 여기에 실제로 아이템을 인벤토리에 추가하는 로직을 구현하면 됩니다.
-            // 예: InventoryManager.Instance.AddItem(currentSelectedItem);
-
-            // --- UI 즉시 업데이트 ---
-            // 골드 텍스트 갱신
-            goldText.text = $"{GameManager.Instance.gold} G";
-            
-            // 치료 버튼 상호작용 상태 갱신
-            healButton.interactable = (GameManager.Instance.gold >= healCost);
-
-            // 현재 아이템 구매 버튼 상태 갱신 (가장 중요)
-            UpdatePurchaseButtonState(currentSelectedItem);
+                // --- UI 즉시 업데이트 ---
+                UpdateUI();
+            }
+            else
+            {
+                // 인벤토리가 가득 찼을 경우
+                Debug.Log("인벤토리가 가득 차서 아이템을 구매할 수 없습니다.");
+                // 여기서 사용자에게 피드백을 주는 UI를 추가할 수 있습니다. (예: 메시지 팝업)
+            }
         }
     }
 

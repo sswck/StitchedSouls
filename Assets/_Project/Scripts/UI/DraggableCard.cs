@@ -33,7 +33,15 @@ public class DraggableCard : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
 
     public void OnDrag(PointerEventData eventData)
     {
-        transform.position = eventData.position;
+        Vector2 localPoint;
+        if (RectTransformUtility.ScreenPointToLocalPointInRectangle(
+            (RectTransform)BattleUIManager.Instance.dragLayer, 
+            eventData.position, 
+            eventData.pressEventCamera, 
+            out localPoint))
+        {
+            rectTransform.anchoredPosition = localPoint;
+        }
     }
 
     public void OnEndDrag(PointerEventData eventData)

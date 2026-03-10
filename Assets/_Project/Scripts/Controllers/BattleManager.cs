@@ -355,6 +355,63 @@ public class BattleManager : MonoBehaviour
             if (Keyboard.current.leftArrowKey.wasPressedThisFrame) MovePlayer(-1, 0);
             if (Keyboard.current.rightArrowKey.wasPressedThisFrame) MovePlayer(1, 0);
         }
+
+        // 아이템 사용 로직
+        if (Keyboard.current.digit1Key.wasPressedThisFrame) TryUseItem(0);
+        if (Keyboard.current.digit2Key.wasPressedThisFrame) TryUseItem(1);
+        if (Keyboard.current.digit3Key.wasPressedThisFrame) TryUseItem(2);
+    }
+
+    void TryUseItem(int itemIndex)
+    {
+        if (InventoryManager.Instance == null || playerUnit == null) return;
+
+        ItemData itemToUse = InventoryManager.Instance.GetItem(itemIndex);
+
+        if (itemToUse == null)
+        {
+            Debug.Log($"아이템 슬롯 {itemIndex + 1}이 비어있습니다.");
+            return;
+        }
+
+        // 아이템 사용! (인벤토리에서 제거 및 이벤트 발생)
+        InventoryManager.Instance.UseItem(itemIndex);
+
+        // 효과 적용
+        ApplyItemEffect(itemToUse);
+    }
+
+    void ApplyItemEffect(ItemData item)
+    {
+        Debug.Log($"[아이템 효과] '{item.itemName}' 사용! 효과: {item.effectType}, 수치: {item.value}");
+
+        switch (item.effectType)
+        {
+            case ItemEffectType.HealHP:
+                playerUnit.Heal(item.value);
+                Debug.Log($"플레이어의 HP를 {item.value} 만큼 회복. 현재 HP: {playerUnit.currentHP}/{playerUnit.maxHP}");
+                break;
+            case ItemEffectType.HealSP:
+                // GameManager의 SP를 직접 조작해야 할 수 있습니다.
+                if (GameManager.Instance != null)
+                {
+                    GameManager.Instance.currentSp = Mathf.Min(GameManager.Instance.currentSp + item.value, GameManager.Instance.maxSp);
+                    Debug.Log($"SP를 {item.value} 만큼 회복. 현재 SP: {GameManager.Instance.currentSp}/{GameManager.Instance.maxSp}");
+                    // TODO: SP UI가 있다면 업데이트
+                }
+                break;
+            case ItemEffectType.DamageBuff:
+                playerUnit.ApplyDamageBuff(item.value, 3);
+                Debug.Log($"플레이어의 데미지가 {item.value} 만큼 증가합니다. (3턴 지속)");
+                break;
+            case ItemEffectType.MaxMovePoints:
+                playerUnit.ApplyMoveBuff(item.value, 2);
+                Debug.Log($"플레이어의 이동 횟수가 {item.value} 만큼 증가합니다. (2턴 지속)");
+                break;
+        }
+
+        // 체력바 UI 업데이트
+        playerUnit.UpdateHPBar();
     }
 
     public void PreviewCardRange(CardData card)
