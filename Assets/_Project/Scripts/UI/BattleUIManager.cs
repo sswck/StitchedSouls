@@ -76,34 +76,45 @@ public class BattleUIManager : MonoBehaviour
 
     public void UpdateActionSlotUI(List<CardData> actionSlots)
     {
-        // 1. 기존 슬롯 지우기
         foreach (Transform child in actionSlotPanel)
         {
             Destroy(child.gameObject);
         }
 
-        int maxSlots = 3;   // 나중에 리팩토링할 것
+        int maxSlots = 3;   // 나중에 상수변수로 리팩토링할 것
 
         for (int i = 0; i < maxSlots; i++)
         {
             if (i < actionSlots.Count)
             {
-                // [CASE A] 리스트에 카드가 있는 경우 -> 카드 슬롯 생성
+                // [CASE A] 카드가 장착된 슬롯
                 CardData card = actionSlots[i];
                 GameObject newSlot = Instantiate(cardSlotPrefab, actionSlotPanel);
                 
-                // 텍스트 및 데이터 설정
                 TextMeshProUGUI text = newSlot.GetComponentInChildren<TextMeshProUGUI>();
                 if (text != null) text.text = card.cardName;
 
-                // (중요) 슬롯에 들어간 카드는 더 이상 드롭을 받지 않거나, 
-                // 혹은 클릭해서 뺄 수 있어야 함. 일단은 드래그 기능만 넣어둠.
-                // 이미 장착된 카드는 드래그 불가능하게 하려면 DraggableCard를 꺼도 됨.
+                DraggableCard draggable = newSlot.GetComponent<DraggableCard>();
+                if (draggable != null)
+                {
+                    Destroy(draggable);
+                }
+
+                Button btn = newSlot.GetComponent<Button>();
+                if (btn == null) btn = newSlot.AddComponent<Button>();
+
+                btn.onClick.RemoveAllListeners();
+                btn.onClick.AddListener(() => 
+                {
+                    if (BattleManager.Instance != null)
+                    {
+                        BattleManager.Instance.RemoveCardFromSlot(card);
+                    }
+                });
             }
             else
             {
-                // [CASE B] 리스트에 카드가 없는 경우 -> 빈 슬롯 생성
-                // 빈 슬롯 프리팹에는 'ActionSlot' 스크립트가 있어서 드롭을 받을 수 있음
+                // [CASE B] 빈 슬롯
                 Instantiate(emptySlotPrefab, actionSlotPanel);
             }
         }

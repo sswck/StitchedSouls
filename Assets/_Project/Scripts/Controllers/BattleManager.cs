@@ -300,6 +300,23 @@ public class BattleManager : MonoBehaviour
         }
     }
 
+    public void RemoveCardFromSlot(CardData card)
+    {
+        if (actionSlots.Contains(card))
+        {
+            actionSlots.Remove(card);
+            
+            // DeckManager에게 손패로 돌려보내라고 명령
+            if (DeckManager.Instance != null)
+            {
+                DeckManager.Instance.ReturnCardToHand(card);
+            }
+
+            // 슬롯 UI 다시 그리기
+            BattleUIManager.Instance.UpdateActionSlotUI(actionSlots);
+        }
+    }
+
     // -----------------------------------------------------------------------
     // 턴 종료 버튼(스페이스바)을 누르면 실행되는 함수
     // -----------------------------------------------------------------------
