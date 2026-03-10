@@ -13,6 +13,12 @@ public class Unit : MonoBehaviour
     public int currentHP;
     public int maxMovePoints = 2;
     public int currentMovePoints;
+    public int damageBuff = 0;
+
+    [Header("Buff Durations")]
+    public int damageBuffDuration = 0;
+    public int moveBonus = 0;
+    public int moveBuffDuration = 0;
 
     [Header("Position")]
     public int gridX;
@@ -164,6 +170,29 @@ public class Unit : MonoBehaviour
 
     public void OnTurnStart()
     {
+        // 1. 이동 버프 체크 및 차감
+        if (moveBuffDuration > 0)
+        {
+            moveBuffDuration--;
+            if (moveBuffDuration <= 0)
+            {
+                maxMovePoints -= moveBonus;
+                Debug.Log($"{unitName} 이동 버프 종료. 최대 이동 횟수 복구: {maxMovePoints}");
+                moveBonus = 0;
+            }
+        }
+
+        // 2. 데미지 버프 체크 및 차감
+        if (damageBuffDuration > 0)
+        {
+            damageBuffDuration--;
+            if (damageBuffDuration <= 0)
+            {
+                Debug.Log($"{unitName} 데미지 버프 종료. 공격력 복구.");
+                damageBuff = 0;
+            }
+        }
+
         currentMovePoints = maxMovePoints;
     }
 
@@ -287,7 +316,10 @@ public class Unit : MonoBehaviour
             int strBonus = (BattleManager.Instance != null && this == BattleManager.Instance.playerUnit
                 && (card.cardType == CardType.Attack || card.cardName == "강타") && GameManager.Instance != null)
                 ? GameManager.Instance.str * 3 : 0;
-            int effectiveValue = card.value + strBonus;
+            
+            // 아이템으로 인한 데미지 버프 추가
+            int totalBuff = strBonus + damageBuff;
+            int effectiveValue = card.value + totalBuff;
 
             if (BattleManager.Instance != null && this == BattleManager.Instance.playerUnit && target != BattleManager.Instance.playerUnit)
             {
@@ -344,6 +376,45 @@ public class Unit : MonoBehaviour
         transform.DOShakePosition(0.3f, 0.2f);
 
         if (currentHP <= 0) Die();
+    }
+
+    public void Heal(int amount)
+    {
+        currentHP = Mathf.Min(currentHP + amount, maxHP);
+        Debug.Log($"{unitName} 회복! 현재 체력: {currentHP}");
+        UpdateHPBar();
+
+        // 회복 연출 (초록색 깜빡임)
+        if (skeletonAnimation != null)
+        {
+            DOTween.To(() => skeletonAnimation.skeleton.GetColor(), 
+                       x => skeletonAnimation.skeleton.SetColor(x), 
+                       Color.green, 0.1f)
+                   .SetLoops(2, LoopType.Yoyo)
+                   .OnComplete(() => skeletonAnimation.skeleton.SetColor(Color.white));
+        }
+    }
+
+    public void ApplyDamageBuff(int amount, int duration)
+    {
+        damageBuff = amount;
+        damageBuffDuration = duration;
+        Debug.Log($"{unitName} 공격력 버프 적용! 데미지 +{amount} ({duration}턴 지속)");
+        
+        // 버프 연출 (크기 살짝 커졌다가 돌아오기)
+        transform.DOScale(transform.localScale * 1.1f, 0.2f).SetLoops(2, LoopType.Yoyo);
+    }
+
+    public void ApplyMoveBuff(int amount, int duration)
+    {
+        moveBonus = amount;
+        moveBuffDuration = duration;
+        maxMovePoints += amount;
+        currentMovePoints += amount; 
+        Debug.Log($"{unitName} 이동 버프 적용! 최대 이동 +{amount} ({duration}턴 지속)");
+
+        // 연출 (좌우로 살짝 흔들기)
+        transform.DOShakeRotation(0.3f, new Vector3(0, 0, 10), 10);
     }
 
     public void GetKnockedBack(int pushX, int pushY)

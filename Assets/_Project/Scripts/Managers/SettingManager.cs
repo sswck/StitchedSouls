@@ -60,7 +60,7 @@ public class SettingManager : MonoBehaviour
         settingPanel = panelTransform.gameObject;
 
         // Back 버튼
-        var backBtnTransform = panelTransform.Find("BackBtn");
+        var backBtnTransform = panelTransform.Find("Setting")?.Find("BackBtn");
         if (backBtnTransform != null)
         {
             closeSettingButton = backBtnTransform.GetComponent<Button>();
@@ -73,7 +73,7 @@ public class SettingManager : MonoBehaviour
 
         // BGM 슬라이더
         var sliderTransform = panelTransform
-            .Find("BGMTxt")
+            .Find("Setting")?.Find("BGMTxt")
             ?.Find("BGMSlider");
 
         if (sliderTransform == null) return;

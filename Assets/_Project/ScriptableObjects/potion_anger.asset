@@ -9,11 +9,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: be0c67d8f3cbf814b9a261fbcc8529d2, type: 3}
+  m_Script: {fileID: 11500000, guid: a0d807b70a6c1a545b348ae60fdf1575, type: 3}
   m_Name: potion_anger
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
   itemName: "\uBD84\uB178 \uC751\uCD95\uC561"
-  itemDescription: 
-  itemEffectText: "\uC0AC\uC6A9 \uC2DC pp 30 \uD68C\uBCF5"
-  itemIcon: {fileID: -708401748, guid: 0383db4ce511592469ec124a91017ba9, type: 3}
-  itemPrice: 30
+  icon: {fileID: -708401748, guid: 0383db4ce511592469ec124a91017ba9, type: 3}
+  description: 
+  effect: 
+  price: 30
+  effectType: 1
+  value: 0
