@@ -12,6 +12,7 @@ public class DeckManager : MonoBehaviour
 
     [Header("Settings")]
     public int drawCountPerTurn = 4;
+    public int maxHandSize = 8;
 
     private void Awake()
     {
@@ -49,33 +50,40 @@ public class DeckManager : MonoBehaviour
     {
         for (int i = 0; i < amount; i++)
         {
-            // 뽑을 카드가 없다면
             if (drawPile.Count == 0)
             {
-                // 버린 패도 없다면 더 이상 뽑을 수 없음
                 if (discardPile.Count == 0)
                 {
                     Debug.Log("⚠️ 덱과 버린 패가 모두 비어 더 이상 카드를 뽑을 수 없습니다!");
                     break;
                 }
-                
-                // 무덤 섞어서 다시 덱으로
                 ReshuffleDiscardIntoDraw();
             }
 
             // 맨 위 카드 1장 손패로 가져오기
             CardData drawnCard = drawPile[0];
             drawPile.RemoveAt(0);
-            handDeck.Add(drawnCard);
+
+            // [추가] 손패가 꽉 찼는지 체크
+            if (handDeck.Count >= maxHandSize)
+            {
+                // 패가 꽉 찼다면 버린 패(무덤)로 직행
+                Debug.Log($"✋ 손패가 꽉 찼습니다! [{drawnCard.cardName}] 카드가 무덤으로 버려집니다.");
+                discardPile.Add(drawnCard);
+            }
+            else
+            {
+                // 패에 여유가 있다면 손으로 가져옴
+                handDeck.Add(drawnCard);
+            }
         }
 
-        // 손패 UI 업데이트 (BattleUIManager 호출)
         if (BattleUIManager.Instance != null)
         {
             BattleUIManager.Instance.UpdateHandUI(handDeck);
         }
         
-        Debug.Log($"🎴 {amount}장 드로우 완료. (현재 패: {handDeck.Count}장, 남은 덱: {drawPile.Count}장)");
+        Debug.Log($"🎴 드로우 완료. (현재 패: {handDeck.Count}장 / 덱: {drawPile.Count}장 / 무덤: {discardPile.Count}장)");
     }
 
     /// <summary>
