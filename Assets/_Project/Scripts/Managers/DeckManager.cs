@@ -143,4 +143,21 @@ public class DeckManager : MonoBehaviour
         discardPile.AddRange(usedCards);
         Debug.Log($"🪦 사용한 카드 {usedCards.Count}장을 무덤으로 보냈습니다.");
     }
+
+    /// <summary>
+    /// 액션 슬롯에서 등록된 카드를 손패로 되돌림
+    /// </summary>
+    public void ReturnCardToHand(CardData card)
+    {
+        if (!handDeck.Contains(card))
+        {
+            handDeck.Add(card);
+            
+            if (BattleUIManager.Instance != null)
+            {
+                BattleUIManager.Instance.UpdateHandUI(handDeck);
+            }
+            Debug.Log($"🔙 카드 장착 취소: {card.cardName}이(가) 손패로 돌아왔습니다.");
+        }
+    }
 }
