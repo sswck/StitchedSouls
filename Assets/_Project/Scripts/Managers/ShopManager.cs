@@ -96,13 +96,13 @@ public class ShopManager : MonoBehaviour
         switch (data.effectType)
         {
             case ItemEffectType.HealHP:
-                return itemEffect.text;
+                return data.effect;
             case ItemEffectType.HealSP:
-                return itemEffect.text;
+                return data.effect;
             case ItemEffectType.DamageBuff:
-                return itemEffect.text;
+                return data.effect;
             case ItemEffectType.MaxMovePoints:
-                return itemEffect.text;
+                return data.effect;
             default:
                 return "특별한 효과가 없는 아이템입니다.";
         }
