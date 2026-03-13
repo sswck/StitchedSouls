@@ -467,10 +467,13 @@ MonoBehaviour:
     offset: {x: 0, y: 0, z: 0.125}
   - gridX: 3
     gridY: 3
-    offset: {x: 0, y: 0, z: 0.3}
+    offset: {x: 0, y: 0, z: 0.325}
   - gridX: 4
     gridY: 2
     offset: {x: 0.6, y: 0, z: 1.1}
+  - gridX: 0
+    gridY: 2
+    offset: {x: 0, y: 0, z: -0.125}
   allUnits: []
   totalDamageDeal: 0
   totalDamageTaken: 0
@@ -1906,7 +1909,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 14
   m_TargetDisplay: 0
 --- !u!1 &832575517
 GameObject:
@@ -2443,6 +2446,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1106064200}
   - component: {fileID: 1106064201}
+  - component: {fileID: 1106064202}
   m_Layer: 5
   m_Name: Panel_Hand
   m_TagString: Untagged
@@ -2476,7 +2480,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1106064199}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 30649d3a9faa99c48a7b1166b86bf2a0, type: 3}
   m_Name: 
@@ -2495,6 +2499,22 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &1106064202
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1106064199}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b7a65b8a1b657e42b45c8a0895addfc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CardFanLayout
+  radius: 650
+  maxAngle: 50
+  heightOffset: -60
+  spacingMultiplier: 0.8
 --- !u!1 &1115983345
 GameObject:
   m_ObjectHideFlags: 0
@@ -4507,7 +4527,7 @@ Canvas:
   m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
-  m_SortingOrder: 15
+  m_SortingOrder: 13
   m_TargetDisplay: 0
 --- !u!224 &2132860235
 RectTransform:
