@@ -74,7 +74,6 @@ public class AnchorGridManager : MonoBehaviour
             for (int y = 0; y < height; y++)
             {
                 // 1. 네 꼭짓점 비율 계산
-                // 예: x=0이면 0.0 ~ 0.166, x=1이면 0.166 ~ 0.333 ...
                 float xMin = (float)x / width;
                 float xMax = (float)(x + 1) / width;
                 float yMin = (float)y / height;

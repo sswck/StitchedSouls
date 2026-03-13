@@ -26,7 +26,7 @@ public class Unit : MonoBehaviour
     [Tooltip("타일 중심에서 유닛 위치를 보정합니다. (예: 발이 타일 위에 오도록 Y를 낮추려면 (0, -0.3, 0) 등)")]
     public Vector3 tilePositionOffset = Vector3.zero;
     [Tooltip("2D 레이어 정렬 기준값. gridY가 작을수록 이 값에 더해져 앞에 그려집니다.")]
-    [SerializeField] private int sortingOrderBase = 10;
+    [SerializeField] private int sortingOrderBase = 5; // [수정] 10 -> 5 (UI 가림 방지)
     [Tooltip("3D 프로젝트: gridY가 작을수록(앞줄) Z를 보정해 카메라에 가깝게 그려지게 합니다. 0이면 미적용.")]
     [SerializeField] private float layerDepthStep = 0.1f;
 
@@ -66,9 +66,6 @@ public class Unit : MonoBehaviour
         PlayAnim(idleAnimName, true);
     }
 
-    /// <summary>
-    /// 3D 프로젝트: gridY가 작을수록(앞줄) Z를 키워 카메라에 가깝게 그려지게 합니다.
-    /// </summary>
     private void ApplyLayerDepth(ref Vector3 pos, int gridY)
     {
         if (layerDepthStep <= 0f || AnchorGridManager.Instance == null) return;
@@ -76,9 +73,6 @@ public class Unit : MonoBehaviour
         pos.z += (h - 1 - gridY) * layerDepthStep;
     }
 
-    /// <summary>
-    /// 2D: gridY가 작을수록(앞줄) sortingOrder를 높여 앞에 그려지게 합니다.
-    /// </summary>
     private void UpdateSortingOrder()
     {
         int order = sortingOrderBase;
@@ -89,11 +83,15 @@ public class Unit : MonoBehaviour
         {
             r.sortingOrder = order;
         }
+
+        // [추가] 체력바(Canvas) 정렬 동기화
+        // 유닛 본체보다 1 더 높게 설정하여 항상 앞에 오도록 함
+        foreach (var c in GetComponentsInChildren<Canvas>(true))
+        {
+            c.sortingOrder = order + 1;
+        }
     }
 
-    // ----------------------------------------------------------------
-    // [1] 애니메이션 & 비주얼
-    // ----------------------------------------------------------------
     private void PlayAnim(string animName, bool loop)
     {
         if (skeletonAnimation == null || string.IsNullOrEmpty(animName)) return;
@@ -104,7 +102,12 @@ public class Unit : MonoBehaviour
     {
         if (skeletonAnimation != null)
         {
-            skeletonAnimation.Skeleton.ScaleX = isLeft ? -1 : 1;
+            // [수정] 적 유닛의 스프라이트 기본 방향 반전 보정
+            bool isPlayer = BattleManager.Instance != null && BattleManager.Instance.playerUnit == this;
+            if (isPlayer)
+                skeletonAnimation.Skeleton.ScaleX = isLeft ? -1 : 1;
+            else
+                skeletonAnimation.Skeleton.ScaleX = isLeft ? 1 : -1;
         }
     }
 
@@ -113,7 +116,6 @@ public class Unit : MonoBehaviour
         if (hpBarPrefab == null) return;
         GameObject go = Instantiate(hpBarPrefab, transform);
 
-        //작업자:김주완- 플레이어, 적의 체력바 위치 조절절
         bool isPlayer = BattleManager.Instance != null && BattleManager.Instance.playerUnit == this;
         go.transform.localPosition = isPlayer ? playerHpBarOffset : hpBarOffset;
 
@@ -126,23 +128,22 @@ public class Unit : MonoBehaviour
         if (hpBar != null) hpBar.SetHP(currentHP, maxHP);
     }
 
-    // ----------------------------------------------------------------
-    // [2] 이동 로직 (키보드/AI 전용)
-    // ----------------------------------------------------------------
     public bool CanMove() => currentMovePoints > 0;
 
     public void Move(int dirX, int dirY)
     {
-        if (dirX != 0) SetFlip(dirX < 0);
-
         int targetX = gridX + dirX;
         int targetY = gridY + dirY;
 
+        if (dirX != 0) SetFlip(dirX < 0);
+
         if (AnchorGridManager.Instance != null)
         {
+            // [수정] width=5일 때 4번 인덱스 허용 (targetX < 0 || targetX >= width)
             if (targetX < 0 || targetX >= AnchorGridManager.Instance.width ||
                 targetY < 0 || targetY >= AnchorGridManager.Instance.height)
             {
+                Debug.Log($"[{unitName}] 이동 불가: 경계 밖 ({targetX}, {targetY})");
                 transform.DOShakePosition(0.2f, 0.1f);
                 return;
             }
@@ -165,30 +166,29 @@ public class Unit : MonoBehaviour
         ApplyLayerDepth(ref targetPos, gridY);
 
         UpdateSortingOrder();
+
+        // [수정] 트윈 중첩 방지
+        transform.DOKill();
         transform.DOJump(targetPos, 0.5f, 1, 0.3f);
     }
 
     public void OnTurnStart()
     {
-        // 1. 이동 버프 체크 및 차감
         if (moveBuffDuration > 0)
         {
             moveBuffDuration--;
             if (moveBuffDuration <= 0)
             {
                 maxMovePoints -= moveBonus;
-                Debug.Log($"{unitName} 이동 버프 종료. 최대 이동 횟수 복구: {maxMovePoints}");
                 moveBonus = 0;
             }
         }
 
-        // 2. 데미지 버프 체크 및 차감
         if (damageBuffDuration > 0)
         {
             damageBuffDuration--;
             if (damageBuffDuration <= 0)
             {
-                Debug.Log($"{unitName} 데미지 버프 종료. 공격력 복구.");
                 damageBuff = 0;
             }
         }
@@ -196,43 +196,33 @@ public class Unit : MonoBehaviour
         currentMovePoints = maxMovePoints;
     }
 
-    // ----------------------------------------------------------------
-    // [3] 카드 액션 로직
-    // ----------------------------------------------------------------
     public void PerformAction(CardData card, Sequence seq)
     {
-        Debug.Log($"[{unitName}] 카드 실행: {card.cardName} (Type: {card.targetType})");
-
         switch (card.targetType)
         {
             case TargetType.Pattern:
                 AttackPattern(card, seq);
                 break;
-
             case TargetType.Self:
                 if (seq != null)
                 {
-                    // 버프 쓰는 시늉 (공격 모션 재활용하거나 별도 모션 사용)
                     seq.AppendCallback(() => ApplyEffect(this, card));
                     seq.AppendInterval(0.2f);
                 }
                 else ApplyEffect(this, card);
                 break;
-
             case TargetType.AllEnemies:
                 AttackAllEnemies(card, seq);
-                break;
-
-            case TargetType.AllAllies:
-                // 구현 예정
                 break;
         }
     }
 
     public void AttackPattern(CardData card, Sequence seq)
     {
-        // 현재 바라보는 방향 확인 (왼쪽을 보고 있으면 패턴도 좌우 반전)
         int direction = (skeletonAnimation != null && skeletonAnimation.Skeleton.ScaleX < 0) ? -1 : 1;
+        // 적 유닛은 ScaleX가 반전되어 있으므로 direction 보정이 필요할 수 있음
+        bool isPlayer = BattleManager.Instance != null && BattleManager.Instance.playerUnit == this;
+        if (!isPlayer) direction = (skeletonAnimation.Skeleton.ScaleX > 0) ? -1 : 1;
 
         List<Unit> validTargets = new List<Unit>();
 
@@ -255,29 +245,13 @@ public class Unit : MonoBehaviour
         {
             seq.AppendCallback(() => PlayAnim(attackAnimName, false));
             seq.AppendInterval(0.3f);
-
             seq.AppendCallback(() => 
             {
-                if (validTargets.Count > 0)
+                foreach (var target in validTargets)
                 {
-                    foreach (var target in validTargets)
-                    {
-                        ApplyEffect(target, card);
-                        
-                        // 넉백 (선택 사항: 바로 앞 1칸 공격일 때만 넉백)
-                        if (card.targetPattern.Count == 1 && card.targetPattern[0].x == 1)
-                        {
-                            target.GetKnockedBack(direction, 0);
-                        }
-                    }
-                }
-                else
-                {
-                    Debug.Log("허공을 공격했습니다.");
+                    ApplyEffect(target, card);
                 }
             });
-
-            // 복귀
             seq.AppendInterval(0.5f);
             seq.AppendCallback(() => PlayAnim(idleAnimName, true));
         }
@@ -293,13 +267,11 @@ public class Unit : MonoBehaviour
             {
                 foreach (var unit in BattleManager.Instance.allUnits)
                 {
-                    // 플레이어가 아니면 모두 적이라고 가정 (나중에 태그나 팀 구분 필요)
                     if (unit != this && unit.gameObject.activeInHierarchy)
                     {
                         ApplyEffect(unit, card);
                     }
                 }
-                Debug.Log("⚡ 적 전체 공격!");
             });
             seq.AppendInterval(0.5f);
             seq.AppendCallback(() => PlayAnim(idleAnimName, true));
@@ -309,63 +281,38 @@ public class Unit : MonoBehaviour
     private void ApplyEffect(Unit target, CardData card)
     {
         if (target == null) return;
-
         if (card.cardType == CardType.Attack)
         {
-            // str: 플레이어의 공격/강타 카드 value 보정 (포인트 1당 +3)
             int strBonus = (BattleManager.Instance != null && this == BattleManager.Instance.playerUnit
                 && (card.cardType == CardType.Attack || card.cardName == "강타") && GameManager.Instance != null)
                 ? GameManager.Instance.str * 3 : 0;
-            
-            // 아이템으로 인한 데미지 버프 추가
             int totalBuff = strBonus + damageBuff;
             int effectiveValue = card.value + totalBuff;
-
             if (BattleManager.Instance != null && this == BattleManager.Instance.playerUnit && target != BattleManager.Instance.playerUnit)
             {
                 BattleManager.Instance.RecordDamageDeal(effectiveValue);
             }
             target.TakeDamage(effectiveValue);
         }
-        else if (card.cardType == CardType.Defense)
-        {
-            // 일단은 체력 회복으로 대체 (나중에 방어도 추가)
-            Debug.Log($"🛡️ {target.unitName} 방어/회복 (+{card.value})");
-            // target.Heal(card.value); 
-        }
-        else if (card.cardType == CardType.Skill)
-        {
-            Debug.Log($"✨ {target.unitName}에게 스킬 효과!");
-        }
     }
     
-    // ----------------------------------------------------------------
-    // [4] 피격 및 기타
-    // ----------------------------------------------------------------
     public void TakeDamage(int damage)
     {
-        // def: 플레이어가 피격 시 받는 피해량 감소 (포인트 1당 -1)
         int finalDamage = damage;
         if (BattleManager.Instance != null && this == BattleManager.Instance.playerUnit && GameManager.Instance != null)
         {
             finalDamage = Mathf.Max(0, damage - GameManager.Instance.def);
         }
-
         if (BattleManager.Instance != null && this == BattleManager.Instance.playerUnit)
         {
             BattleManager.Instance.RecordDamageTaken(finalDamage);
         }
 
         currentHP -= finalDamage;
-        Debug.Log($"{unitName} 피격! 남은 체력: {currentHP}");
         UpdateHPBar();
 
         if (skeletonAnimation != null)
         {
-            Color originalColor = skeletonAnimation.skeleton.GetColor();
-            
-            // 빨간색으로 변경 후 원래대로 복구 (DOTween.To 사용)
-            // Spine은 Material이 아니라 Skeleton 자체의 색을 바꿔야 합니다.
             DOTween.To(() => skeletonAnimation.skeleton.GetColor(), 
                        x => skeletonAnimation.skeleton.SetColor(x), 
                        Color.red, 0.1f)
@@ -374,34 +321,19 @@ public class Unit : MonoBehaviour
         }
 
         transform.DOShakePosition(0.3f, 0.2f);
-
         if (currentHP <= 0) Die();
     }
 
     public void Heal(int amount)
     {
         currentHP = Mathf.Min(currentHP + amount, maxHP);
-        Debug.Log($"{unitName} 회복! 현재 체력: {currentHP}");
         UpdateHPBar();
-
-        // 회복 연출 (초록색 깜빡임)
-        if (skeletonAnimation != null)
-        {
-            DOTween.To(() => skeletonAnimation.skeleton.GetColor(), 
-                       x => skeletonAnimation.skeleton.SetColor(x), 
-                       Color.green, 0.1f)
-                   .SetLoops(2, LoopType.Yoyo)
-                   .OnComplete(() => skeletonAnimation.skeleton.SetColor(Color.white));
-        }
     }
 
     public void ApplyDamageBuff(int amount, int duration)
     {
         damageBuff = amount;
         damageBuffDuration = duration;
-        Debug.Log($"{unitName} 공격력 버프 적용! 데미지 +{amount} ({duration}턴 지속)");
-        
-        // 버프 연출 (크기 살짝 커졌다가 돌아오기)
         transform.DOScale(transform.localScale * 1.1f, 0.2f).SetLoops(2, LoopType.Yoyo);
     }
 
@@ -411,53 +343,29 @@ public class Unit : MonoBehaviour
         moveBuffDuration = duration;
         maxMovePoints += amount;
         currentMovePoints += amount; 
-        Debug.Log($"{unitName} 이동 버프 적용! 최대 이동 +{amount} ({duration}턴 지속)");
-
-        // 연출 (좌우로 살짝 흔들기)
-        transform.DOShakeRotation(0.3f, new Vector3(0, 0, 10), 10);
     }
 
     public void GetKnockedBack(int pushX, int pushY)
     {
         int nextX = gridX + pushX;
         int nextY = gridY + pushY;
-        bool isWallHit = false;
-        bool isUnitHit = false;
-
-        if (AnchorGridManager.Instance != null)
-        {
-            if (nextX < 0 || nextX >= AnchorGridManager.Instance.width ||
-                nextY < 0 || nextY >= AnchorGridManager.Instance.height)
-            {
-                isWallHit = true;
-            }
-        }
-
+        bool isWallHit = (AnchorGridManager.Instance != null && (nextX < 0 || nextX >= AnchorGridManager.Instance.width || nextY < 0 || nextY >= AnchorGridManager.Instance.height));
         Unit obstacle = BattleManager.Instance.GetUnitAt(nextX, nextY);
-        if (obstacle != null)
-        {
-            isUnitHit = true;
-        }
 
-        if (isWallHit || isUnitHit)
+        if (isWallHit || obstacle != null)
         {
-            Debug.Log($"💥 {unitName} 넉백 충돌! (벽/유닛)");
-
             transform.DOShakePosition(0.5f, 0.5f, 20, 90);
-
             TakeDamage(10); 
             return;
         }
 
         gridX = nextX;
         gridY = nextY;
-
         Vector3 targetPos = AnchorGridManager.Instance != null 
             ? AnchorGridManager.Instance.GetTileCenterPosition(gridX, gridY)
             : new Vector3(gridX * 1.1f, 0.5f, gridY * 1.1f);
         targetPos += tilePositionOffset;
         ApplyLayerDepth(ref targetPos, gridY);
-
         UpdateSortingOrder();
         transform.DOMove(targetPos, 0.2f).SetEase(Ease.OutBack);
     }
@@ -466,7 +374,6 @@ public class Unit : MonoBehaviour
     {
         Collider col = GetComponent<Collider>();
         if (col != null) col.enabled = false;
-
         transform.DOScale(Vector3.zero, 0.5f).OnComplete(() =>
         {
             gameObject.SetActive(false);
@@ -477,26 +384,19 @@ public class Unit : MonoBehaviour
     public void AI_TakeAction(Unit target)
     {
         if (target == null) return;
+
+        // [핵심 수정] 타겟(플레이어)을 항상 바라보도록 설정
+        SetFlip(target.gridX < gridX);
+
         int dist = Mathf.Abs(target.gridX - gridX) + Mathf.Abs(target.gridY - gridY);
 
         if (dist <= 1)
         {
-            // 방향 전환 후 공격
-            int dirX = target.gridX - gridX;
-            if (dirX != 0) SetFlip(dirX < 0);
-            
-            // AI는 단순하게 기본 공격(1칸 앞)을 한다고 가정하여 가짜 카드 데이터 생성 후 실행
-            // (실제로는 AI도 CardData를 가지고 있어야 함)
-            // 여기선 간단히 AttackPattern 메서드를 모방하여 직접 처리
             Debug.Log($"🤖 AI {unitName} 공격!");
-            
-            // 임시 공격 연출
             PlayAnim(attackAnimName, false);
-            // 0.3초 뒤 데미지
             DOVirtual.DelayedCall(0.3f, () => {
                 if(target != null) target.TakeDamage(7);
             });
-            // 0.8초 뒤 복귀
             DOVirtual.DelayedCall(0.8f, () => PlayAnim(idleAnimName, true));
         }
         else
@@ -509,7 +409,9 @@ public class Unit : MonoBehaviour
             else
                 moveY = (target.gridY > gridY) ? 1 : -1;
 
+            // 이동 시에도 타겟을 바라보도록 보장 (Move 내에서도 SetFlip이 호출되지만, AI 시점에선 플레이어를 고정해서 보는 것이 안정적)
             Move(moveX, moveY);
+            SetFlip(target.gridX < gridX);
         }
     }
 }

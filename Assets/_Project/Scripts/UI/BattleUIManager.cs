@@ -72,6 +72,10 @@ public class BattleUIManager : MonoBehaviour
                 draggable.cardData = card;
             }
         }
+
+        // 부채꼴 레이아웃 업데이트
+        CardFanLayout fanLayout = handPanel.GetComponent<CardFanLayout>();
+        if (fanLayout != null) fanLayout.UpdateLayout();
     }
 
     public void UpdateActionSlotUI(List<CardData> actionSlots)

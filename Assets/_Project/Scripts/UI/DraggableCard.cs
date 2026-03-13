@@ -15,6 +15,15 @@ public class DraggableCard : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         canvasGroup = GetComponent<CanvasGroup>();
     }
 
+    private void OnDisable()
+    {
+        // 오브젝트가 파괴되거나 비활성화될 때(예: 슬롯 등록 시 UI 갱신) 가이드라인 제거
+        if (BattleManager.Instance != null)
+        {
+            BattleManager.Instance.StopPreviewRange();
+        }
+    }
+
     public void OnBeginDrag(PointerEventData eventData)
     {
         //  Debug.Log("드래그 시작!");
