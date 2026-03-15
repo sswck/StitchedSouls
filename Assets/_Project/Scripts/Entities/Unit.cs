@@ -243,7 +243,15 @@ public class Unit : MonoBehaviour
 
         if (seq != null)
         {
-            seq.AppendCallback(() => PlayAnim(attackAnimName, false));
+            seq.AppendCallback(() =>
+            {
+                PlayAnim(attackAnimName, false);
+
+                if (isPlayer && SoundManager.Instance != null)
+                {
+                    SoundManager.Instance.PlaySFX(SoundManager.Instance.allyAttackSFX);
+                }
+            });
             seq.AppendInterval(0.3f);
             seq.AppendCallback(() => 
             {
@@ -261,7 +269,14 @@ public class Unit : MonoBehaviour
     {
         if (seq != null)
         {
-            seq.AppendCallback(() => PlayAnim(attackAnimName, false));
+            seq.AppendCallback(() =>
+            {
+                PlayAnim(attackAnimName, false);
+                if (SoundManager.Instance != null)
+                {
+                    SoundManager.Instance.PlaySFX(SoundManager.Instance.allyAttackSFX);
+                }
+            });
             seq.AppendInterval(0.3f);
             seq.AppendCallback(() => 
             {
@@ -299,17 +314,25 @@ public class Unit : MonoBehaviour
     public void TakeDamage(int damage)
     {
         int finalDamage = damage;
-        if (BattleManager.Instance != null && this == BattleManager.Instance.playerUnit && GameManager.Instance != null)
+        bool isPlayer = BattleManager.Instance != null && this == BattleManager.Instance.playerUnit;
+
+        if (isPlayer && GameManager.Instance != null)
         {
             finalDamage = Mathf.Max(0, damage - GameManager.Instance.def);
         }
-        if (BattleManager.Instance != null && this == BattleManager.Instance.playerUnit)
+        if (isPlayer)
         {
             BattleManager.Instance.RecordDamageTaken(finalDamage);
         }
 
         currentHP -= finalDamage;
         UpdateHPBar();
+
+        if (SoundManager.Instance != null)
+        {
+            if (isPlayer) SoundManager.Instance.PlaySFX(SoundManager.Instance.allyHitSFX);
+            else SoundManager.Instance.PlaySFX(SoundManager.Instance.enemyHitSFX);
+        }
 
         if (skeletonAnimation != null)
         {
@@ -394,6 +417,12 @@ public class Unit : MonoBehaviour
         {
             Debug.Log($"🤖 AI {unitName} 공격!");
             PlayAnim(attackAnimName, false);
+
+            if (SoundManager.Instance != null)
+            {
+                SoundManager.Instance.PlaySFX(SoundManager.Instance.enemyAttackSFX);
+            }
+
             DOVirtual.DelayedCall(0.3f, () => {
                 if(target != null) target.TakeDamage(7);
             });

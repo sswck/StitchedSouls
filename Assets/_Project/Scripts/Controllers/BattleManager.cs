@@ -495,6 +495,9 @@ public class BattleManager : MonoBehaviour
         isBattleEnded = true;
         state = BattleState.Won;
 
+        if (SoundManager.Instance != null) 
+            SoundManager.Instance.PlaySFX(SoundManager.Instance.victorySFX);
+
         if (GameManager.Instance != null && playerUnit != null)
         {
             GameManager.Instance.currentHP = playerUnit.currentHP;
@@ -520,6 +523,10 @@ public class BattleManager : MonoBehaviour
     {
         isBattleEnded = true;
         state = BattleState.Lost;
+
+        if (SoundManager.Instance != null) 
+            SoundManager.Instance.PlaySFX(SoundManager.Instance.defeatSFX);
+
         Debug.Log("💀 GAME OVER... 플레이어가 사망했습니다.");
 
         BattleUIManager.Instance.ShowResultUI(false);
