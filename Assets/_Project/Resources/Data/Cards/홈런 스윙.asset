@@ -10,13 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ef841a2a9b881d64da04c2f38e57016d, type: 3}
-  m_Name: "\uBC29\uC5B4"
+  m_Name: "\uD648\uB7F0 \uC2A4\uC719"
   m_EditorClassIdentifier: Assembly-CSharp::CardData
-  cardName: "\uBC29\uC5B4"
-  description: 
+  cardName: "\uD648\uB7F0 \uC2A4\uC719"
+  description: "\uD53C\uD574 6 + \uC801 1\uCE78 \uBC00\uC5B4\uB0C4"
   icon: {fileID: 0}
-  cardType: 1
-  targetType: 1
-  ppCost: 0
-  value: 4
-  targetPattern: []
+  cardType: 0
+  targetType: 0
+  ppCost: 5
+  value: 6
+  targetPattern:
+  - {x: 1, y: 0}
