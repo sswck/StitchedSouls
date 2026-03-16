@@ -236,8 +236,13 @@ MonoBehaviour:
   unitName: 
   maxHP: 50
   currentHP: 0
+  attackSpeed: 5
   maxMovePoints: 2
   currentMovePoints: 0
+  damageBuff: 0
+  damageBuffDuration: 0
+  moveBonus: 0
+  moveBuffDuration: 0
   gridX: 0
   gridY: 0
   tilePositionOffset: {x: 0, y: 0, z: 0}
@@ -246,6 +251,8 @@ MonoBehaviour:
   skeletonAnimation: {fileID: 7524962045035121095}
   idleAnimName: E_03_attack_standing
   attackAnimName: E_03_attack
-  hpBarPrefab: {fileID: 98269044502590925, guid: 9250afce0bd9f314c814cd4001ff0db0, type: 3}
-  hpBarOffset: {x: 0, y: 2.5, z: 0}
+  activeIcon: {fileID: -1327267660, guid: cf1d76534e5013147b402b982d2500a9, type: 3}
+  inactiveIcon: {fileID: 1818766786, guid: da4f4866a52f46743ac6c7f444b9cd0f, type: 3}
+  hpBarPrefab: {fileID: 98269044502590925, guid: 94cfec57033a52c4bbb6c2cc0dac6724, type: 3}
+  hpBarOffset: {x: 0, y: 3, z: 0}
   playerHpBarOffset: {x: 0, y: 3.2, z: 0}

@@ -11,9 +11,11 @@ public class Unit : MonoBehaviour
     public string unitName;
     public int maxHP = 50;
     public int currentHP;
+    public int attackSpeed = 10; // 추가
     public int maxMovePoints = 2;
     public int currentMovePoints;
     public int damageBuff = 0;
+
 
     [Header("Buff Durations")]
     public int damageBuffDuration = 0;
@@ -37,6 +39,8 @@ public class Unit : MonoBehaviour
     [SpineAnimation] public string attackAnimName = "attack_standing";
 
     [Header("UI")]
+    public Sprite activeIcon;   // 턴일 때 표시될 스프라이트
+    public Sprite inactiveIcon; // 턴이 아닐 때 표시될 스프라이트
     public GameObject hpBarPrefab;
     public Vector3 hpBarOffset = new Vector3(0f, 2.5f, 0f);
     public Vector3 playerHpBarOffset = new Vector3(0f, 3.2f, 0f);

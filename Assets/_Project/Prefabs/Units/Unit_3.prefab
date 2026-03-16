@@ -238,13 +238,18 @@ MonoBehaviour:
   currentHP: 0
   maxMovePoints: 2
   currentMovePoints: 0
+  damageBuff: 0
+  damageBuffDuration: 0
+  moveBonus: 0
+  moveBuffDuration: 0
   gridX: 0
   gridY: 0
   tilePositionOffset: {x: 0, y: 0, z: 0}
-  smallerZInFront: 1
+  sortingOrderBase: 10
+  layerDepthStep: 0.1
   skeletonAnimation: {fileID: 0}
   idleAnimName: E_04_attack_standing
   attackAnimName: E_04_attack
-  hpBarPrefab: {fileID: 98269044502590925, guid: 9250afce0bd9f314c814cd4001ff0db0, type: 3}
+  hpBarPrefab: {fileID: 98269044502590925, guid: 94cfec57033a52c4bbb6c2cc0dac6724, type: 3}
   hpBarOffset: {x: 0, y: 2.5, z: 0}
   playerHpBarOffset: {x: 0, y: 3.2, z: 0}
