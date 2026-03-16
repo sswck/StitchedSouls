@@ -26,6 +26,9 @@ public class BattleUIManager : MonoBehaviour
     public Button restartButton;
     public Button titleButton;
 
+    [Header("Turn Order UI")]
+    public TurnOrderUI turnOrderUI;
+
     [Header("Reward UI")]
     public RewardUIManager rewardUI;
 

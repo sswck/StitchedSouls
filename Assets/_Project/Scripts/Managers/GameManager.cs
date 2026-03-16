@@ -22,7 +22,8 @@ public class GameManager : MonoBehaviour
     public int str;
     public int def;
     public int spd;
-    
+    public int movePoint;
+
     public List<CardData> masterDeck = new List<CardData>();
 
     [Header("Map Progress")]
@@ -52,13 +53,13 @@ public class GameManager : MonoBehaviour
     {
         maxHP = defaultMaxHP;
         currentHP = maxHP;
-        
+
         masterDeck.Clear();
         if (startingDeck != null)
         {
             foreach (var card in startingDeck)
             {
-                masterDeck.Add(card); 
+                masterDeck.Add(card);
             }
         }
 
@@ -66,7 +67,7 @@ public class GameManager : MonoBehaviour
 
         currentStageIndex = 0;
         lastClearedStageIndex = -1;
-        
+
         LoadScene("MapScene");
     }
 

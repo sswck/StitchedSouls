@@ -33,16 +33,21 @@ public class BattleManager : MonoBehaviour
     [Tooltip("스폰 위치별 Tile Position Offset. (3,3), (3,0), (4,2) 등 각 타일마다 다른 오프셋을 Inspector에서 지정할 수 있습니다.")]
     public List<SpawnOffsetConfig> spawnPositionOffsets = new List<SpawnOffsetConfig>();
 
+    [Header("Turn System")]
+    public List<Unit> turnQueue = new List<Unit>();
+    public List<Unit> actedUnits = new List<Unit>(); // 이미 턴을 마친 유닛들
+    public Unit currentTurnUnit;
+
     [Header("Units")]
     public List<Unit> allUnits = new List<Unit>();
 
-    // TODO_juwan: 배틀 통계 기능 추가
     [Header("Battle Statistics")]
     public int totalDamageDeal;
     public int totalDamageTaken;
     public int totalDamageBlocked;
 
     private bool isBattleEnded = false;
+
 
     void Start()
     {
@@ -51,13 +56,13 @@ public class BattleManager : MonoBehaviour
 
         if (AnchorGridManager.Instance != null)
             AnchorGridManager.Instance.GenerateGrid();
-        
+
         SpawnPlayer();
         LoadPlayerData();
 
         if (GameManager.Instance != null && DeckManager.Instance != null)
         {
-             DeckManager.Instance.InitializeDeck(GameManager.Instance.masterDeck);
+            DeckManager.Instance.InitializeDeck(GameManager.Instance.masterDeck);
         }
 
         StartCoroutine(SetupBattle());
@@ -93,8 +98,9 @@ public class BattleManager : MonoBehaviour
             {
                 playerUnit.maxHP = GameManager.Instance.maxHP;
                 playerUnit.currentHP = GameManager.Instance.currentHP;
-                // spd: 전투 시 플레이어 턴 최대 이동 횟수 = 기본 2 + spd
-                playerUnit.maxMovePoints = 2 + GameManager.Instance.spd;
+                playerUnit.attackSpeed = playerUnit.attackSpeed + GameManager.Instance.spd; // 공격속도 연동
+                // spd: 전투 시 플레이어 턴 최대 이동 횟수 = 기본 2 + spd (기존 로직 유지 가능 혹은 변경 가능)
+                playerUnit.maxMovePoints = 2 + GameManager.Instance.movePoint;
 
                 playerUnit.UpdateHPBar();
             }
@@ -104,15 +110,90 @@ public class BattleManager : MonoBehaviour
     IEnumerator SetupBattle()
     {
         yield return new WaitForSeconds(0.5f);
-        StartPlayerTurn();
+        StartNextTurn();
+    }
+
+    public void GenerateTurnQueue()
+    {
+        turnQueue.Clear();
+        actedUnits.Clear();
+        // 공격속도 내림차순 정렬
+        List<Unit> sortedUnits = new List<Unit>(allUnits);
+
+        Debug.Log("--- [턴 큐 생성 시작] ---");
+        foreach (var u in sortedUnits)
+        {
+            Debug.Log($"유닛: {u.name}, 공격속도: {u.attackSpeed}");
+        }
+
+        sortedUnits.Sort((a, b) => b.attackSpeed.CompareTo(a.attackSpeed));
+
+        foreach (var unit in sortedUnits)
+        {
+            if (unit.currentHP > 0)
+                turnQueue.Add(unit);
+        }
+
+        string orderStr = "최종 턴 순서: ";
+        foreach (var u in turnQueue) orderStr += $"{u.name}({u.attackSpeed}) -> ";
+        Debug.Log(orderStr);
+        Debug.Log($"--- 새로운 라운드 시작! 유닛 수: {turnQueue.Count} ---");
+
+        if (TurnOrderUI.Instance != null)
+        {
+            TurnOrderUI.Instance.Refresh(turnQueue, currentTurnUnit, actedUnits);
+        }
+    }
+
+    public void StartNextTurn()
+    {
+        if (state == BattleState.Won || state == BattleState.Lost) return;
+
+        // 큐가 비어있으면 새로운 라운드 생성
+        if (turnQueue.Count == 0)
+        {
+            GenerateTurnQueue();
+        }
+
+        if (turnQueue.Count == 0)
+        {
+            Debug.LogWarning("행동 가능한 유닛이 없습니다.");
+            return;
+        }
+
+        currentTurnUnit = turnQueue[0];
+        turnQueue.RemoveAt(0);
+
+        if (currentTurnUnit == null || currentTurnUnit.currentHP <= 0)
+        {
+            StartNextTurn();
+            return;
+        }
+
+        Debug.Log($">>> [{currentTurnUnit.name}]의 턴! (SPD: {currentTurnUnit.attackSpeed}) <<<");
+
+        if (TurnOrderUI.Instance != null)
+        {
+            TurnOrderUI.Instance.Refresh(turnQueue, currentTurnUnit, actedUnits);
+        }
+
+        if (currentTurnUnit == playerUnit)
+        {
+            StartPlayerTurn();
+        }
+        else
+        {
+            state = BattleState.EnemyTurn;
+            StartCoroutine(EnemyTurnRoutine(currentTurnUnit));
+        }
     }
 
     void StartPlayerTurn()
     {
         Debug.Log(">>> ⚔️ 플레이어 턴 시작! ⚔️ <<<");
         state = BattleState.PlayerTurn;
-        
-        if(playerUnit != null) playerUnit.OnTurnStart();
+
+        if (playerUnit != null) playerUnit.OnTurnStart();
 
         if (DeckManager.Instance != null)
         {
@@ -124,49 +205,50 @@ public class BattleManager : MonoBehaviour
     {
         if (state == BattleState.Won || state == BattleState.Lost) return;
 
+        if (currentTurnUnit != null && !actedUnits.Contains(currentTurnUnit))
+        {
+            actedUnits.Add(currentTurnUnit);
+        }
+
         Debug.Log("플레이어 턴 종료...");
 
         if (DeckManager.Instance != null)
         {
             DeckManager.Instance.DiscardHand();
         }
-        
-        state = BattleState.EnemyTurn;
-        StartCoroutine(EnemyTurnRoutine());
+
+        StartNextTurn();
     }
 
     // AI 로직이 들어갈 곳
-    IEnumerator EnemyTurnRoutine()
+    IEnumerator EnemyTurnRoutine(Unit unit)
     {
-        Debug.Log(">>> 😈 적 턴 시작! 😈 <<<");
+        yield return new WaitForSeconds(0.5f);
+
+        if (state == BattleState.Won || state == BattleState.Lost) yield break;
+
+        if (unit == null || unit.currentHP <= 0)
+        {
+            StartNextTurn();
+            yield break;
+        }
+
+        Debug.Log($"[{unit.name}] 행동 시작...");
+
+        // AI 행동 실행 (타겟은 무조건 플레이어)
+        unit.AI_TakeAction(playerUnit);
+
+        // 행동 간 딜레이 (애니메이션 볼 시간 줌)
         yield return new WaitForSeconds(1.0f);
 
         if (state == BattleState.Won || state == BattleState.Lost) yield break;
 
-        // 1. 모든 적 유닛을 찾아서 행동시키기
-        // (지금은 리스트에 플레이어도 섞여 있으니 구분해야 함. 
-        //  하지만 간단하게 allUnits 중 playerUnit이 아닌 것만 적이라고 가정)
-        // 복사본으로 순회 → AI_TakeAction 중 allUnits가 수정되어도 열거자 오류 방지
-        foreach (var unit in new List<Unit>(allUnits))
+        if (unit != null && !actedUnits.Contains(unit))
         {
-            // [추가] 행동 루프 도중에도 게임이 끝났다면 즉시 중단 (예: 반격으로 적 사망 등)
-            if (state == BattleState.Won || state == BattleState.Lost) yield break;
-
-            // 플레이어거나 죽은 유닛은 패스
-            if (unit == playerUnit || unit.currentHP <= 0) continue;
-
-            Debug.Log($"[{unit.name}] 행동 시작...");
-            
-            // AI 행동 실행 (타겟은 무조건 플레이어)
-            unit.AI_TakeAction(playerUnit);
-
-            // 행동 간 딜레이 (애니메이션 볼 시간 줌)
-            yield return new WaitForSeconds(1.0f);
+            actedUnits.Add(unit);
         }
 
-        Debug.Log("적 턴 종료!");
-        if (state == BattleState.Won || state == BattleState.Lost) yield break;
-        StartPlayerTurn();
+        StartNextTurn();
     }
 
     void SpawnPlayer()
@@ -175,12 +257,12 @@ public class BattleManager : MonoBehaviour
         playerUnit.name = "Player Unit";
         ApplySpawnOffset(playerUnit, 0, 2);
         playerUnit.Init(0, 2);
-        
+
         allUnits.Add(playerUnit);
-        
+
         SpawnEnemy();
     }
-    
+
     void SpawnEnemy()
     {
         // GameManager 정보가 없다면 기본 1마리만 중앙에 소환
@@ -305,7 +387,7 @@ public class BattleManager : MonoBehaviour
         if (actionSlots.Contains(card))
         {
             actionSlots.Remove(card);
-            
+
             // DeckManager에게 손패로 돌려보내라고 명령
             if (DeckManager.Instance != null)
             {
@@ -340,14 +422,15 @@ public class BattleManager : MonoBehaviour
             seq.AppendInterval(0.6f);
         }
 
-        seq.OnComplete(() => {
+        seq.OnComplete(() =>
+        {
             Debug.Log("--- 턴 종료 ---");
 
             if (DeckManager.Instance != null)
             {
                 DeckManager.Instance.DiscardUsedCards(actionSlots);
             }
-            
+
             actionSlots.Clear();
             BattleUIManager.Instance.UpdateActionSlotUI(actionSlots);
             EndPlayerTurn();
@@ -358,7 +441,7 @@ public class BattleManager : MonoBehaviour
     void Update()
     {
         if (state != BattleState.PlayerTurn) return;
-        
+
         if (Keyboard.current.spaceKey.wasPressedThisFrame)
         {
             ExecuteSlots();
@@ -445,7 +528,7 @@ public class BattleManager : MonoBehaviour
         else if (card.targetType == TargetType.Self)
         {
             // (선택 사항) 버프 카드는 내 위치만 표시하거나 다른 색으로 표시
-            AnchorGridManager.Instance.HighlightAttackRange(playerUnit.gridX, playerUnit.gridY, new List<Vector2Int>{ Vector2Int.zero }, isLeft);
+            AnchorGridManager.Instance.HighlightAttackRange(playerUnit.gridX, playerUnit.gridY, new List<Vector2Int> { Vector2Int.zero }, isLeft);
         }
     }
 
@@ -462,6 +545,15 @@ public class BattleManager : MonoBehaviour
     public void OnUnitDead(Unit unit)
     {
         allUnits.Remove(unit);
+        if (turnQueue.Contains(unit))
+            turnQueue.Remove(unit);
+        if (actedUnits.Contains(unit))
+            actedUnits.Remove(unit);
+
+        if (TurnOrderUI.Instance != null)
+        {
+            TurnOrderUI.Instance.Refresh(turnQueue, currentTurnUnit, actedUnits);
+        }
 
         if (unit == playerUnit)
         {
@@ -489,7 +581,7 @@ public class BattleManager : MonoBehaviour
             OnVictory();
         }
     }
-    
+
     private void OnVictory()
     {
         isBattleEnded = true;
@@ -500,13 +592,13 @@ public class BattleManager : MonoBehaviour
             GameManager.Instance.currentHP = playerUnit.currentHP;
             Debug.Log($"💾 체력 저장 완료: {GameManager.Instance.currentHP}");
         }
-        
+
         Debug.Log("🎉 VICTORY! 모든 적을 처치했습니다.");
         BattleUIManager.Instance.ShowResultUI(true);
-        
+
         // sp 획득 로직
         //일반: +1, 엘리트: +2, 보스: +3
-        if(GameManager.Instance.currentNodeType == NodeType.Elite)
+        if (GameManager.Instance.currentNodeType == NodeType.Elite)
             GameManager.Instance.currentSp += 2;
         else
             GameManager.Instance.currentSp += 1;

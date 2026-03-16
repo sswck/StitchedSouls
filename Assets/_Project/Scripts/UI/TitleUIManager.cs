@@ -8,7 +8,7 @@ public class TitleUIManager : MonoBehaviour
     public Button startButton;
     public Button exitButton;
     public Button StatusButton;
-    
+
 
     [Header("Status Panel")]
     public GameObject statusPanel;
@@ -21,7 +21,7 @@ public class TitleUIManager : MonoBehaviour
     public Button upgradeDefButton;
     public Button upgradeSpdButton;
     [Tooltip("SP 부족 시 안내 메시지 (선택)")]
-    public TextMeshProUGUI statusMessageText;
+    public GameObject statusMessageText;
 
     void Start()
     {
@@ -31,7 +31,7 @@ public class TitleUIManager : MonoBehaviour
         startButton.onClick.AddListener(OnStartClick);
         exitButton.onClick.AddListener(OnExitClick);
         StatusButton.onClick.AddListener(OnStatusClick);
-        
+
 
         if (statusPanel != null)
         {
@@ -45,6 +45,10 @@ public class TitleUIManager : MonoBehaviour
             if (upgradeSpdButton != null)
                 upgradeSpdButton.onClick.AddListener(() => OnUpgradeStat("spd"));
         }
+
+        if (GameManager.Instance.currentSp < 1)
+            statusMessageText.SetActive(true);
+
     }
 
     void OnStartClick()
@@ -98,14 +102,17 @@ public class TitleUIManager : MonoBehaviour
         if (upgradeSpdButton != null)
             upgradeSpdButton.interactable = canUpgrade;
 
-        if (statusMessageText != null)
-            statusMessageText.text = canUpgrade ? "" : "SP가 부족합니다.";
+
     }
 
     void OnUpgradeStat(string statKey)
     {
         if (GameManager.Instance == null) return;
-        if (GameManager.Instance.currentSp < 1) return;
+        if (GameManager.Instance.currentSp < 1)
+        {
+            statusMessageText.SetActive(true);
+            return;
+        }
 
         GameManager.Instance.currentSp -= 1;
         switch (statKey)
@@ -123,5 +130,5 @@ public class TitleUIManager : MonoBehaviour
         RefreshStatusPanel();
     }
 
-    
+
 }
