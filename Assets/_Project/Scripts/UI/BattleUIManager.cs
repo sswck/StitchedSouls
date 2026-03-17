@@ -68,7 +68,15 @@ public class BattleUIManager : MonoBehaviour
             // 텍스트 변경 (프리팹 구조에 따라 경로가 다를 수 있음. GetComponentInChildren 사용)
             TextMeshProUGUI text = newSlot.GetComponentInChildren<TextMeshProUGUI>();
             if (text != null) text.text = card.cardName;
+
+            // 🖼️ [수정] 카드 이미지 설정 (프리팹 최상단에서 직접 Image 컴포넌트 가져오기)
+            Image cardImg = newSlot.GetComponent<Image>();
             
+            if (cardImg != null && card.cardImage != null)
+            {
+                cardImg.sprite = card.cardImage;
+            }
+
             DraggableCard draggable = newSlot.GetComponent<DraggableCard>();
             if (draggable != null)
             {
@@ -100,6 +108,12 @@ public class BattleUIManager : MonoBehaviour
                 
                 TextMeshProUGUI text = newSlot.GetComponentInChildren<TextMeshProUGUI>();
                 if (text != null) text.text = card.cardName;
+
+                Image cardImg = newSlot.GetComponent<Image>();
+                if (cardImg != null && card.cardImage != null)
+                {
+                    cardImg.sprite = card.cardImage;
+                }
 
                 DraggableCard draggable = newSlot.GetComponent<DraggableCard>();
                 if (draggable != null)
@@ -205,6 +219,21 @@ public class BattleUIManager : MonoBehaviour
         if (GameManager.Instance != null)
         {
             GameManager.Instance.LoadScene("TitleScene");
+        }
+    }
+
+    public void OnClickDiscardPileButton()
+    {
+        DeckViewUI deckViewUI = Object.FindFirstObjectByType<DeckViewUI>(FindObjectsInactive.Include);
+
+        if (DeckManager.Instance != null && deckViewUI != null)
+        {
+            // 무덤 리스트를 명시적으로 넘겨서 팝업 열기
+            deckViewUI.OpenDeckView(DeckManager.Instance.discardPile);
+        }
+        else if (deckViewUI == null)    // 디버그용
+        {
+            Debug.LogError("DeckViewUI 스크립트를 찾을 수 없습니다!");
         }
     }
 }

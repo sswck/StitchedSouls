@@ -120,9 +120,9 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 1202770359191720731, guid: 8a4ea66ea31797d46ac4185c267bda52, type: 3}
         m_TargetAssemblyTypeName: DeckViewUI, Assembly-CSharp
-        m_MethodName: OpenDeckView
+        m_MethodName: 
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
