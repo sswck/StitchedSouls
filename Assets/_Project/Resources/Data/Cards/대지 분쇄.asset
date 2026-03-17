@@ -22,3 +22,4 @@ MonoBehaviour:
   targetPattern:
   - {x: 1, y: 1}
   - {x: 1, y: -1}
+  cardImage: {fileID: 21300000, guid: 855dcaa5627c07d4ab28aa67077091e4, type: 3}

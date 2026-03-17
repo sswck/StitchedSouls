@@ -33,4 +33,7 @@ public class CardData : ScriptableObject
 
     [Header("Pattern Attack Settings")]
     public List<Vector2Int> targetPattern;
+
+    [Header("Visuals")]
+    public Sprite cardImage;
 }

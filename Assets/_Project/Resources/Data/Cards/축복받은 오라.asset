@@ -21,3 +21,4 @@ MonoBehaviour:
   ppCost: 5
   value: 8
   targetPattern: []
+  cardImage: {fileID: 21300000, guid: 226d1176a133fcf47ab7aee189e73a99, type: 3}

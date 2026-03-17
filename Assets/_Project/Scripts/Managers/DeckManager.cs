@@ -157,15 +157,20 @@ public class DeckManager : MonoBehaviour
     /// </summary>
     public void ReturnCardToHand(CardData card)
     {
-        if (!handDeck.Contains(card))
+        if (handDeck.Count >= maxHandSize)
+        {
+            Debug.Log($"✋ 손패가 꽉 차서 장착 취소된 [{card.cardName}] 카드가 무덤으로 버려집니다.");
+            discardPile.Add(card);
+        }
+        else
         {
             handDeck.Add(card);
-            
-            if (BattleUIManager.Instance != null)
-            {
-                BattleUIManager.Instance.UpdateHandUI(handDeck);
-            }
             Debug.Log($"🔙 카드 장착 취소: {card.cardName}이(가) 손패로 돌아왔습니다.");
+        }
+        
+        if (BattleUIManager.Instance != null)
+        {
+            BattleUIManager.Instance.UpdateHandUI(handDeck);
         }
     }
 }
