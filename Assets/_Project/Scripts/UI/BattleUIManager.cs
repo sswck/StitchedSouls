@@ -32,6 +32,9 @@ public class BattleUIManager : MonoBehaviour
     [Header("Reward UI")]
     public RewardUIManager rewardUI;
 
+    [Header("PP UI")]
+    public TextMeshProUGUI ppText;
+
     void Start()
     {
         if (restartButton != null)
@@ -42,6 +45,8 @@ public class BattleUIManager : MonoBehaviour
             
         // 시작할 땐 결과창 끄기
         if (resultPanel != null) resultPanel.SetActive(false);
+
+        UpdatePPUI();
     }
 
     void Awake()
@@ -138,6 +143,17 @@ public class BattleUIManager : MonoBehaviour
                 // [CASE B] 빈 슬롯
                 Instantiate(emptySlotPrefab, actionSlotPanel);
             }
+        }
+    }
+
+    /// <summary>
+    /// PP바를 갱신합니다.
+    /// </summary>
+    public void UpdatePPUI()
+    {
+        if (BattleManager.Instance != null && BattleManager.Instance.playerUnit != null)
+        {
+            BattleManager.Instance.playerUnit.UpdatePPBar();
         }
     }
 
