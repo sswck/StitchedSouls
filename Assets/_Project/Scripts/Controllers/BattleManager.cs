@@ -366,8 +366,19 @@ public class BattleManager : MonoBehaviour
     {
         if (actionSlots.Count < 3) // 슬롯이 3개라고 가정 추후 3을 상수변수로 변경
         {
+            if (GameManager.Instance != null && GameManager.Instance.currentPP < card.ppCost)
+            {
+                Debug.LogWarning($"PP가 부족합니다! (필요: {card.ppCost}, 현재: {GameManager.Instance.currentPP})");
+                // TODO: 텍스트가 빨간색으로 흔들리는 등의 UI 피드백을 주면 좋습니다.
+                return;
+            }
+
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.currentPP -= card.ppCost;
+            }
             actionSlots.Add(card);
-            Debug.Log($"슬롯에 카드 등록됨: {card.cardName}");
+            Debug.Log($"슬롯에 카드 등록됨: {card.cardName} (남은 PP: {GameManager.Instance.currentPP})");
 
             if (DeckManager.Instance != null)
             {
@@ -375,6 +386,7 @@ public class BattleManager : MonoBehaviour
             }
 
             BattleUIManager.Instance.UpdateActionSlotUI(actionSlots);
+            BattleUIManager.Instance.UpdatePPUI();
         }
         else
         {
@@ -386,16 +398,19 @@ public class BattleManager : MonoBehaviour
     {
         if (actionSlots.Contains(card))
         {
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.currentPP = Mathf.Min(GameManager.Instance.currentPP + card.ppCost, GameManager.Instance.maxPP);
+            }
             actionSlots.Remove(card);
 
-            // DeckManager에게 손패로 돌려보내라고 명령
             if (DeckManager.Instance != null)
             {
                 DeckManager.Instance.ReturnCardToHand(card);
             }
 
-            // 슬롯 UI 다시 그리기
             BattleUIManager.Instance.UpdateActionSlotUI(actionSlots);
+            BattleUIManager.Instance.UpdatePPUI();
         }
     }
 

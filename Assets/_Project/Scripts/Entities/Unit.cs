@@ -46,10 +46,23 @@ public class Unit : MonoBehaviour
     public Vector3 playerHpBarOffset = new Vector3(0f, 3.2f, 0f);
     private UnitHPBar hpBar;
 
+    [Header("Defense")]
+    public int currentBlock = 0;
+
+    [Header("PendingHeal")]
+    private int pendingHealHP = 0;
+    private int pendingHealPP = 0;
+
     #endregion
 
     public void Init(int startX, int startY)
     {
+        if (string.IsNullOrEmpty(unitName))
+        {
+            // "(Clone)" 같은 지저분한 글자가 붙는 걸 떼고 깔끔하게 이름만 가져옵니다.
+            unitName = gameObject.name.Replace("(Clone)", "").Trim();
+        }
+
         currentHP = maxHP;
         currentMovePoints = maxMovePoints;
         gridX = startX;
@@ -67,6 +80,7 @@ public class Unit : MonoBehaviour
         UpdateSortingOrder();
 
         InitializeHPBar();
+        UpdateHPBar();
         PlayAnim(idleAnimName, true);
     }
 
@@ -132,6 +146,20 @@ public class Unit : MonoBehaviour
         if (hpBar != null) hpBar.SetHP(currentHP, maxHP);
     }
 
+    public void UpdatePPBar()
+    {
+        if (hpBar != null && GameManager.Instance != null)
+        {
+            bool isPlayer = BattleManager.Instance != null && BattleManager.Instance.playerUnit == this;
+            
+            hpBar.ShowPPBar(isPlayer); 
+            if (isPlayer)
+            {
+                hpBar.SetPP(GameManager.Instance.currentPP, GameManager.Instance.maxPP);
+            }
+        }
+    }
+
     public bool CanMove() => currentMovePoints > 0;
 
     public void Move(int dirX, int dirY)
@@ -178,6 +206,12 @@ public class Unit : MonoBehaviour
 
     public void OnTurnStart()
     {
+        if (currentBlock > 0)
+        {
+            Debug.Log($"⏳ 턴 시작: [{unitName}]의 이전 턴 방어도가 0으로 초기화되었습니다.");
+            currentBlock = 0;
+        }
+
         if (moveBuffDuration > 0)
         {
             moveBuffDuration--;
@@ -195,6 +229,21 @@ public class Unit : MonoBehaviour
             {
                 damageBuff = 0;
             }
+        }
+
+        if (pendingHealHP > 0)
+        {
+            Heal(pendingHealHP);
+            pendingHealHP = 0;
+        }
+
+        if (pendingHealPP > 0 && GameManager.Instance != null)
+        {
+            GameManager.Instance.currentPP = Mathf.Min(GameManager.Instance.currentPP + pendingHealPP, GameManager.Instance.maxPP);
+            pendingHealPP = 0;
+            
+            if (BattleUIManager.Instance != null) BattleUIManager.Instance.UpdatePPUI();
+            UpdatePPBar();
         }
 
         currentMovePoints = maxMovePoints;
@@ -313,6 +362,34 @@ public class Unit : MonoBehaviour
             }
             target.TakeDamage(effectiveValue);
         }
+        if (card.healHP > 0) target.Heal(card.healHP);
+        if (card.healPP > 0 && GameManager.Instance != null && target == BattleManager.Instance.playerUnit)
+        {
+            GameManager.Instance.currentPP = Mathf.Min(GameManager.Instance.currentPP + card.healPP, GameManager.Instance.maxPP);
+            if (BattleUIManager.Instance != null) BattleUIManager.Instance.UpdatePPUI();
+            target.UpdatePPBar();
+            Debug.Log($"🔋 PP {card.healPP} 회복! 현재 PP: {GameManager.Instance.currentPP}");
+        }
+
+        if (card.nextTurnHealHP > 0 || card.nextTurnHealPP > 0)
+        {
+            target.pendingHealHP += card.nextTurnHealHP;
+            target.pendingHealPP += card.nextTurnHealPP;
+            Debug.Log($"⏳ 다음 턴에 HP {card.nextTurnHealHP}, PP {card.nextTurnHealPP} 회복 예약됨!");
+        }
+
+        int blockGain = card.block;
+
+        if (card.isMissingHPBlock)
+        {
+            blockGain = target.maxHP - target.currentHP;
+        }
+
+        if (blockGain > 0)
+        {
+            target.currentBlock += blockGain;
+            Debug.Log($"🛡️ [{target.unitName}] 방어도 {blockGain} 획득! (현재 총 방어도: {target.currentBlock})");
+        }
     }
     
     public void TakeDamage(int damage)
@@ -324,6 +401,25 @@ public class Unit : MonoBehaviour
         {
             finalDamage = Mathf.Max(0, damage - GameManager.Instance.def);
         }
+
+        if (currentBlock > 0)
+        {
+            if (currentBlock >= finalDamage)
+            {
+                // 방어도로 피해를 완벽히 막아낸 경우
+                currentBlock -= finalDamage;
+                Debug.Log($"🛡️ [{unitName}] 방어도로 공격 완벽 차단! (들어온 피해: {finalDamage} / 남은 방어도: {currentBlock})");
+                finalDamage = 0; 
+            }
+            else
+            {
+                // 방어도가 뚫리고 남은 데미지가 들어가는 경우
+                finalDamage -= currentBlock;
+                Debug.Log($"💥 [{unitName}] 방어도가 뚫렸습니다! (방어도 {currentBlock} 소모 / 실제 들어온 피해: {finalDamage})");
+                currentBlock = 0;
+            }
+        }
+        
         if (isPlayer)
         {
             BattleManager.Instance.RecordDamageTaken(finalDamage);

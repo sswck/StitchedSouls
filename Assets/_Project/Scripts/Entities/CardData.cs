@@ -28,7 +28,22 @@ public class CardData : ScriptableObject
     public CardType cardType;
     public TargetType targetType;
 
-    public int ppCost;
+    [Header("Cost")]
+    public int ppCost = 0;
+
+    [Header("Recovery Effects")]
+    public int healHP = 0;
+    public int healPP = 0;
+
+    [Header("Delayed Effects (Next Turn)")]
+    public int nextTurnHealHP = 0;
+    public int nextTurnHealPP = 0;
+
+    [Header("Defense Effects")]
+    public int block = 0;
+    public bool isMissingHPBlock = false;   // true일 경우 잃은 체력만큼 방어도
+
+    [Header("Damage")]
     public int value;
 
     [Header("Pattern Attack Settings")]

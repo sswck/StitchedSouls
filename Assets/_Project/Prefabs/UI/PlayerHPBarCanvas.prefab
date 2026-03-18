@@ -38,7 +38,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: -0.0385, y: 0}
+  m_AnchoredPosition: {x: -0.038513184, y: 0}
   m_SizeDelta: {x: 386.7701, y: 40}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &1968022236439617397
@@ -86,7 +86,7 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
-  m_PresetInfoIsWorld: 1
+  m_PresetInfoIsWorld: 0
 --- !u!114 &7139249056479475729
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -116,7 +116,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a083e5d8506b4dc479a17061e3d63ad5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UnitHPBar
-  fillImage: {fileID: 87184749654274811}
+  hpFill: {fileID: 87184749654274811}
+  ppFill: {fileID: 7556464569717471137}
+  ppBarContainer: {fileID: 7966913782174952066}
 --- !u!1 &5201278559940650870
 GameObject:
   m_ObjectHideFlags: 0

@@ -13,12 +13,12 @@ MonoBehaviour:
   m_Name: "\uB300\uC9C0 \uBD84\uC1C4"
   m_EditorClassIdentifier: Assembly-CSharp::CardData
   cardName: "\uB300\uC9C0 \uBD84\uC1C4"
-  description: "\uD53C\uD574 1 + \uC2A4\uD134"
+  description: "\uD53C\uD574 2 + \uC2A4\uD134"
   icon: {fileID: 0}
   cardType: 0
   targetType: 0
-  ppCost: 5
-  value: 1
+  ppCost: 8
+  value: 2
   targetPattern:
   - {x: 1, y: 1}
   - {x: 1, y: -1}

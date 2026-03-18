@@ -14,6 +14,8 @@ public class GameManager : MonoBehaviour
     [Header("Player Resources")]
     public int maxHP;
     public int currentHP;
+    public int maxPP = 50;
+    public int currentPP = 25;
     public int gold = 100;
     public int currentSp;
     public int maxSp;
