@@ -16,6 +16,8 @@ public class Unit : MonoBehaviour
     public int currentMovePoints;
     public int damageBuff = 0;
 
+    [Header("Ultimate Skill")]
+    public CardData ultimateSkillCard;
 
     [Header("Buff Durations")]
     public int damageBuffDuration = 0;

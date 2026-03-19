@@ -20,6 +20,10 @@ public class GameManager : MonoBehaviour
     public int currentSp;
     public int maxSp;
 
+    [Header("Player Resource (Ultimate SP)")]
+    public int maxUlt = 100;
+    public int currentUlt = 0;
+
     [Header("Player Status")]
     public int str;
     public int def;
