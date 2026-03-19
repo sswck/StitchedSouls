@@ -434,6 +434,7 @@ public class BattleManager : MonoBehaviour
         foreach (var card in actionSlots)
         {
             playerUnit.PerformAction(card, seq);
+            seq.AppendCallback(() => ChargeUlt(card.ultCharge));
             seq.AppendInterval(0.6f);
         }
 
@@ -527,6 +528,49 @@ public class BattleManager : MonoBehaviour
 
         // 체력바 UI 업데이트
         playerUnit.UpdateHPBar();
+    }
+
+    public void ChargeUlt(int amount)
+    {
+        if (GameManager.Instance == null || amount <= 0) return;
+
+        GameManager.Instance.currentUlt += amount;
+        if (GameManager.Instance.currentUlt > GameManager.Instance.maxUlt)
+            GameManager.Instance.currentUlt = GameManager.Instance.maxUlt;
+
+        Debug.Log($"⚡ SP 충전! (+{amount}) 현재 게이지: {GameManager.Instance.currentUlt}%");
+        
+        if (BattleUIManager.Instance != null)
+            BattleUIManager.Instance.UpdateUltUI();
+    }
+
+    public void OnClickUltimateButton()
+    {
+        if (state != BattleState.PlayerTurn)
+        {
+            Debug.Log("지금은 궁극기를 사용할 수 없는 상태입니다!");
+            return;
+        }
+        
+        if (GameManager.Instance == null || GameManager.Instance.currentUlt < GameManager.Instance.maxUlt)
+        {
+            Debug.LogWarning("궁극기 게이지가 부족합니다!");
+            return;
+        }
+
+        if (playerUnit == null || playerUnit.ultimateSkillCard == null)
+        {
+            Debug.LogError($"🚨 {playerUnit.unitName}에게 장착된 궁극기 데이터가 없습니다!");
+            return;
+        }
+
+        GameManager.Instance.currentUlt = 0;
+        if (BattleUIManager.Instance != null) BattleUIManager.Instance.UpdateUltUI();
+
+        Debug.Log($"🔥 궁극기 발동!! [{playerUnit.unitName}]의 <{playerUnit.ultimateSkillCard.cardName}>!!");
+
+        Sequence ultSeq = DOTween.Sequence();
+        playerUnit.PerformAction(playerUnit.ultimateSkillCard, ultSeq);
     }
 
     public void PreviewCardRange(CardData card)

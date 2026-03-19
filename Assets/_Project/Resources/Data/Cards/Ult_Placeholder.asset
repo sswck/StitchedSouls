@@ -10,22 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ef841a2a9b881d64da04c2f38e57016d, type: 3}
-  m_Name: "\uCD95\uBCF5\uBC1B\uC740 \uC624\uB77C"
+  m_Name: Ult_Placeholder
   m_EditorClassIdentifier: Assembly-CSharp::CardData
-  cardName: "\uCD95\uBCF5\uBC1B\uC740 \uC624\uB77C"
-  description: "\uBC29\uC5B4\uB3C4 8 \uD68D\uB4DD + \uAD81\uADF9\uAE30\uAC8C\uC774\uC9C0
-    15% \uCDA9\uC804"
+  cardName: "\uC784\uC2DC\uAD81\uADF9\uAE30"
+  description: "\uC801 \uC804\uCCB4 \uD53C\uD574 50"
   icon: {fileID: 0}
-  cardType: 1
-  targetType: 1
-  ppCost: 5
+  cardType: 0
+  targetType: 2
+  ppCost: 0
   healHP: 0
   healPP: 0
   nextTurnHealHP: 0
   nextTurnHealPP: 0
-  block: 8
+  block: 0
   isMissingHPBlock: 0
-  value: 0
-  ultCharge: 15
+  value: 50
+  ultCharge: 0
   targetPattern: []
-  cardImage: {fileID: 21300000, guid: 226d1176a133fcf47ab7aee189e73a99, type: 3}
+  cardImage: {fileID: 0}

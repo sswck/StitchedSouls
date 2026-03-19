@@ -35,6 +35,10 @@ public class BattleUIManager : MonoBehaviour
     [Header("PP UI")]
     public TextMeshProUGUI ppText;
 
+    [Header("Ultimate UI")]
+    public Image ultFillImage;
+    public Button ultimateButton;
+
     void Start()
     {
         if (restartButton != null)
@@ -154,6 +158,27 @@ public class BattleUIManager : MonoBehaviour
         if (BattleManager.Instance != null && BattleManager.Instance.playerUnit != null)
         {
             BattleManager.Instance.playerUnit.UpdatePPBar();
+        }
+    }
+
+    /// <summary>
+    /// 궁극기 UI 게이지와 버튼 상태를 갱신합니다.
+    /// </summary>
+    public void UpdateUltUI()
+    {
+        if (GameManager.Instance == null) return;
+
+        if (ultFillImage != null)
+        {
+            ultFillImage.fillAmount = (float)GameManager.Instance.currentUlt / GameManager.Instance.maxUlt;
+        }
+
+        if (ultimateButton != null)
+        {
+            bool isReady = GameManager.Instance.currentUlt >= GameManager.Instance.maxUlt;
+            ultimateButton.interactable = isReady;
+            
+            // 여유가 되시면 여기서 버튼의 색상/이펙트를 켜고 끄는 로직을 넣어도 좋습니다!
         }
     }
 

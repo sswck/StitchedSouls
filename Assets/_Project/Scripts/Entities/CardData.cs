@@ -46,6 +46,9 @@ public class CardData : ScriptableObject
     [Header("Damage")]
     public int value;
 
+    [Header("Ultimate System")]
+    public int ultCharge = 0;
+
     [Header("Pattern Attack Settings")]
     public List<Vector2Int> targetPattern;
 
