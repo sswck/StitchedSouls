@@ -41,5 +41,14 @@ public class CardFanLayout : MonoBehaviour
             
             // Sibling Index에 따라 레이어 순서가 결정됨 (보통 오른쪽 카드가 위로 옴)
         }
+
+        // ✨ 레이아웃 배치가 완료된 후, 각 카드가 돌아올 '기본 위치'를 현재 위치로 갱신합니다.
+        for (int i = 0; i < childCount; i++)
+        {
+            if (transform.GetChild(i).TryGetComponent<CardHoverEffect>(out var hover))
+            {
+                hover.RefreshDefaultState();
+            }
+        }
     }
 }
