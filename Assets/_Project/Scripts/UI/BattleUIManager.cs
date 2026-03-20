@@ -124,10 +124,24 @@ public class BattleUIManager : MonoBehaviour
                     cardImg.sprite = card.cardImage;
                 }
 
+                RectTransform cardRect = newSlot.GetComponent<RectTransform>();
+                if (cardRect != null)
+                {
+                    cardRect.anchoredPosition = Vector2.zero;
+                    cardRect.localRotation = Quaternion.identity;
+                    cardRect.localScale = Vector3.one;
+                }
+
                 DraggableCard draggable = newSlot.GetComponent<DraggableCard>();
                 if (draggable != null)
                 {
                     Destroy(draggable);
+                }
+
+                CardHoverEffect hoverEffect = newSlot.GetComponent<CardHoverEffect>();
+                if (hoverEffect != null)
+                {
+                    Destroy(hoverEffect);
                 }
 
                 Button btn = newSlot.GetComponent<Button>();

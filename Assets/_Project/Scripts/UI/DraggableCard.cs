@@ -9,6 +9,8 @@ public class DraggableCard : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     private CanvasGroup canvasGroup;
     private RectTransform rectTransform;
 
+    public bool IsDragging { get; private set; } = false;
+
     void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
@@ -27,6 +29,13 @@ public class DraggableCard : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     public void OnBeginDrag(PointerEventData eventData)
     {
         //  Debug.Log("드래그 시작!");
+        IsDragging = true;
+        
+        // [추가] 드래그 시작 시 호버 효과 즉시 초기화
+        if (TryGetComponent<CardHoverEffect>(out var hoverEffect))
+        {
+            hoverEffect.ResetToDefaultImmediate();
+        }
         
         parentToReturnTo = transform.parent;
         transform.SetParent(BattleUIManager.Instance.dragLayer);
@@ -56,6 +65,7 @@ public class DraggableCard : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
     public void OnEndDrag(PointerEventData eventData)
     {
         //  Debug.Log("드래그 종료!");
+        IsDragging = false;
         
         canvasGroup.blocksRaycasts = true; // 다시 터치 가능하게 복구
         canvasGroup.alpha = 1.0f; // 투명도 복구
@@ -63,8 +73,12 @@ public class DraggableCard : MonoBehaviour, IBeginDragHandler, IDragHandler, IEn
         // (나중에 여기에 '슬롯에 넣었나?' 확인하는 로직 추가 예정)
         // 지금은 무조건 원래 자리로 돌아오게 함
         transform.SetParent(parentToReturnTo);
-        // 위치 초기화 (슬롯 중앙에 예쁘게 맞추기 위함)
-        rectTransform.localPosition = Vector3.zero;
+        
+        // 부모의 레이아웃(CardFanLayout)이 있다면 갱신하여 드래그 후 위치를 올바르게 잡습니다.
+        if (parentToReturnTo != null && parentToReturnTo.TryGetComponent<CardFanLayout>(out var layout))
+        {
+            layout.UpdateLayout();
+        }
 
         if (BattleManager.Instance != null)
         {
