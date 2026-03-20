@@ -10,6 +10,7 @@ public class SettingManager : MonoBehaviour
     public GameObject settingPanel;
     public Slider BGMVolumeSlider;
     public Button openSettingButton;
+    public Button openSettingButton_Title;
     public Button closeSettingButton;
 
     void Awake()
@@ -53,6 +54,17 @@ public class SettingManager : MonoBehaviour
             }
         }
 
+        var titleSettingBtnTransform = canvas.transform.Find("Title_SettingBtn");
+        if (titleSettingBtnTransform != null)
+        {
+            openSettingButton_Title = titleSettingBtnTransform.GetComponent<Button>();
+            if (openSettingButton_Title != null)
+            {
+                openSettingButton_Title.onClick.RemoveListener(OpenTitle_SettingPanel);
+                openSettingButton_Title.onClick.AddListener(OpenTitle_SettingPanel);
+            }
+        }
+
         // Setting 패널
         var panelTransform = canvas.transform.Find("SettingPanel");
         if (panelTransform == null) return;
@@ -91,6 +103,14 @@ public class SettingManager : MonoBehaviour
     }
 
     void OpenSettingPanel()
+    {
+        if (settingPanel != null)
+        {
+            settingPanel.SetActive(true);
+        }
+    }
+
+    void OpenTitle_SettingPanel()
     {
         if (settingPanel != null)
         {
