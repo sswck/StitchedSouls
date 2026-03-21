@@ -41,6 +41,12 @@ public class DeckManager : MonoBehaviour
 
         ShuffleDeck(drawPile);
         Debug.Log($"🃏 덱 초기화 완료. 덱 장수: {drawPile.Count}");
+
+        // UI 갱신 (덱 장수)
+        if (BattleUIManager.Instance != null)
+        {
+            BattleUIManager.Instance.UpdateDeckAndDiscardCountUI();
+        }
     }
 
     /// <summary>
@@ -81,6 +87,7 @@ public class DeckManager : MonoBehaviour
         if (BattleUIManager.Instance != null)
         {
             BattleUIManager.Instance.UpdateHandUI(handDeck);
+            BattleUIManager.Instance.UpdateDeckAndDiscardCountUI();
         }
         
         Debug.Log($"🎴 드로우 완료. (현재 패: {handDeck.Count}장 / 덱: {drawPile.Count}장 / 무덤: {discardPile.Count}장)");
@@ -97,6 +104,7 @@ public class DeckManager : MonoBehaviour
         if (BattleUIManager.Instance != null)
         {
             BattleUIManager.Instance.UpdateHandUI(handDeck);
+            BattleUIManager.Instance.UpdateDeckAndDiscardCountUI();
         }
         Debug.Log($"🗑️ 손패를 모두 버렸습니다. (무덤: {discardPile.Count}장)");
     }
@@ -110,6 +118,11 @@ public class DeckManager : MonoBehaviour
         drawPile.AddRange(discardPile);
         discardPile.Clear();
         ShuffleDeck(drawPile);
+
+        if (BattleUIManager.Instance != null)
+        {
+            BattleUIManager.Instance.UpdateDeckAndDiscardCountUI();
+        }
     }
     
     /// <summary>
@@ -150,6 +163,11 @@ public class DeckManager : MonoBehaviour
     {
         discardPile.AddRange(usedCards);
         Debug.Log($"🪦 사용한 카드 {usedCards.Count}장을 무덤으로 보냈습니다.");
+
+        if (BattleUIManager.Instance != null)
+        {
+            BattleUIManager.Instance.UpdateDeckAndDiscardCountUI();
+        }
     }
 
     /// <summary>
@@ -161,6 +179,11 @@ public class DeckManager : MonoBehaviour
         {
             Debug.Log($"✋ 손패가 꽉 차서 장착 취소된 [{card.cardName}] 카드가 무덤으로 버려집니다.");
             discardPile.Add(card);
+
+            if (BattleUIManager.Instance != null)
+            {
+                BattleUIManager.Instance.UpdateDeckAndDiscardCountUI();
+            }
         }
         else
         {

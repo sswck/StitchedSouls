@@ -25,4 +25,6 @@ public class DeckViewCardUI : MonoBehaviour
 
         // 타입별 색상 지정 (예시)
     }
+
 }
+

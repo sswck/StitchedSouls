@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public enum NodeType { Battle, Elite, Rest, Shop, Boss }
 public enum NodeStatus { Locked, Available, Completed }
@@ -58,6 +59,13 @@ public class MapNode : MonoBehaviour
 
     void OnNodeClick()
     {
+        // 팝업으로 띄어졌을 때 실수로 눌러서 씬 이동하는 것 방지
+        if (SceneManager.GetActiveScene().name == "BattleScene")
+        {
+            Debug.Log("현재 전투 중에는 이동할 수 없습니다");
+            return;
+        }
+
         if (GameManager.Instance != null)
         {
             GameManager.Instance.currentNodeType = this.nodeType;

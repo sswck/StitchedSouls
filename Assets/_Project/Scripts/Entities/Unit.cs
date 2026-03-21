@@ -204,6 +204,12 @@ public class Unit : MonoBehaviour
         // [수정] 트윈 중첩 방지
         transform.DOKill();
         transform.DOJump(targetPos, 0.5f, 1, 0.3f);
+
+        // [추가] 플레이어 이동 시 UI 갱신
+        if (BattleManager.Instance != null && this == BattleManager.Instance.playerUnit)
+        {
+            if (BattleUIManager.Instance != null) BattleUIManager.Instance.UpdateMovementUI();
+        }
     }
 
     public void OnTurnStart()
@@ -249,6 +255,12 @@ public class Unit : MonoBehaviour
         }
 
         currentMovePoints = maxMovePoints;
+
+        // [추가] 턴 시작 시 이동력 UI 갱신
+        if (BattleManager.Instance != null && this == BattleManager.Instance.playerUnit)
+        {
+            if (BattleUIManager.Instance != null) BattleUIManager.Instance.UpdateMovementUI();
+        }
     }
 
     public void PerformAction(CardData card, Sequence seq)
@@ -467,7 +479,13 @@ public class Unit : MonoBehaviour
         moveBonus = amount;
         moveBuffDuration = duration;
         maxMovePoints += amount;
-        currentMovePoints += amount; 
+        currentMovePoints += amount;
+
+        // [추가] 버프 적용 시 이동력 UI 갱신
+        if (BattleManager.Instance != null && this == BattleManager.Instance.playerUnit)
+        {
+            if (BattleUIManager.Instance != null) BattleUIManager.Instance.UpdateMovementUI();
+        }
     }
 
     public void GetKnockedBack(int pushX, int pushY)

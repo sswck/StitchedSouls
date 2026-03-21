@@ -158,4 +158,6 @@ public class CardHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExit
         _rectTransform.localRotation = _defaultLocalRotation;
         transform.SetSiblingIndex(_defaultSiblingIndex);
     }
+
 }
+
