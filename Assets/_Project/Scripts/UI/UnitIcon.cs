@@ -23,4 +23,6 @@ public class UnitIcon : MonoBehaviour
             iconImage.color = isActive ? Color.white : new Color(1, 1, 1, 0.5f);
         }
     }
+
 }
+

@@ -115,4 +115,6 @@ public class TurnOrderUI : MonoBehaviour
 
         return icon;
     }
+
 }
+

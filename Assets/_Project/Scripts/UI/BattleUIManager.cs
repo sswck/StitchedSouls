@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
+using Unity.VisualScripting;
 
 public class BattleUIManager : MonoBehaviour
 {
@@ -29,6 +30,9 @@ public class BattleUIManager : MonoBehaviour
     [Header("Turn Order UI")]
     public TurnOrderUI turnOrderUI;
 
+    [Header("Map Popup UI")]
+    public GameObject mapPopup;
+
     [Header("Reward UI")]
     public RewardUIManager rewardUI;
 
@@ -39,6 +43,13 @@ public class BattleUIManager : MonoBehaviour
     public Image ultFillImage;
     public Button ultimateButton;
 
+    [Header("Deck/Discard Count UI")]
+    public TextMeshProUGUI deckCountText;
+    public TextMeshProUGUI discardCountText;
+
+    [Header("Movement Gauge UI")]
+    public TextMeshProUGUI movementText;
+
     void Start()
     {
         if (restartButton != null)
@@ -46,11 +57,13 @@ public class BattleUIManager : MonoBehaviour
 
         if (titleButton != null)
             titleButton.onClick.AddListener(OnTitleButtonClick);
-            
+
         // 시작할 땐 결과창 끄기
         if (resultPanel != null) resultPanel.SetActive(false);
 
         UpdatePPUI();
+        UpdateDeckAndDiscardCountUI();
+        UpdateMovementUI();
     }
 
     void Awake()
@@ -64,7 +77,7 @@ public class BattleUIManager : MonoBehaviour
 
         if (dragLayer != null)
         {
-            foreach (Transform child in dragLayer) 
+            foreach (Transform child in dragLayer)
             {
                 Destroy(child.gameObject);
             }
@@ -80,7 +93,7 @@ public class BattleUIManager : MonoBehaviour
 
             // 🖼️ [수정] 카드 이미지 설정 (프리팹 최상단에서 직접 Image 컴포넌트 가져오기)
             Image cardImg = newSlot.GetComponent<Image>();
-            
+
             if (cardImg != null && card.cardImage != null)
             {
                 cardImg.sprite = card.cardImage;
@@ -114,7 +127,7 @@ public class BattleUIManager : MonoBehaviour
                 // [CASE A] 카드가 장착된 슬롯
                 CardData card = actionSlots[i];
                 GameObject newSlot = Instantiate(cardSlotPrefab, actionSlotPanel);
-                
+
                 TextMeshProUGUI text = newSlot.GetComponentInChildren<TextMeshProUGUI>();
                 if (text != null) text.text = card.cardName;
 
@@ -148,7 +161,7 @@ public class BattleUIManager : MonoBehaviour
                 if (btn == null) btn = newSlot.AddComponent<Button>();
 
                 btn.onClick.RemoveAllListeners();
-                btn.onClick.AddListener(() => 
+                btn.onClick.AddListener(() =>
                 {
                     if (BattleManager.Instance != null)
                     {
@@ -191,8 +204,19 @@ public class BattleUIManager : MonoBehaviour
         {
             bool isReady = GameManager.Instance.currentUlt >= GameManager.Instance.maxUlt;
             ultimateButton.interactable = isReady;
-            
+
             // 여유가 되시면 여기서 버튼의 색상/이펙트를 켜고 끄는 로직을 넣어도 좋습니다!
+        }
+    }
+
+    public void UpdateMovementUI()
+    {
+        if (BattleManager.Instance != null && BattleManager.Instance.playerUnit != null)
+        {
+            if (movementText != null)
+            {
+                movementText.text = $"{BattleManager.Instance.playerUnit.currentMovePoints}/{BattleManager.Instance.playerUnit.maxMovePoints}";
+            }
         }
     }
 
@@ -201,7 +225,7 @@ public class BattleUIManager : MonoBehaviour
         if (resultPanel == null) return;
 
         resultPanel.SetActive(true); // 패널 켜기
-        
+
 
         if (isWin)
         {
@@ -210,24 +234,24 @@ public class BattleUIManager : MonoBehaviour
             // 승리 시 효과음 재생 (나중에 SoundManager 연결)
 
             // TODO_juwan: 승리 시 집계된 데이터 표시
-            if(GameManager.Instance.currentNodeType == NodeType.Elite)
+            if (GameManager.Instance.currentNodeType == NodeType.Elite)
             {
                 damageDealText.gameObject.SetActive(true);
                 damageTakenText.gameObject.SetActive(true);
-              
+
                 goldText.gameObject.SetActive(true);
                 titleButton.gameObject.SetActive(true);
                 restartButton.gameObject.SetActive(false);
                 damageDealText.text = $"입힌 피해량: {BattleManager.Instance.totalDamageDeal}";
                 damageTakenText.text = $"입은 피해량: {BattleManager.Instance.totalDamageTaken}";
-                
+
                 goldText.text = $"골드: {GameManager.Instance.gold}";
             }
             else
             {
                 damageDealText.gameObject.SetActive(false);
                 damageTakenText.gameObject.SetActive(false);
-              
+
                 goldText.gameObject.SetActive(false);
                 titleButton.gameObject.SetActive(false);
             }
@@ -240,15 +264,15 @@ public class BattleUIManager : MonoBehaviour
             //TODO_juwan: 게임 오버 시 집계된 데이터 표시
             damageDealText.gameObject.SetActive(true);
             damageTakenText.gameObject.SetActive(true);
-            
+
             goldText.gameObject.SetActive(true);
             titleButton.gameObject.SetActive(true);
             restartButton.gameObject.SetActive(false);
             damageDealText.text = $"입힌 피해량: {BattleManager.Instance.totalDamageDeal}";
-        
+
             damageTakenText.text = $"입은 피해량: {BattleManager.Instance.totalDamageTaken}";
 
-            
+
             goldText.text = $"골드: {GameManager.Instance.gold}";
         }
     }
@@ -289,6 +313,46 @@ public class BattleUIManager : MonoBehaviour
         else if (deckViewUI == null)    // 디버그용
         {
             Debug.LogError("DeckViewUI 스크립트를 찾을 수 없습니다!");
+        }
+    }
+
+    /// <summary>
+    /// 현재 덱과 무덤의 카드 장수를 UI에 업데이트합니다.
+    /// </summary>
+    public void UpdateDeckAndDiscardCountUI()
+    {
+        if (DeckManager.Instance == null) return;
+
+        if (deckCountText != null)
+        {
+            deckCountText.text = DeckManager.Instance.drawPile.Count.ToString();
+        }
+
+        if (discardCountText != null)
+        {
+            discardCountText.text = DeckManager.Instance.discardPile.Count.ToString();
+        }
+    }
+
+    /// <summary>
+    /// Map 팝업을 열고, 최신 상태로 지도를 생성합니다.
+    /// </summary>
+    public void OpenMapPopup()
+    {
+        if (mapPopup != null)
+        {
+            mapPopup.SetActive(true);
+            
+            // MapManager를 찾아서 맵 다시 그리기
+            MapManager mapManager = mapPopup.GetComponentInChildren<MapManager>(true);
+            if (mapManager != null)
+            {
+                mapManager.GenerateMap();
+            }
+        }
+        else
+        {
+            Debug.LogError("Map Popup 오브젝트가 Inspector에 연결되지 않았습니다!");
         }
     }
 }

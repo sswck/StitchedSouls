@@ -103,6 +103,7 @@ public class BattleManager : MonoBehaviour
                 playerUnit.maxMovePoints = 2 + GameManager.Instance.movePoint;
 
                 playerUnit.UpdateHPBar();
+                if (BattleUIManager.Instance != null) BattleUIManager.Instance.UpdateMovementUI();
             }
         }
     }

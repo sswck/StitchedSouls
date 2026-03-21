@@ -1,6 +1,9 @@
-using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+
 
 public class DeckViewUI : MonoBehaviour
 {
@@ -11,6 +14,9 @@ public class DeckViewUI : MonoBehaviour
 
     public GameObject cardPrefab; // 덱에 표시할 카드 프리팹 (DeckViewCardUI 부착됨)
 
+    [Header("Total Deck Count UI")]
+    public TextMeshProUGUI deckCountText; // 버튼 등에 표시될 텍스트
+
     private List<GameObject> activeCardUIs = new List<GameObject>();
 
     private void Start()
@@ -18,9 +24,15 @@ public class DeckViewUI : MonoBehaviour
         // [수정] 이 부분을 과감하게 주석 처리하거나 삭제하세요!
         // 시작 시 팝업 닫기는 코드(Start)로 하지 말고, 유니티 에디터 인스펙터 창에서 
         // 팝업 패널(Popup Panel) 오브젝트 자체의 체크박스를 해제해서 기본적으로 꺼두는 것이 정석입니다.
-        
+
         // if (popupPanel != null)
         //     popupPanel.SetActive(false);
+
+        // 시작 시 즉시 장수 반영
+        if (deckCountText != null)
+        {
+            deckCountText.text = GetCurrentPlayerDeck().Count.ToString();
+        }
     }
 
     /// <summary>
@@ -29,7 +41,7 @@ public class DeckViewUI : MonoBehaviour
     public void OpenDeckView()
     {
         // 매개변수 없이 호출되면 아래 함수에 null을 넘겨서 기본 로직을 타게 합니다.
-        OpenDeckView(null); 
+        OpenDeckView(null);
     }
 
     /// <summary>
@@ -105,4 +117,22 @@ public class DeckViewUI : MonoBehaviour
 
         return new List<CardData>();
     }
+
+    private void Update()
+    {
+        RefreshCount();
+    }
+
+    /// <summary>
+    /// 현재 상황에 맞는 덱 장수를 텍스트에 즉시 반영합니다.
+    /// (비활성화 상태에서도 외부에서 호출 가능)
+    /// </summary>
+    public void RefreshCount()
+    {
+        if (deckCountText != null)
+        {
+            deckCountText.text = GetCurrentPlayerDeck().Count.ToString();
+        }
+    }
 }
+
