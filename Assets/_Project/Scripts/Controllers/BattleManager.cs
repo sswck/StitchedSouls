@@ -41,6 +41,9 @@ public class BattleManager : MonoBehaviour
     [Header("Units")]
     public List<Unit> allUnits = new List<Unit>();
 
+    [Header("Item VFX Prefabs")]
+    public GameObject healItemVFXPrefab;
+
     [Header("Battle Statistics")]
     public int totalDamageDeal;
     public int totalDamageTaken;
@@ -507,6 +510,13 @@ public class BattleManager : MonoBehaviour
             case ItemEffectType.HealHP:
                 playerUnit.Heal(item.value);
                 Debug.Log($"플레이어의 HP를 {item.value} 만큼 회복. 현재 HP: {playerUnit.currentHP}/{playerUnit.maxHP}");
+                
+                if (healItemVFXPrefab != null && playerUnit != null)
+                {
+                    GameObject vfx = Instantiate(healItemVFXPrefab, playerUnit.transform.position + Vector3.up * 1f, Quaternion.identity);
+                    foreach (var r in vfx.GetComponentsInChildren<Renderer>()) r.sortingOrder = 30;
+                    Destroy(vfx, 1.2f);
+                }
                 break;
             case ItemEffectType.HealSP:
                 // GameManager의 SP를 직접 조작해야 할 수 있습니다.

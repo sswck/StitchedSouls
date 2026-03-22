@@ -11,7 +11,7 @@ TagManager:
   - 
   - Water
   - UI
-  - 
+  - SettingPanel
   - 
   - 
   - 
@@ -49,6 +49,9 @@ TagManager:
     locked: 0
   - name: Foreground
     uniqueID: 1259212867
+    locked: 0
+  - name: SettingPanel
+    uniqueID: 2833450051
     locked: 0
   - name: UI
     uniqueID: 2039071657

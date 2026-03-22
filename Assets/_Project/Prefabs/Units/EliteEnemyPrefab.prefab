@@ -240,6 +240,7 @@ MonoBehaviour:
   maxMovePoints: 2
   currentMovePoints: 0
   damageBuff: 0
+  ultimateSkillCard: {fileID: 0}
   damageBuffDuration: 0
   moveBonus: 0
   moveBuffDuration: 0
@@ -256,3 +257,9 @@ MonoBehaviour:
   hpBarPrefab: {fileID: 98269044502590925, guid: 94cfec57033a52c4bbb6c2cc0dac6724, type: 3}
   hpBarOffset: {x: 0, y: 3.5, z: 0}
   playerHpBarOffset: {x: 0, y: 3.2, z: 0}
+  currentBlock: 0
+  hitVFXPrefab: {fileID: 4021103657954561961, guid: 5c755f9bc5253ea418e919994537dcc7, type: 3}
+  playerHitVFXPrefab: {fileID: 0}
+  defenseVFXPrefab: {fileID: 0}
+  ppRecoveryVFXPrefab: {fileID: 0}
+  damageBuffVFXPrefab: {fileID: 0}
