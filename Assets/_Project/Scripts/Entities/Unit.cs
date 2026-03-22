@@ -51,6 +51,15 @@ public class Unit : MonoBehaviour
     [Header("Defense")]
     public int currentBlock = 0;
 
+    [Header("VFX Prefabs")]
+    public GameObject hitVFXPrefab;
+    public GameObject playerHitVFXPrefab;
+    public GameObject defenseVFXPrefab;
+    public GameObject ppRecoveryVFXPrefab;
+    public GameObject damageBuffVFXPrefab;
+    
+    private GameObject activeBuffVFX;
+
     [Header("PendingHeal")]
     private int pendingHealHP = 0;
     private int pendingHealPP = 0;
@@ -236,6 +245,11 @@ public class Unit : MonoBehaviour
             if (damageBuffDuration <= 0)
             {
                 damageBuff = 0;
+                if (activeBuffVFX != null)
+                {
+                    Destroy(activeBuffVFX);
+                    activeBuffVFX = null;
+                }
             }
         }
 
@@ -383,6 +397,14 @@ public class Unit : MonoBehaviour
             if (BattleUIManager.Instance != null) BattleUIManager.Instance.UpdatePPUI();
             target.UpdatePPBar();
             Debug.Log($"🔋 PP {card.healPP} 회복! 현재 PP: {GameManager.Instance.currentPP}");
+
+            if (target.ppRecoveryVFXPrefab != null)
+            {
+                GameObject vfx = Instantiate(target.ppRecoveryVFXPrefab, target.transform.position, Quaternion.identity);
+                // 2D 환경에서 파티클이 캐릭터 뒤에 가려지는 현상 방지
+                foreach (var r in vfx.GetComponentsInChildren<Renderer>()) r.sortingOrder = 30;
+                Destroy(vfx, 1.2f);
+            }
         }
 
         if (card.nextTurnHealHP > 0 || card.nextTurnHealPP > 0)
@@ -403,6 +425,13 @@ public class Unit : MonoBehaviour
         {
             target.currentBlock += blockGain;
             Debug.Log($"🛡️ [{target.unitName}] 방어도 {blockGain} 획득! (현재 총 방어도: {target.currentBlock})");
+
+            if (target.defenseVFXPrefab != null)
+            {
+                GameObject vfx = Instantiate(target.defenseVFXPrefab, target.transform.position, Quaternion.identity);
+                foreach (var r in vfx.GetComponentsInChildren<Renderer>()) r.sortingOrder = 30;
+                Destroy(vfx, 1.2f);
+            }
         }
     }
     
@@ -448,6 +477,19 @@ public class Unit : MonoBehaviour
             else SoundManager.Instance.PlaySFX(SoundManager.Instance.enemyHitSFX);
         }
 
+        if (isPlayer && playerHitVFXPrefab != null)
+        {
+            GameObject vfx = Instantiate(playerHitVFXPrefab, transform.position + Vector3.up * 1f, Quaternion.identity);
+            foreach (var r in vfx.GetComponentsInChildren<Renderer>()) r.sortingOrder = 30;
+            Destroy(vfx, 1.2f);
+        }
+        else if (!isPlayer && hitVFXPrefab != null)
+        {
+            GameObject vfx = Instantiate(hitVFXPrefab, transform.position + Vector3.up * 1f, Quaternion.identity);
+            foreach (var r in vfx.GetComponentsInChildren<Renderer>()) r.sortingOrder = 30;
+            Destroy(vfx, 1.2f);
+        }
+
         if (skeletonAnimation != null)
         {
             DOTween.To(() => skeletonAnimation.skeleton.GetColor(), 
@@ -472,6 +514,12 @@ public class Unit : MonoBehaviour
         damageBuff = amount;
         damageBuffDuration = duration;
         transform.DOScale(transform.localScale * 1.1f, 0.2f).SetLoops(2, LoopType.Yoyo);
+
+        if (damageBuffVFXPrefab != null && activeBuffVFX == null)
+        {
+            activeBuffVFX = Instantiate(damageBuffVFXPrefab, transform.position, Quaternion.identity, transform);
+            foreach (var r in activeBuffVFX.GetComponentsInChildren<Renderer>()) r.sortingOrder = 30;
+        }
     }
 
     public void ApplyMoveBuff(int amount, int duration)
