@@ -6,11 +6,19 @@ public enum ItemEffectType
     HealSP,
     DamageBuff,
     MaxMovePoints,
+    IncreaseMaxHP,
+    IncreaseStr,
+    IncreaseDef,
+    IncreaseSpd,
+    IncreaseMovePoint
 }
 
 [CreateAssetMenu(fileName = "New Item", menuName = "Stitched Souls/Item Data")]
 public class ItemData : ScriptableObject
 {
+    [Header("Item Type")]
+    public bool isRelic;
+
     [Header("Info")]
     public string itemName;
     public Sprite icon;

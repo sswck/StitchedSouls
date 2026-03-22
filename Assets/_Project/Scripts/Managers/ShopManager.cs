@@ -115,7 +115,9 @@ public class ShopManager : MonoBehaviour
     private void UpdatePurchaseButtonState(ItemData data)
     {
         bool hasEnoughGold = GameManager.Instance.gold >= data.price;
-        bool hasSpace = InventoryManager.Instance.inventory.Count < InventoryManager.MAX_SLOTS;
+        bool hasSpace = data.isRelic ? 
+                        GameManager.Instance.activeRelics.Count < GameManager.MAX_RELICS : 
+                        InventoryManager.Instance.inventory.Count < InventoryManager.MAX_SLOTS;
 
         // 디버깅 로그 추가
         Debug.Log($"[ShopManager] Checking gold for item '{data.itemName}'. Player Gold: {GameManager.Instance.gold}, Item Price: {data.price}, HasEnoughGold: {hasEnoughGold}, HasSpace: {hasSpace}");
@@ -144,10 +146,19 @@ public class ShopManager : MonoBehaviour
         // 골드가 충분한지 한번 더 확인
         if (GameManager.Instance.gold >= currentSelectedItem.price)
         {
-            // 먼저 인벤토리에 공간이 있는지 확인
-            if (InventoryManager.Instance.AddItem(currentSelectedItem))
+            bool added = false;
+            if (currentSelectedItem.isRelic)
             {
-                // 인벤토리에 추가 성공 시 골드 차감
+                added = GameManager.Instance.AddRelic(currentSelectedItem);
+            }
+            else
+            {
+                added = InventoryManager.Instance.AddItem(currentSelectedItem);
+            }
+
+            if (added)
+            {
+                // 인벤토리 달성/유물 달성 성공 시 골드 차감
                 GameManager.Instance.gold -= currentSelectedItem.price;
                 Debug.Log($"{currentSelectedItem.itemName} 을(를) 구매했습니다! 남은 골드: {GameManager.Instance.gold}");
 
@@ -156,9 +167,7 @@ public class ShopManager : MonoBehaviour
             }
             else
             {
-                // 인벤토리가 가득 찼을 경우
-                Debug.Log("인벤토리가 가득 차서 아이템을 구매할 수 없습니다.");
-                // 여기서 사용자에게 피드백을 주는 UI를 추가할 수 있습니다. (예: 메시지 팝업)
+                Debug.Log(currentSelectedItem.isRelic ? "유물 슬롯이 가득 찼습니다." : "인벤토리가 가득 찼습니다.");
             }
         }
     }
