@@ -36,9 +36,6 @@ public class BattleUIManager : MonoBehaviour
     [Header("Reward UI")]
     public RewardUIManager rewardUI;
 
-    [Header("PP UI")]
-    public TextMeshProUGUI ppText;
-
     [Header("Ultimate UI")]
     public Image ultFillImage;
     public Button ultimateButton;
