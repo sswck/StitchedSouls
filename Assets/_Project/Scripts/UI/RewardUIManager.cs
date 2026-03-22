@@ -44,7 +44,7 @@ public class RewardUIManager : MonoBehaviour
         List<CardData> tempPool = new List<CardData>(pool);
         int countToDraw = Mathf.Min(3, tempPool.Count);
 
-        for (int i = 0; i < 3; i++)
+        for (int i = 0; i < 3; i++) // 상수변수로 추후 리팩토링(3에서 확장가능 그럴경우 UI도 레이아웃을 사용하는 것으로 개선해야함)
         {
             if (i < countToDraw)
             {
@@ -60,6 +60,12 @@ public class RewardUIManager : MonoBehaviour
                 cardButtons[i].gameObject.SetActive(true);
                 TextMeshProUGUI btnText = cardButtons[i].GetComponentInChildren<TextMeshProUGUI>();
                 if (btnText != null) btnText.text = selectedCard.cardName;
+
+                Image cardImg = cardButtons[i].GetComponent<Image>();
+                if (cardImg != null && selectedCard.cardImage != null)
+                {
+                    cardImg.sprite = selectedCard.cardImage;
+                }
 
                 int choiceIndex = i; 
                 cardButtons[i].onClick.RemoveAllListeners();
