@@ -29,6 +29,8 @@ public class InventoryManager : MonoBehaviour
 
     public bool AddItem(ItemData item)
     {
+        if (item.isRelic) return false;
+
         if (inventory.Count >= MAX_SLOTS)
         {
             Debug.Log("Inventory is full.");
