@@ -17,6 +17,6 @@ MonoBehaviour:
   icon: {fileID: 513537982, guid: b0526ec1d53340949b90cbeed287ee43, type: 3}
   description: 
   price: 70
-  effectType: 6
-  effect: 
-  value: 6
+  effectType: 9
+  effect: "\uACE8\uB4DC\uD68D\uB4DD\uB7C910\uC99D\uAC00"
+  value: 10

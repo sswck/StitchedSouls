@@ -10,7 +10,8 @@ public enum ItemEffectType
     IncreaseStr,
     IncreaseDef,
     IncreaseSpd,
-    IncreaseMovePoint
+    IncreaseMovePoint,
+    IncreaseGold
 }
 
 [CreateAssetMenu(fileName = "New Item", menuName = "Stitched Souls/Item Data")]
