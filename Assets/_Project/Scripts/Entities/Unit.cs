@@ -49,7 +49,7 @@ public class Unit : MonoBehaviour
     private UnitHPBar hpBar;
 
     [Header("Defense")]
-    public int currentBlock = 0;
+    public int currentShield = 0;
 
     [Header("VFX Prefabs")]
     public GameObject hitVFXPrefab;
@@ -223,10 +223,11 @@ public class Unit : MonoBehaviour
 
     public void OnTurnStart()
     {
-        if (currentBlock > 0)
+        if (currentShield > 0)
         {
             Debug.Log($"⏳ 턴 시작: [{unitName}]의 이전 턴 방어도가 0으로 초기화되었습니다.");
-            currentBlock = 0;
+            currentShield = 0;
+            if (hpBar != null) hpBar.UpdateShieldUI(currentShield);
         }
 
         if (moveBuffDuration > 0)
@@ -423,18 +424,31 @@ public class Unit : MonoBehaviour
 
         if (blockGain > 0)
         {
-            target.currentBlock += blockGain;
-            Debug.Log($"🛡️ [{target.unitName}] 방어도 {blockGain} 획득! (현재 총 방어도: {target.currentBlock})");
-
-            if (target.defenseVFXPrefab != null)
-            {
-                GameObject vfx = Instantiate(target.defenseVFXPrefab, target.transform.position, Quaternion.identity);
-                foreach (var r in vfx.GetComponentsInChildren<Renderer>()) r.sortingOrder = 30;
-                Destroy(vfx, 1.2f);
-            }
+            target.AddShield(blockGain);
         }
     }
     
+    public void AddShield(int amount)
+    {
+        if (amount <= 0) return;
+
+        currentShield += amount;
+        Debug.Log($"🛡️ [{unitName}] 방어도 {amount} 획득! (현재 총 방어도: {currentShield})");
+
+        if (defenseVFXPrefab != null)
+        {
+            GameObject vfx = Instantiate(defenseVFXPrefab, transform.position, Quaternion.identity);
+            foreach (var r in vfx.GetComponentsInChildren<Renderer>()) r.sortingOrder = 30;
+            Destroy(vfx, 1.2f);
+        }
+
+        // UI 애니메이션 업데이트 호출
+        if (hpBar != null)
+        {
+            hpBar.UpdateShieldUI(currentShield);
+        }
+    }
+
     public void TakeDamage(int damage)
     {
         int finalDamage = damage;
@@ -445,22 +459,24 @@ public class Unit : MonoBehaviour
             finalDamage = Mathf.Max(0, damage - GameManager.Instance.def);
         }
 
-        if (currentBlock > 0)
+        if (currentShield > 0)
         {
-            if (currentBlock >= finalDamage)
+            if (currentShield >= finalDamage)
             {
                 // 방어도로 피해를 완벽히 막아낸 경우
-                currentBlock -= finalDamage;
-                Debug.Log($"🛡️ [{unitName}] 방어도로 공격 완벽 차단! (들어온 피해: {finalDamage} / 남은 방어도: {currentBlock})");
+                currentShield -= finalDamage;
+                Debug.Log($"🛡️ [{unitName}] 방어도로 공격 완벽 차단! (들어온 피해: {finalDamage} / 남은 방어도: {currentShield})");
                 finalDamage = 0; 
             }
             else
             {
                 // 방어도가 뚫리고 남은 데미지가 들어가는 경우
-                finalDamage -= currentBlock;
-                Debug.Log($"💥 [{unitName}] 방어도가 뚫렸습니다! (방어도 {currentBlock} 소모 / 실제 들어온 피해: {finalDamage})");
-                currentBlock = 0;
+                finalDamage -= currentShield;
+                Debug.Log($"💥 [{unitName}] 방어도가 뚫렸습니다! (방어도 {currentShield} 소모 / 실제 들어온 피해: {finalDamage})");
+                currentShield = 0;
             }
+            // 쉴드 변경 적용
+            if (hpBar != null) hpBar.UpdateShieldUI(currentShield);
         }
         
         if (isPlayer)
@@ -468,8 +484,11 @@ public class Unit : MonoBehaviour
             BattleManager.Instance.RecordDamageTaken(finalDamage);
         }
 
-        currentHP -= finalDamage;
-        UpdateHPBar();
+        if (finalDamage > 0)
+        {
+            currentHP -= finalDamage;
+            UpdateHPBar();
+        }
 
         if (SoundManager.Instance != null)
         {
