@@ -51,6 +51,8 @@ public class BattleManager : MonoBehaviour
 
     private bool isBattleEnded = false;
 
+    public int goldReward = 0;
+
 
     void Start()
     {
@@ -677,6 +679,17 @@ public class BattleManager : MonoBehaviour
             GameManager.Instance.currentSp += 1;
 
         GameManager.Instance.currentSp = Mathf.Min(GameManager.Instance.currentSp, GameManager.Instance.maxSp);
+
+        // 골드 보상 로직
+        goldReward = 0;
+        if (GameManager.Instance.currentNodeType == NodeType.Elite)
+            goldReward = 50; // 엘리트 전투 보상
+        else if (GameManager.Instance.currentNodeType == NodeType.Boss)
+            goldReward = 100; // 보스 전투 보상
+        else
+            goldReward = 20; // 일반 전투 보상
+
+        GameManager.Instance.gold += goldReward;
         // [수정] 결과창의 '확인/다음' 버튼이 누를 때 CompleteStage가 실행되도록 해야 함.
         // BattleUIManager의 OnRestartButton(또는 OnNextButton)을 수정해야 합니다.
     }

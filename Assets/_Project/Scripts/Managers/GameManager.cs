@@ -74,6 +74,7 @@ public class GameManager : MonoBehaviour
             case ItemEffectType.IncreaseDef: def += relic.value; break;
             case ItemEffectType.IncreaseSpd: spd += relic.value; break;
             case ItemEffectType.IncreaseMovePoint: movePoint += relic.value; break;
+            case ItemEffectType.IncreaseGold: BattleManager.Instance.goldReward += relic.value; break;
         }
 
         OnRelicChanged?.Invoke();

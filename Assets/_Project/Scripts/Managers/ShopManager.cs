@@ -103,6 +103,9 @@ public class ShopManager : MonoBehaviour
                 return data.effect;
             case ItemEffectType.MaxMovePoints:
                 return data.effect;
+            case ItemEffectType.IncreaseGold:
+                return data.effect;
+            
             default:
                 return "특별한 효과가 없는 아이템입니다.";
         }
