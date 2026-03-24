@@ -114,10 +114,10 @@ public class Unit : MonoBehaviour
         }
 
         // [추가] 체력바(Canvas) 정렬 동기화
-        // 유닛 본체보다 1 더 높게 설정하여 항상 앞에 오도록 함
+        // 유닛 본체보다 충분히 높게 설정하여 항상 앞에 오도록 함 (UI 레이어와 겹치지 않도록 주의)
         foreach (var c in GetComponentsInChildren<Canvas>(true))
         {
-            c.sortingOrder = order + 1;
+            c.sortingOrder = order + 50;
         }
     }
 

@@ -58,14 +58,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1388152975117259187}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0.3420201, y: 0, z: 0, w: 0.9396927}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.3, y: 0.33, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1995749205793604625}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 40, y: 0, z: 0}
 --- !u!65 &7671886899702581513
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -122,8 +122,8 @@ MonoBehaviour:
   inactiveIcon: {fileID: -1510594635, guid: 30ef9bf58cbc470419c45538c040e55b, type: 3}
   hpBarPrefab: {fileID: 98269044502590925, guid: 9250afce0bd9f314c814cd4001ff0db0, type: 3}
   hpBarOffset: {x: 0, y: 2.5, z: 0}
-  playerHpBarOffset: {x: 1, y: 9, z: 0}
-  currentBlock: 0
+  playerHpBarOffset: {x: 1, y: 8.5, z: 0}
+  currentShield: 0
   hitVFXPrefab: {fileID: 0}
   playerHitVFXPrefab: {fileID: 5880797563127281583, guid: 265d3a5ba69981a4698ceabcedf368b0, type: 3}
   defenseVFXPrefab: {fileID: 4772634663576830964, guid: e1385af346f4e624eb313ec1ea4fcd7e, type: 3}

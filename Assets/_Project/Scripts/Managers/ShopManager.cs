@@ -13,7 +13,7 @@ public class ShopManager : MonoBehaviour
     [Header("Shop Settings")]
     public int healCost = 50;
     public int healAmount = 20;
-    
+
     //[Header("Player Gold")]
     //[SerializeField] private int playerCurrentGold; // 임시: GameManager와 연동하기 전 테스트용 골드
 
@@ -23,6 +23,7 @@ public class ShopManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI itemTitle;
     [SerializeField] private TextMeshProUGUI itemDescription;
     [SerializeField] private TextMeshProUGUI itemEffect;
+    [SerializeField] private TextMeshProUGUI itemPrice;
 
     [Header("Item Purchase UI")]
     [SerializeField] private Button purchaseButton;
@@ -62,7 +63,7 @@ public class ShopManager : MonoBehaviour
             healButton.interactable = (GameManager.Instance.gold >= healCost);
             // playerCurrentGold = GameManager.Instance.gold; // GameManager와 연동 시 이와 같이 사용
         }
-        
+
         // 상세 정보창이 열려있고, 선택된 아이템이 있다면 골드 변동 시 구매 버튼 상태를 바로 업데이트
         if (itemDescriptionBox.anchoredPosition == descriptionBoxOnScreenPos && currentSelectedItem != null)
         {
@@ -83,6 +84,8 @@ public class ShopManager : MonoBehaviour
         itemTitle.text = data.itemName;
         itemDescription.text = data.description;
         itemEffect.text = GetItemEffectText(data);
+        itemPrice.text = $"{data.price} G";
+
 
         // 아이템 정보를 표시한 후, 구매 버튼 상태 업데이트
         UpdatePurchaseButtonState(data);
@@ -105,21 +108,21 @@ public class ShopManager : MonoBehaviour
                 return data.effect;
             case ItemEffectType.IncreaseGold:
                 return data.effect;
-            
+
             default:
                 return "특별한 효과가 없는 아이템입니다.";
         }
     }
-    
-    
+
+
     /// <summary>
     /// 아이템 가격과 플레이어 골드를 비교하여 구매 버튼의 상태(Sprite, interactable)를 업데이트합니다.
     /// </summary>
     private void UpdatePurchaseButtonState(ItemData data)
     {
         bool hasEnoughGold = GameManager.Instance.gold >= data.price;
-        bool hasSpace = data.isRelic ? 
-                        GameManager.Instance.activeRelics.Count < GameManager.MAX_RELICS : 
+        bool hasSpace = data.isRelic ?
+                        GameManager.Instance.activeRelics.Count < GameManager.MAX_RELICS :
                         InventoryManager.Instance.inventory.Count < InventoryManager.MAX_SLOTS;
 
         // 디버깅 로그 추가
@@ -178,13 +181,13 @@ public class ShopManager : MonoBehaviour
     public void OnBuyHeal()
     {
         if (GameManager.Instance == null) return;
-        
+
         if (GameManager.Instance.gold >= healCost)
         {
             GameManager.Instance.gold -= healCost;
             GameManager.Instance.currentHP = Mathf.Min(GameManager.Instance.currentHP + healAmount, GameManager.Instance.maxHP);
             Debug.Log($"💖 체력 회복 완료! 현재 HP: {GameManager.Instance.currentHP}");
-            
+
             UpdateUI(); // 골드 변경이 있으므로 UI 전체 업데이트
         }
     }
