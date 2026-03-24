@@ -4,11 +4,11 @@ using UnityEngine;
 public class BackgroundFitter : MonoBehaviour
 {
     public bool keepAspectRatio = true;
-    
+
     // [설정] 카메라로부터 얼마나 떨어뜨릴지 (이 값이 곧 레이어 깊이)
     // 01_Floor는 멀리(예: 15), 05_Fore는 가까이(예: 5) 설정하세요.
     [Range(1f, 100f)]
-    public float distance = 10.0f; 
+    public float distance = 10.0f;
 
     // [추가] 오프셋 (혹시 미세 조정이 필요하면 사용)
     public Vector2 offset = Vector2.zero;
@@ -31,7 +31,7 @@ public class BackgroundFitter : MonoBehaviour
         // 1. 위치 & 회전 동기화 (가장 중요!)
         // 카메라 위치에서 시선 방향(Forward)으로 distance만큼 떨어진 곳에 배치
         transform.position = cam.transform.position + (cam.transform.forward * distance);
-        
+
         // 카메라는 (50, 0, 0)인데 배경이 (0, 0, 0)이면 비스듬하게 보임.
         // 배경도 카메라랑 똑같이 회전시켜서 정면을 보게 함.
         transform.rotation = cam.transform.rotation;

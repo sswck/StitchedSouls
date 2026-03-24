@@ -14,6 +14,7 @@ public class TurnOrderUI : MonoBehaviour
 
     [Header("Settings")]
     public float spacing = 120f;
+    public float startOffset = -400f; // 시작 위치 오프셋 (이미지 왼쪽에서 시작하도록 조정)
     public float moveDuration = 0.5f;
 
     private Dictionary<Unit, UnitIcon> iconMap = new Dictionary<Unit, UnitIcon>();
@@ -77,8 +78,8 @@ public class TurnOrderUI : MonoBehaviour
             bool isCurrent = (unit == currentUnit);
             icon.SetIcon(unit, isCurrent);
 
-            // 목표 위치 계산 (좌측 정렬 기준)
-            float targetX = i * spacing;
+            // 목표 위치 계산 (startOffset 기준)
+            float targetX = startOffset + (i * spacing);
             icon.transform.SetAsLastSibling(); // 계층 구조 순서 정렬 (겹칠 경우 대비)
             
             // DOTween으로 부드럽게 이동
@@ -110,7 +111,7 @@ public class TurnOrderUI : MonoBehaviour
         RectTransform rect = icon.GetComponent<RectTransform>();
         if (rect != null)
         {
-            rect.anchoredPosition = new Vector2(container.childCount * spacing, 0);
+            rect.anchoredPosition = new Vector2(startOffset + (container.childCount * spacing), 0);
         }
 
         return icon;
