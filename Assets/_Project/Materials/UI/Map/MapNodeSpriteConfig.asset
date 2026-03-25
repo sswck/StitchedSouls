@@ -24,3 +24,7 @@ MonoBehaviour:
     active: {fileID: -1434256050, guid: e8deb2a131c72fb4cb0c90987ca6fe1b, type: 3}
     inactive01: {fileID: -1040916420, guid: 6cc6332ca30e6134b9a29f627f82f82e, type: 3}
     inactive02: {fileID: -868138527, guid: f661bdff0f6cc174abd2af144d17a929, type: 3}
+  boss:
+    active: {fileID: 2057330013, guid: a466f02a08f4a9d4cb5a7cc2bc289265, type: 3}
+    inactive01: {fileID: -464747172, guid: ef7acefcd2c2e114c908b142b4d7585a, type: 3}
+    inactive02: {fileID: 1088349922, guid: fb7af1524ce247a4489c7074da6de002, type: 3}

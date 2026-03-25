@@ -160,14 +160,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6646362995664105598}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: 0.3420201, y: 0, z: 0, w: 0.9396927}
+  m_LocalPosition: {x: 0, y: 0, z: 0.2}
   m_LocalScale: {x: 0.25, y: 0.35, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8861015546896156605}
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 40, y: 0, z: 0}
 --- !u!65 &4911853266618875838
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -204,9 +204,11 @@ MonoBehaviour:
   unitName: 
   maxHP: 50
   currentHP: 0
+  attackSpeed: 5
   maxMovePoints: 2
   currentMovePoints: 0
   damageBuff: 0
+  ultimateSkillCard: {fileID: 0}
   damageBuffDuration: 0
   moveBonus: 0
   moveBuffDuration: 0
@@ -218,9 +220,17 @@ MonoBehaviour:
   skeletonAnimation: {fileID: 2767940222178672164}
   idleAnimName: E_02_attack_standing
   attackAnimName: E_02_attack
+  activeIcon: {fileID: -1474840885, guid: 0cf3099878259ec49a6e85a29c751a53, type: 3}
+  inactiveIcon: {fileID: 526239568, guid: 82a20ebbe5e2b51468f483f2f4feeb20, type: 3}
   hpBarPrefab: {fileID: 98269044502590925, guid: 94cfec57033a52c4bbb6c2cc0dac6724, type: 3}
-  hpBarOffset: {x: 0, y: 2.5, z: 0}
+  hpBarOffset: {x: 0, y: 3, z: 0}
   playerHpBarOffset: {x: 0, y: 3.2, z: 0}
+  currentShield: 0
+  hitVFXPrefab: {fileID: 4021103657954561961, guid: 5c755f9bc5253ea418e919994537dcc7, type: 3}
+  playerHitVFXPrefab: {fileID: 0}
+  defenseVFXPrefab: {fileID: 0}
+  ppRecoveryVFXPrefab: {fileID: 0}
+  damageBuffVFXPrefab: {fileID: 0}
 --- !u!1 &7250430457669874228
 GameObject:
   m_ObjectHideFlags: 0

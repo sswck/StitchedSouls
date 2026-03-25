@@ -194,7 +194,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0.3420201, y: 0, z: 0, w: 0.9396927}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.4, y: 0.7, z: 1}
+  m_LocalScale: {x: 0.4, y: 0.5, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 288570172931563269}
@@ -244,9 +244,9 @@ MonoBehaviour:
   damageBuffDuration: 0
   moveBonus: 0
   moveBuffDuration: 0
-  gridX: 0
-  gridY: 0
-  tilePositionOffset: {x: 0, y: 0, z: 0}
+  gridX: 4
+  gridY: 2
+  tilePositionOffset: {x: 0.61, y: 0, z: 0.5}
   sortingOrderBase: 10
   layerDepthStep: 0.1
   skeletonAnimation: {fileID: 7524962045035121095}
@@ -255,7 +255,7 @@ MonoBehaviour:
   activeIcon: {fileID: -1960856277, guid: 6bc8b399e58e76f4bbcc9305e1b98c75, type: 3}
   inactiveIcon: {fileID: 1908568763, guid: 2c2aacb819b528242883cedd99ec8f7d, type: 3}
   hpBarPrefab: {fileID: 98269044502590925, guid: 94cfec57033a52c4bbb6c2cc0dac6724, type: 3}
-  hpBarOffset: {x: 0, y: 3.5, z: 0}
+  hpBarOffset: {x: 0, y: 2.6, z: 0}
   playerHpBarOffset: {x: 0, y: 3.2, z: 0}
   currentShield: 0
   hitVFXPrefab: {fileID: 4021103657954561961, guid: 5c755f9bc5253ea418e919994537dcc7, type: 3}
