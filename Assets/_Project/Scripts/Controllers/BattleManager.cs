@@ -5,6 +5,7 @@ using UnityEngine.InputSystem;
 using System.Collections;
 
 public enum BattleState { Start, PlayerTurn, EnemyTurn, Won, Lost }
+public enum EnemyType { Normal, Elite, Boss, Player }
 
 [System.Serializable]
 public class SpawnOffsetConfig
@@ -12,6 +13,7 @@ public class SpawnOffsetConfig
     public int gridX;
     public int gridY;
     public Vector3 offset = Vector3.zero;
+    public EnemyType enemyType = EnemyType.Normal;
 }
 
 public class BattleManager : MonoBehaviour
@@ -28,8 +30,9 @@ public class BattleManager : MonoBehaviour
 
     [Header("Spawn Settings")]
     public Unit unitPrefab;
-    public Unit normalEnemyPrefab;
-    public Unit eliteEnemyPrefab;
+    public List<Unit> normalEnemyPrefabs = new List<Unit>();
+    public List<Unit> eliteEnemyPrefabs = new List<Unit>();
+    public List<Unit> bossEnemyPrefabs = new List<Unit>();
     [Tooltip("스폰 위치별 Tile Position Offset. (3,3), (3,0), (4,2) 등 각 타일마다 다른 오프셋을 Inspector에서 지정할 수 있습니다.")]
     public List<SpawnOffsetConfig> spawnPositionOffsets = new List<SpawnOffsetConfig>();
 
@@ -261,7 +264,7 @@ public class BattleManager : MonoBehaviour
     {
         playerUnit = Instantiate(unitPrefab);
         playerUnit.name = "Player Unit";
-        ApplySpawnOffset(playerUnit, 0, 2);
+        ApplySpawnOffset(playerUnit, 0, 2, EnemyType.Player);
         playerUnit.Init(0, 2);
 
         allUnits.Add(playerUnit);
@@ -271,9 +274,10 @@ public class BattleManager : MonoBehaviour
 
     void SpawnEnemy()
     {
-        // GameManager 정보가 없다면 기본 1마리만 중앙에 소환
         if (GameManager.Instance == null)
         {
+            // 기본값으로 일반 전투 스폰 진행
+            SpawnNormalEnemyAt(3, 0);
             SpawnNormalEnemyAt(3, 3);
             return;
         }
@@ -281,28 +285,29 @@ public class BattleManager : MonoBehaviour
         switch (GameManager.Instance.currentNodeType)
         {
             case NodeType.Battle:
-                // 일반 전투: 노말 적 2마리 Tile_3_3, Tile_3_0
-                SpawnNormalEnemyAt(3, 3);
+                // 일반 전투: (3,0), (3,3)에 일반 몬스터 소환
                 SpawnNormalEnemyAt(3, 0);
+                SpawnNormalEnemyAt(3, 3);
                 break;
 
             case NodeType.Elite:
-                // 엘리트 전투: 노말 2마리 (Tile_3_3, Tile_3_0) + 엘리트 1마리 (Tile_4_2)
-                SpawnNormalEnemyAt(3, 3);
+                // 엘리트 전투: (3,0), (3,3)에 일반 몬스터, (4,2)에 엘리트 몬스터 소환
                 SpawnNormalEnemyAt(3, 0);
+                SpawnNormalEnemyAt(3, 3);
                 SpawnEliteEnemyAt(4, 2);
                 Debug.Log("⚠️ 경고: 엘리트 몬스터 출현! (노말 x2 + 엘리트 x1)");
                 break;
 
             case NodeType.Boss:
-                // 보스 전투는 아직 구현 전이므로 임시로 노말 1마리만 소환
-                // 이후 보스 프리팹이 생기면 여기서 교체
-                Debug.Log("디버그 보스 스폰 지점 (임시로 노말 1마리 소환)");
-                SpawnNormalEnemyAt(3, 3);
+                // 보스 전투: (3,0), (3,3)에 엘리트 몬스터, (4,2)에 보스 몬스터 소환
+                SpawnEliteEnemyAt(3, 0);
+                SpawnEliteEnemyAt(3, 3);
+                SpawnBossEnemyAt(4, 2);
+                Debug.Log("⚠️ 경고: 보스 몬스터 출현! (엘리트 x2 + 보스 x1)");
                 break;
 
             default:
-                // 그 외 타입은 안전하게 기본 1마리
+                SpawnNormalEnemyAt(3, 0);
                 SpawnNormalEnemyAt(3, 3);
                 break;
         }
@@ -310,42 +315,69 @@ public class BattleManager : MonoBehaviour
 
     void SpawnNormalEnemyAt(int x, int y)
     {
-        if (normalEnemyPrefab == null)
+        if (normalEnemyPrefabs == null || normalEnemyPrefabs.Count == 0)
         {
-            Debug.LogWarning("normalEnemyPrefab 이 설정되지 않았습니다.");
+            Debug.LogWarning("normalEnemyPrefabs 리스트가 비어있습니다.");
             return;
         }
 
-        Unit enemy = Instantiate(normalEnemyPrefab);
+        Unit prefab = normalEnemyPrefabs[UnityEngine.Random.Range(0, normalEnemyPrefabs.Count)];
+        Unit enemy = Instantiate(prefab);
         enemy.name = "Normal Enemy";
-        ApplySpawnOffset(enemy, x, y);
+
+        ApplySpawnOffset(enemy, x, y, EnemyType.Normal);
         enemy.Init(x, y);
+
         allUnits.Add(enemy);
     }
 
     void SpawnEliteEnemyAt(int x, int y)
     {
-        if (eliteEnemyPrefab == null)
+        if (eliteEnemyPrefabs == null || eliteEnemyPrefabs.Count == 0)
         {
-            Debug.LogWarning("eliteEnemyPrefab 이 설정되지 않았습니다.");
+            Debug.LogWarning("eliteEnemyPrefabs 리스트가 비어있습니다.");
             return;
         }
 
-        Unit enemy = Instantiate(eliteEnemyPrefab);
+        Unit prefab = eliteEnemyPrefabs[UnityEngine.Random.Range(0, eliteEnemyPrefabs.Count)];
+        Unit enemy = Instantiate(prefab);
         enemy.name = "Elite Enemy";
-        ApplySpawnOffset(enemy, x, y);
+
+        ApplySpawnOffset(enemy, x, y, EnemyType.Elite);
         enemy.Init(x, y);
+
         allUnits.Add(enemy);
     }
 
-    void ApplySpawnOffset(Unit unit, int x, int y)
+    void SpawnBossEnemyAt(int x, int y)
     {
+        if (bossEnemyPrefabs == null || bossEnemyPrefabs.Count == 0)
+        {
+            Debug.LogWarning("bossEnemyPrefabs 리스트가 비어있습니다.");
+            return;
+        }
+
+        Unit prefab = bossEnemyPrefabs[UnityEngine.Random.Range(0, bossEnemyPrefabs.Count)];
+        Unit enemy = Instantiate(prefab);
+        enemy.name = "Boss Enemy";
+
+        ApplySpawnOffset(enemy, x, y, EnemyType.Boss);
+        enemy.Init(x, y);
+
+        allUnits.Add(enemy);
+    }
+
+    void ApplySpawnOffset(Unit unit, int x, int y, EnemyType tier)
+    {
+        // 1. 프리팹 자체에 설정된 기본 오프셋을 '베이스'로 유지합니다.
+        // 2. 만약 특정 좌표(x, y)와 해당 몬스터 등급(tier)에 대한 설정이 있다면 더해줍니다.
         if (spawnPositionOffsets == null) return;
+
         foreach (var config in spawnPositionOffsets)
         {
-            if (config.gridX == x && config.gridY == y)
+            if (config.gridX == x && config.gridY == y && config.enemyType == tier)
             {
-                unit.tilePositionOffset = config.offset;
+                unit.tilePositionOffset += config.offset;
                 break;
             }
         }
@@ -512,7 +544,7 @@ public class BattleManager : MonoBehaviour
             case ItemEffectType.HealHP:
                 playerUnit.Heal(item.value);
                 Debug.Log($"플레이어의 HP를 {item.value} 만큼 회복. 현재 HP: {playerUnit.currentHP}/{playerUnit.maxHP}");
-                
+
                 if (healItemVFXPrefab != null && playerUnit != null)
                 {
                     GameObject vfx = Instantiate(healItemVFXPrefab, playerUnit.transform.position + Vector3.up * 1f, Quaternion.identity);
@@ -552,7 +584,7 @@ public class BattleManager : MonoBehaviour
             GameManager.Instance.currentUlt = GameManager.Instance.maxUlt;
 
         Debug.Log($"⚡ SP 충전! (+{amount}) 현재 게이지: {GameManager.Instance.currentUlt}%");
-        
+
         if (BattleUIManager.Instance != null)
             BattleUIManager.Instance.UpdateUltUI();
     }
@@ -564,7 +596,7 @@ public class BattleManager : MonoBehaviour
             Debug.Log("지금은 궁극기를 사용할 수 없는 상태입니다!");
             return;
         }
-        
+
         if (GameManager.Instance == null || GameManager.Instance.currentUlt < GameManager.Instance.maxUlt)
         {
             Debug.LogWarning("궁극기 게이지가 부족합니다!");
@@ -659,7 +691,7 @@ public class BattleManager : MonoBehaviour
         isBattleEnded = true;
         state = BattleState.Won;
 
-        if (SoundManager.Instance != null) 
+        if (SoundManager.Instance != null)
             SoundManager.Instance.PlaySFX(SoundManager.Instance.victorySFX);
 
         if (GameManager.Instance != null && playerUnit != null)
@@ -675,6 +707,8 @@ public class BattleManager : MonoBehaviour
         //일반: +1, 엘리트: +2, 보스: +3
         if (GameManager.Instance.currentNodeType == NodeType.Elite)
             GameManager.Instance.currentSp += 2;
+        else if (GameManager.Instance.currentNodeType == NodeType.Boss)
+            GameManager.Instance.currentSp += 3;
         else
             GameManager.Instance.currentSp += 1;
 
@@ -699,7 +733,7 @@ public class BattleManager : MonoBehaviour
         isBattleEnded = true;
         state = BattleState.Lost;
 
-        if (SoundManager.Instance != null) 
+        if (SoundManager.Instance != null)
             SoundManager.Instance.PlaySFX(SoundManager.Instance.defeatSFX);
 
         Debug.Log("💀 GAME OVER... 플레이어가 사망했습니다.");

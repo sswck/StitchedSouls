@@ -603,6 +603,22 @@ PrefabInstance:
       propertyPath: deckCountText
       value: 
       objectReference: {fileID: 794989955}
+    - target: {fileID: 2492219582287808507, guid: 8a4ea66ea31797d46ac4185c267bda52, type: 3}
+      propertyPath: m_Color.a
+      value: 0.92941177
+      objectReference: {fileID: 0}
+    - target: {fileID: 2492219582287808507, guid: 8a4ea66ea31797d46ac4185c267bda52, type: 3}
+      propertyPath: m_Color.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2492219582287808507, guid: 8a4ea66ea31797d46ac4185c267bda52, type: 3}
+      propertyPath: m_Color.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2492219582287808507, guid: 8a4ea66ea31797d46ac4185c267bda52, type: 3}
+      propertyPath: m_Color.r
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7877778354241516234, guid: 8a4ea66ea31797d46ac4185c267bda52, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -681,6 +697,22 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7877778354241516234, guid: 8a4ea66ea31797d46ac4185c267bda52, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8469790164208069539, guid: 8a4ea66ea31797d46ac4185c267bda52, type: 3}
+      propertyPath: m_Color.a
+      value: 0.77254903
+      objectReference: {fileID: 0}
+    - target: {fileID: 8469790164208069539, guid: 8a4ea66ea31797d46ac4185c267bda52, type: 3}
+      propertyPath: m_Color.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8469790164208069539, guid: 8a4ea66ea31797d46ac4185c267bda52, type: 3}
+      propertyPath: m_Color.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8469790164208069539, guid: 8a4ea66ea31797d46ac4185c267bda52, type: 3}
+      propertyPath: m_Color.r
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -1724,7 +1756,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1950665469487217002, guid: 70ee99f22271a0b4cb47d639c54c0b66, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.0002550488
+      value: 0.0005541329
+      objectReference: {fileID: 0}
+    - target: {fileID: 3338020980736299069, guid: 70ee99f22271a0b4cb47d639c54c0b66, type: 3}
+      propertyPath: fixedMapPath.Array.data[1].type
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3338020980736299069, guid: 70ee99f22271a0b4cb47d639c54c0b66, type: 3}
+      propertyPath: fixedMapPath.Array.data[3].type
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 4798702927202791632, guid: 70ee99f22271a0b4cb47d639c54c0b66, type: 3}
       propertyPath: m_Pivot.x

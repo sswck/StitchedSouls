@@ -27,6 +27,17 @@ public class RewardUIManager : MonoBehaviour
     public void ShowReward()
     {
         rewardPanel.SetActive(true);
+
+        // [추가] 보상 패널이 체력바(Sorting Order 500+)보다 앞에 보이도록 설정
+        Canvas canvas = rewardPanel.GetComponent<Canvas>();
+        if (canvas == null) canvas = rewardPanel.AddComponent<Canvas>();
+        canvas.overrideSorting = true;
+        canvas.sortingOrder = 1000;
+
+        // GraphicRaycaster 체크
+        if (rewardPanel.GetComponent<UnityEngine.UI.GraphicRaycaster>() == null)
+            rewardPanel.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+
         GenerateChoices();
     }
 

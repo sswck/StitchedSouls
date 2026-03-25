@@ -223,6 +223,16 @@ public class BattleUIManager : MonoBehaviour
 
         resultPanel.SetActive(true); // 패널 켜기
 
+        // [추가] 결과 패널이 체력바(Sorting Order 500+)보다 앞에 보이도록 설정
+        Canvas canvas = resultPanel.GetComponent<Canvas>();
+        if (canvas == null) canvas = resultPanel.AddComponent<Canvas>();
+        canvas.overrideSorting = true;
+        canvas.sortingOrder = 1000;
+
+        // GraphicRaycaster가 없으면 버튼 클릭이 안 될 수 있으므로 체크 후 추가
+        if (resultPanel.GetComponent<UnityEngine.UI.GraphicRaycaster>() == null)
+            resultPanel.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+
 
         if (isWin)
         {
@@ -231,7 +241,7 @@ public class BattleUIManager : MonoBehaviour
             // 승리 시 효과음 재생 (나중에 SoundManager 연결)
 
             // TODO_juwan: 승리 시 집계된 데이터 표시
-            if (GameManager.Instance.currentNodeType == NodeType.Elite)
+            if (GameManager.Instance.currentNodeType == NodeType.Boss)
             {
                 damageDealText.gameObject.SetActive(true);
                 damageTakenText.gameObject.SetActive(true);
@@ -339,7 +349,7 @@ public class BattleUIManager : MonoBehaviour
         if (mapPopup != null)
         {
             mapPopup.SetActive(true);
-            
+
             // MapManager를 찾아서 맵 다시 그리기
             MapManager mapManager = mapPopup.GetComponentInChildren<MapManager>(true);
             if (mapManager != null)

@@ -85,7 +85,6 @@ public class Unit : MonoBehaviour
         else
             pos = new Vector3(gridX * 1.1f, 0.5f, gridY * 1.1f);
         pos += tilePositionOffset;
-        ApplyLayerDepth(ref pos, gridY);
         transform.position = pos;
 
         UpdateSortingOrder();
@@ -97,9 +96,9 @@ public class Unit : MonoBehaviour
 
     private void ApplyLayerDepth(ref Vector3 pos, int gridY)
     {
-        if (layerDepthStep <= 0f || AnchorGridManager.Instance == null) return;
-        int h = AnchorGridManager.Instance.height;
-        pos.z += (h - 1 - gridY) * layerDepthStep;
+        // 3D 뎁스 보정 기능을 비활성화했습니다. 
+        // 2.5D 카메라에서 타일 중앙 위치를 왜곡시킬 수 있기 때문에 Z축 이동을 막고 Sorting Order만 사용합니다.
+        return;
     }
 
     private void UpdateSortingOrder()
@@ -114,10 +113,18 @@ public class Unit : MonoBehaviour
         }
 
         // [추가] 체력바(Canvas) 정렬 동기화
-        // 유닛 본체보다 충분히 높게 설정하여 항상 앞에 오도록 함 (UI 레이어와 겹치지 않도록 주의)
+        // 기본적으로 유닛 본체보다 앞에 오도록 설정하되,
+        // Elite나 Boss 노드일 경우 유닛 종류별로 sortingOrderBase가 다를 수 있으므로 
+        // 체력바(Canvas)는 gridY에만 의존하는 절대적인 정렬 기준(예: 500)을 적용하여 앞뒤 관계를 보장합니다.
+        int canvasOrder = order + 50;
+        if (GameManager.Instance != null && (GameManager.Instance.currentNodeType == NodeType.Elite || GameManager.Instance.currentNodeType == NodeType.Boss))
+        {
+            canvasOrder = 500 + (AnchorGridManager.Instance != null ? (AnchorGridManager.Instance.height - 1 - gridY) : 0);
+        }
+
         foreach (var c in GetComponentsInChildren<Canvas>(true))
         {
-            c.sortingOrder = order + 50;
+            c.sortingOrder = canvasOrder;
         }
     }
 
@@ -206,7 +213,6 @@ public class Unit : MonoBehaviour
             ? AnchorGridManager.Instance.GetTileCenterPosition(gridX, gridY) 
             : new Vector3(gridX * 1.1f, 0.5f, gridY * 1.1f);
         targetPos += tilePositionOffset;
-        ApplyLayerDepth(ref targetPos, gridY);
 
         UpdateSortingOrder();
 
@@ -575,7 +581,6 @@ public class Unit : MonoBehaviour
             ? AnchorGridManager.Instance.GetTileCenterPosition(gridX, gridY)
             : new Vector3(gridX * 1.1f, 0.5f, gridY * 1.1f);
         targetPos += tilePositionOffset;
-        ApplyLayerDepth(ref targetPos, gridY);
         UpdateSortingOrder();
         transform.DOMove(targetPos, 0.2f).SetEase(Ease.OutBack);
     }

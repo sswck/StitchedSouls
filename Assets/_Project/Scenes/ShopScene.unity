@@ -633,7 +633,7 @@ MonoBehaviour:
   itemTitle: {fileID: 78561327}
   itemDescription: {fileID: 1442370593}
   itemEffect: {fileID: 1467924372}
-  itemPrice: {fileID: 0}
+  itemPrice: {fileID: 2044656076}
   purchaseButton: {fileID: 751679270}
   purchaseButtonImage: {fileID: 751679267}
   activePurchaseSprite: {fileID: -1062421004, guid: ce952ed71f47c0c49888632fc82c67ce, type: 3}

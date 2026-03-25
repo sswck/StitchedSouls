@@ -18,11 +18,14 @@ public class MapNodeSpriteConfig : ScriptableObject
     [Header("Normal (Battle, Rest)")]
     public NodeSpriteSet normal;
 
-    [Header("Elite (Boss)")]
+    [Header("Elite")]
     public NodeSpriteSet elite;
 
     [Header("Shop")]
     public NodeSpriteSet shop;
+
+    [Header("Boss")]
+    public NodeSpriteSet boss;
 
     /// <summary>
     /// NodeType과 NodeStatus에 맞는 스프라이트 반환.
@@ -49,7 +52,7 @@ public class MapNodeSpriteConfig : ScriptableObject
             NodeType.Battle => normal,
             NodeType.Rest => normal,
             NodeType.Elite => elite,
-            NodeType.Boss => elite,
+            NodeType.Boss => boss,
             NodeType.Shop => shop,
             _ => normal
         };
