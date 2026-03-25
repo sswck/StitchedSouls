@@ -350,6 +350,16 @@ public class BattleUIManager : MonoBehaviour
         {
             mapPopup.SetActive(true);
 
+            // [추가] 맵 팝업이 체력바(Sorting Order 500+)보다 앞에 보이도록 설정
+            Canvas canvas = mapPopup.GetComponent<Canvas>();
+            if (canvas == null) canvas = mapPopup.AddComponent<Canvas>();
+            canvas.overrideSorting = true;
+            canvas.sortingOrder = 1000;
+
+            // GraphicRaycaster가 없으면 버튼 클릭이 안 될 수 있으므로 체크 후 추가
+            if (mapPopup.GetComponent<UnityEngine.UI.GraphicRaycaster>() == null)
+                mapPopup.AddComponent<UnityEngine.UI.GraphicRaycaster>();
+
             // MapManager를 찾아서 맵 다시 그리기
             MapManager mapManager = mapPopup.GetComponentInChildren<MapManager>(true);
             if (mapManager != null)
