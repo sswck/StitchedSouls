@@ -50,11 +50,11 @@ MonoBehaviour:
   fixedMapPath:
   - type: 0
     position: {x: -405, y: -237}
-  - type: 0
+  - type: 1
     position: {x: 330, y: -237}
   - type: 3
     position: {x: 330, y: 50}
-  - type: 1
+  - type: 4
     position: {x: -487, y: 50}
   isPopup: 0
 --- !u!1 &5002131542245879977
@@ -188,7 +188,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7335561436194791610, guid: 0ae6357969b389e4f983760a3c9a9f1f, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.0034435224
+      value: 0.00037485972
       objectReference: {fileID: 0}
     - target: {fileID: 8158963498130945329, guid: 0ae6357969b389e4f983760a3c9a9f1f, type: 3}
       propertyPath: m_AnchorMax.x
@@ -204,7 +204,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8201527274137713504, guid: 0ae6357969b389e4f983760a3c9a9f1f, type: 3}
       propertyPath: m_Size
-      value: 0.96267927
+      value: 0.99999547
       objectReference: {fileID: 0}
     - target: {fileID: 8356410976853228684, guid: 0ae6357969b389e4f983760a3c9a9f1f, type: 3}
       propertyPath: m_AnchorMax.x

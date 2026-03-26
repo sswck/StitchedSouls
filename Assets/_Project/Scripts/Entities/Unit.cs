@@ -32,7 +32,7 @@ public class Unit : MonoBehaviour
     [Tooltip("2D 레이어 정렬 기준값. gridY가 작을수록 이 값에 더해져 앞에 그려집니다.")]
     [SerializeField] private int sortingOrderBase = 5; // [수정] 10 -> 5 (UI 가림 방지)
     [Tooltip("3D 프로젝트: gridY가 작을수록(앞줄) Z를 보정해 카메라에 가깝게 그려지게 합니다. 0이면 미적용.")]
-    [SerializeField] private float layerDepthStep = 0.1f;
+    //[SerializeField] private float layerDepthStep = 0.1f; // sswck: 참조하는데가 없어 일단 주석처리했습니다
 
     [Header("Visual & Animation")]
     [SerializeField] private SkeletonAnimation skeletonAnimation; 
@@ -59,6 +59,10 @@ public class Unit : MonoBehaviour
     public GameObject damageBuffVFXPrefab;
     
     private GameObject activeBuffVFX;
+
+    [Header("Unit SFX")]
+    // public AudioClip moveSFX;
+    public AudioClip attackSFX;
 
     [Header("PendingHeal")]
     private int pendingHealHP = 0;
@@ -220,10 +224,16 @@ public class Unit : MonoBehaviour
         transform.DOKill();
         transform.DOJump(targetPos, 0.5f, 1, 0.3f);
 
-        // [추가] 플레이어 이동 시 UI 갱신
-        if (BattleManager.Instance != null && this == BattleManager.Instance.playerUnit)
+        // 발소리 재생 (주인공일 때만)
+        bool isPlayer = BattleManager.Instance != null && BattleManager.Instance.playerUnit == this;
+        if (isPlayer && SoundManager.Instance != null && SoundManager.Instance.moveSFX != null)
         {
-            if (BattleUIManager.Instance != null) BattleUIManager.Instance.UpdateMovementUI();
+            SoundManager.Instance.PlaySFX(SoundManager.Instance.moveSFX);
+        }
+
+        if (isPlayer && BattleUIManager.Instance != null)
+        {
+            BattleUIManager.Instance.UpdateMovementUI();
         }
     }
 
@@ -337,7 +347,7 @@ public class Unit : MonoBehaviour
 
                 if (isPlayer && SoundManager.Instance != null)
                 {
-                    SoundManager.Instance.PlaySFX(SoundManager.Instance.allyAttackSFX);
+                    SoundManager.Instance.PlaySFX(attackSFX);
                 }
             });
             seq.AppendInterval(0.3f);
@@ -362,7 +372,7 @@ public class Unit : MonoBehaviour
                 PlayAnim(attackAnimName, false);
                 if (SoundManager.Instance != null)
                 {
-                    SoundManager.Instance.PlaySFX(SoundManager.Instance.allyAttackSFX);
+                    SoundManager.Instance.PlaySFX(attackSFX);
                 }
             });
             seq.AppendInterval(0.3f);
@@ -405,6 +415,11 @@ public class Unit : MonoBehaviour
             target.UpdatePPBar();
             Debug.Log($"🔋 PP {card.healPP} 회복! 현재 PP: {GameManager.Instance.currentPP}");
 
+            if (SoundManager.Instance != null && SoundManager.Instance.ppRecoverySFX != null)
+            {
+                SoundManager.Instance.PlaySFX(SoundManager.Instance.ppRecoverySFX);
+            }
+
             if (target.ppRecoveryVFXPrefab != null)
             {
                 GameObject vfx = Instantiate(target.ppRecoveryVFXPrefab, target.transform.position, Quaternion.identity);
@@ -440,6 +455,11 @@ public class Unit : MonoBehaviour
 
         currentShield += amount;
         Debug.Log($"🛡️ [{unitName}] 방어도 {amount} 획득! (현재 총 방어도: {currentShield})");
+
+        if (SoundManager.Instance != null && SoundManager.Instance.defenseCardSFX != null)
+        {
+            SoundManager.Instance.PlaySFX(SoundManager.Instance.defenseCardSFX);
+        }
 
         if (defenseVFXPrefab != null)
         {
@@ -612,7 +632,7 @@ public class Unit : MonoBehaviour
 
             if (SoundManager.Instance != null)
             {
-                SoundManager.Instance.PlaySFX(SoundManager.Instance.enemyAttackSFX);
+                SoundManager.Instance.PlaySFX(attackSFX);
             }
 
             DOVirtual.DelayedCall(0.3f, () => {

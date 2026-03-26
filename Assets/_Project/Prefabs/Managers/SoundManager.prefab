@@ -48,17 +48,24 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SoundManager
   bgmPlayer: {fileID: 7941908560794426260}
   sfxPlayer: {fileID: 4476071708045215318}
-  titleBGM: {fileID: 8300000, guid: 7351ba33f14779e4c8a104372158463d, type: 3}
+  titleBGM: {fileID: 8300000, guid: dabff5509dac63644af25878e679cfd9, type: 3}
   mapBGM: {fileID: 8300000, guid: 5647e11ba6106064db90548ecef7dded, type: 3}
   shopBGM: {fileID: 8300000, guid: 3949e9387dbcdce478a906ba5389e46b, type: 3}
   normalBattleBGM: {fileID: 8300000, guid: 888d18d01b2428d49815834f94e9cda3, type: 3}
-  eliteBattleBGM: {fileID: 8300000, guid: 16dfdecc754cfc246aae454881c0fab0, type: 3}
-  bossBattleBGM: {fileID: 8300000, guid: 73f405428b7b9ca408cc4e87bc1892d9, type: 3}
+  eliteBattleBGM: {fileID: 8300000, guid: 2241bfdc12d52854bb98aaccfaf73f73, type: 3}
+  bossBattleBGM: {fileID: 8300000, guid: b91faa41a3301a74f8e0e645979f7397, type: 3}
+  moveSFX: {fileID: 8300000, guid: 939d6b3128f82744ba005928ac493915, type: 3}
+  uiClickSFX: {fileID: 8300000, guid: 7fc67ab915377404f85de7e0a9d8cca5, type: 3}
+  sceneChangeSFX: {fileID: 8300000, guid: 45367ae49e5bbbf44abcd90037acd554, type: 3}
+  deckCheckSFX: {fileID: 8300000, guid: 157376ff463106f4baa35e74cf6da634, type: 3}
+  shopBuySFX: {fileID: 8300000, guid: 8c6b82815da89e446a47de4756a3ed98, type: 3}
+  cardAttachSFX: {fileID: 8300000, guid: 500f2aed144c136438109c091e4a2d48, type: 3}
+  defenseCardSFX: {fileID: 8300000, guid: f7e7b1b5b164610439ef16170c3f3f0c, type: 3}
+  ppRecoverySFX: {fileID: 8300000, guid: 12d95b28dd2508b4aac7c171c59d11a2, type: 3}
+  potionUseSFX: {fileID: 8300000, guid: 772c1df06e701ea489ceff6b3fba050c, type: 3}
   victorySFX: {fileID: 8300000, guid: 06de61ba5c86bed46af40cba22e35d79, type: 3}
   defeatSFX: {fileID: 8300000, guid: e2301395898922b4f92edfe1314714a4, type: 3}
-  allyAttackSFX: {fileID: 8300000, guid: de8a440e2e3522b4d86a80d3d700af75, type: 3}
   allyHitSFX: {fileID: 8300000, guid: 59895d80e6c1c2a429486bdd235d7889, type: 3}
-  enemyAttackSFX: {fileID: 8300000, guid: 06f26402706ac2943918f91801438408, type: 3}
   enemyHitSFX: {fileID: 8300000, guid: a4cf518a6f6f4594a95fbe59dd75adee, type: 3}
 --- !u!82 &7941908560794426260
 AudioSource:

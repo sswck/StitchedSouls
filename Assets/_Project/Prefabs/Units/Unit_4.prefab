@@ -82,7 +82,6 @@ MonoBehaviour:
   gridY: 0
   tilePositionOffset: {x: 0, y: 0, z: 0}
   sortingOrderBase: 10
-  layerDepthStep: 0.1
   skeletonAnimation: {fileID: 7694602984689016218}
   idleAnimName: E_06_attack_standing
   attackAnimName: E_06_attack
@@ -97,6 +96,7 @@ MonoBehaviour:
   defenseVFXPrefab: {fileID: 0}
   ppRecoveryVFXPrefab: {fileID: 0}
   damageBuffVFXPrefab: {fileID: 0}
+  attackSFX: {fileID: 8300000, guid: 364df222a367c4b4f82c7dc7098b196a, type: 3}
 --- !u!1 &2749412186145305433
 GameObject:
   m_ObjectHideFlags: 0
