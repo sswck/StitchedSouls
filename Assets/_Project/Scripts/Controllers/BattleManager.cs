@@ -85,8 +85,7 @@ public class BattleManager : MonoBehaviour
             }
             else if (GameManager.Instance.currentNodeType == NodeType.Boss)
             {
-                // 보스곡이 있다면 여기에 (지금은 엘리트 곡 사용하거나 비워둠)
-                SoundManager.Instance.PlayBGM(SoundManager.Instance.eliteBattleBGM);
+                SoundManager.Instance.PlayBGM(SoundManager.Instance.bossBattleBGM);
             }
             else
             {
@@ -418,6 +417,11 @@ public class BattleManager : MonoBehaviour
             actionSlots.Add(card);
             Debug.Log($"슬롯에 카드 등록됨: {card.cardName} (남은 PP: {GameManager.Instance.currentPP})");
 
+            if (SoundManager.Instance != null && SoundManager.Instance.cardAttachSFX != null)
+            {
+                SoundManager.Instance.PlaySFX(SoundManager.Instance.cardAttachSFX);
+            }
+
             if (DeckManager.Instance != null)
             {
                 DeckManager.Instance.RemoveCardFromHand(card);
@@ -538,6 +542,11 @@ public class BattleManager : MonoBehaviour
     void ApplyItemEffect(ItemData item)
     {
         Debug.Log($"[아이템 효과] '{item.itemName}' 사용! 효과: {item.effectType}, 수치: {item.value}");
+
+        if (SoundManager.Instance != null && SoundManager.Instance.potionUseSFX != null)
+        {
+            SoundManager.Instance.PlaySFX(SoundManager.Instance.potionUseSFX);
+        }
 
         switch (item.effectType)
         {
