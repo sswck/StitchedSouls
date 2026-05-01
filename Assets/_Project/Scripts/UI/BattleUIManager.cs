@@ -20,12 +20,13 @@ public class BattleUIManager : MonoBehaviour
 
     [Header("Result UI")]
     public GameObject resultPanel;
-    public TextMeshProUGUI resultText;
+
     public TextMeshProUGUI damageDealText;
     public TextMeshProUGUI damageTakenText;
     public TextMeshProUGUI goldText;
     public Button restartButton;
     public Button titleButton;
+    public List<GameObject> resultImage;
 
     [Header("Turn Order UI")]
     public TurnOrderUI turnOrderUI;
@@ -236,8 +237,7 @@ public class BattleUIManager : MonoBehaviour
 
         if (isWin)
         {
-            resultText.text = "VICTORY!";
-            resultText.color = Color.yellow;
+
             // 승리 시 효과음 재생 (나중에 SoundManager 연결)
 
             // TODO_juwan: 승리 시 집계된 데이터 표시
@@ -265,8 +265,7 @@ public class BattleUIManager : MonoBehaviour
         }
         else
         {
-            resultText.text = "GAME OVER";
-            resultText.color = Color.red;
+
 
             //TODO_juwan: 게임 오버 시 집계된 데이터 표시
             damageDealText.gameObject.SetActive(true);

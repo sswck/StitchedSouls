@@ -68,6 +68,28 @@ public class Unit : MonoBehaviour
     private int pendingHealHP = 0;
     private int pendingHealPP = 0;
 
+    [Header("Transparency")]
+    private float currentAlpha = 1f;
+    private Tweener alphaTweener;
+
+    public void SetTransparency(float targetAlpha)
+    {
+        if (Mathf.Approximately(currentAlpha, targetAlpha)) return;
+        
+        currentAlpha = targetAlpha;
+
+        if (skeletonAnimation != null)
+        {
+            alphaTweener?.Kill();
+            Color color = skeletonAnimation.skeleton.GetColor();
+            alphaTweener = DOTween.To(() => color.a, x => 
+            {
+                color.a = x;
+                skeletonAnimation.skeleton.SetColor(color);
+            }, targetAlpha, 0.3f);
+        }
+    }
+
     #endregion
 
     public void Init(int startX, int startY)
@@ -96,6 +118,7 @@ public class Unit : MonoBehaviour
         InitializeHPBar();
         UpdateHPBar();
         PlayAnim(idleAnimName, true);
+        if (BattleManager.Instance != null) BattleManager.Instance.UpdateUnitTransparencies();
     }
 
     private void ApplyLayerDepth(ref Vector3 pos, int gridY)
@@ -219,6 +242,7 @@ public class Unit : MonoBehaviour
         targetPos += tilePositionOffset;
 
         UpdateSortingOrder();
+        if (BattleManager.Instance != null) BattleManager.Instance.UpdateUnitTransparencies();
 
         // [수정] 트윈 중첩 방지
         transform.DOKill();
@@ -537,11 +561,16 @@ public class Unit : MonoBehaviour
 
         if (skeletonAnimation != null)
         {
+            Color hitColor = Color.red;
+            hitColor.a = currentAlpha;
+            Color baseColor = Color.white;
+            baseColor.a = currentAlpha;
+
             DOTween.To(() => skeletonAnimation.skeleton.GetColor(), 
                        x => skeletonAnimation.skeleton.SetColor(x), 
-                       Color.red, 0.1f)
+                       hitColor, 0.1f)
                    .SetLoops(2, LoopType.Yoyo)
-                   .OnComplete(() => skeletonAnimation.skeleton.SetColor(Color.white));
+                   .OnComplete(() => skeletonAnimation.skeleton.SetColor(baseColor));
         }
 
         transform.DOShakePosition(0.3f, 0.2f);
@@ -602,6 +631,7 @@ public class Unit : MonoBehaviour
             : new Vector3(gridX * 1.1f, 0.5f, gridY * 1.1f);
         targetPos += tilePositionOffset;
         UpdateSortingOrder();
+        if (BattleManager.Instance != null) BattleManager.Instance.UpdateUnitTransparencies();
         transform.DOMove(targetPos, 0.2f).SetEase(Ease.OutBack);
     }
 

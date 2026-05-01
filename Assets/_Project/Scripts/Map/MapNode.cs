@@ -8,7 +8,7 @@ public enum NodeStatus { Locked, Available, Completed }
 
 public class MapNode : MonoBehaviour
 {
-    public int nodeIndex;
+    public int nodeId;
     public NodeType nodeType;
     public NodeStatus status;
 
@@ -16,11 +16,11 @@ public class MapNode : MonoBehaviour
     public Button button;
     public Image iconImage;
     public TextMeshProUGUI label;
-    public Image lineToNext;
+    public Image lineToNext; // (더 이상 사용하지 않지만 직렬화 에러 방지용으로 남겨둠)
 
-    public void Init(int index, NodeType type, NodeStatus status, MapNodeSpriteConfig config)
+    public void Init(int id, NodeType type, NodeStatus status, MapNodeSpriteConfig config)
     {
-        this.nodeIndex = index;
+        this.nodeId = id;
         this.nodeType = type;
         this.status = status;
 
@@ -68,7 +68,7 @@ public class MapNode : MonoBehaviour
 
         if (GameManager.Instance != null)
         {
-            GameManager.Instance.currentNodeType = this.nodeType;
+            GameManager.Instance.MoveToNode(this.nodeId, this.nodeType);
         }
 
         // 노드 타입에 따라 다른 씬 로드
@@ -95,23 +95,5 @@ public class MapNode : MonoBehaviour
         }
     }
 
-    public void SetLine(Vector2 targetPosition)
-{
-    if (lineToNext == null) return;
-
-    RectTransform myRect = GetComponent<RectTransform>();
-    RectTransform lineRect = lineToNext.GetComponent<RectTransform>();
-
-    Vector2 startPos = myRect.anchoredPosition;
-    Vector2 dir = targetPosition - startPos;
-    float distance = dir.magnitude;
-
-    // 선의 길이와 각도 조절
-    lineRect.sizeDelta = new Vector2(distance, lineRect.sizeDelta.y);
-    float angle = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
-    lineRect.rotation = Quaternion.Euler(0, 0, angle);
-    
-    // 선 활성화 (마지막 노드는 선이 없음)
-    lineToNext.gameObject.SetActive(true);
-}
+    // SetLine(Vector2 targetPosition) 메서드는 제거되었습니다. MapManager에서 다중 라인을 직접 생성하도록 변경.
 }
