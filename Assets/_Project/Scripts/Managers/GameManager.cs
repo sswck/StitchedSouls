@@ -39,8 +39,8 @@ public class GameManager : MonoBehaviour
     public event Action OnRelicChanged;
 
     [Header("Map Progress")]
-    public int currentStageIndex = 0;
-    public int lastClearedStageIndex = -1;
+    public MapData currentMapData;
+    public int currentNodeId = -1; // -1: 게임 시작 후 아무 노드도 밟지 않은 상태
 
     [Header("Current Battle Info")]
     public NodeType currentNodeType;
@@ -98,17 +98,31 @@ public class GameManager : MonoBehaviour
 
         Debug.Log($"🚀 새 게임 시작! 체력: {currentHP}, 카드: {masterDeck.Count}장");
 
-        currentStageIndex = 0;
-        lastClearedStageIndex = -1;
+        currentNodeId = -1;
+        currentMapData = MapGenerator.GenerateMap();
 
         LoadScene("MapScene");
     }
 
     public void CompleteStage()
     {
-        lastClearedStageIndex = currentStageIndex;
-        currentStageIndex++;
+        // 맵 화면으로 돌아갈 때 다음 노드들을 선택하도록 대기
         LoadScene("MapScene");
+    }
+
+    public void MoveToNode(int nodeId, NodeType type)
+    {
+        currentNodeId = nodeId;
+        currentNodeType = type;
+        
+        // 이동한 노드의 상태를 완료로 변경 (보스나 휴식 등 즉시 완료되는 애들을 위해)
+        MapNodeData node = currentMapData.GetNode(nodeId);
+        if (node != null)
+        {
+            node.status = NodeStatus.Completed;
+        }
+
+        // 이후 필요한 씬 전환 처리. (이것은 MapManager나 MapNode의 OnClick에서 LoadScene 전에 호출될 예정)
     }
 
     public void LoadScene(string sceneName)

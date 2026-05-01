@@ -663,6 +663,8 @@ public class BattleManager : MonoBehaviour
         if (actedUnits.Contains(unit))
             actedUnits.Remove(unit);
 
+        UpdateUnitTransparencies();
+
         if (TurnOrderUI.Instance != null)
         {
             TurnOrderUI.Instance.Refresh(turnQueue, currentTurnUnit, actedUnits);
@@ -711,6 +713,7 @@ public class BattleManager : MonoBehaviour
 
         Debug.Log("🎉 VICTORY! 모든 적을 처치했습니다.");
         BattleUIManager.Instance.ShowResultUI(true);
+        BattleUIManager.Instance.resultImage[0].SetActive(true);
 
         // sp 획득 로직
         //일반: +1, 엘리트: +2, 보스: +3
@@ -748,6 +751,8 @@ public class BattleManager : MonoBehaviour
         Debug.Log("💀 GAME OVER... 플레이어가 사망했습니다.");
 
         BattleUIManager.Instance.ShowResultUI(false);
+        BattleUIManager.Instance.resultImage[1].SetActive(true);
+
     }
 
     // TODO_juwan: 배틀 통계 기능 추가
@@ -771,5 +776,28 @@ public class BattleManager : MonoBehaviour
         totalDamageDeal = 0;
         totalDamageTaken = 0;
         totalDamageBlocked = 0;
+    }
+
+    public void UpdateUnitTransparencies()
+    {
+        foreach (var unit in allUnits)
+        {
+            if (unit == null || !unit.gameObject.activeInHierarchy || unit.currentHP <= 0) continue;
+
+            bool isObscuring = false;
+            foreach (var other in allUnits)
+            {
+                if (other == unit || other == null || !other.gameObject.activeInHierarchy || other.currentHP <= 0) continue;
+
+                // 같은 열(X축)에 있으면서 바로 뒤(Y가 1만큼 큼)에 존재한다면, 실제로 시각적으로 겹친다고 판별
+                if (other.gridX == unit.gridX && other.gridY > unit.gridY && (other.gridY - unit.gridY) <= 1)
+                {
+                    isObscuring = true;
+                    break;
+                }
+            }
+
+            unit.SetTransparency(isObscuring ? 0.4f : 1f);
+        }
     }
 }
