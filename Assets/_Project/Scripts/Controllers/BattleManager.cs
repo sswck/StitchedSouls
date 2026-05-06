@@ -3,6 +3,8 @@ using DG.Tweening;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using System.Collections;
+using System.Reflection;
+using UnityEngine.UI;
 
 public enum BattleState { Start, PlayerTurn, EnemyTurn, Won, Lost }
 public enum EnemyType { Normal, Elite, Boss, Player }
@@ -55,6 +57,15 @@ public class BattleManager : MonoBehaviour
     private bool isBattleEnded = false;
 
     public int goldReward = 0;
+
+    [Header("execite_Image")]
+    public Sprite exectionImage_Active;
+    public Sprite exectionImage_Inactive;
+    public GameObject execiteButton;
+
+
+
+
 
 
     void Start()
@@ -207,6 +218,12 @@ public class BattleManager : MonoBehaviour
         {
             DeckManager.Instance.DrawCards(DeckManager.Instance.drawCountPerTurn);
         }
+
+        if (execiteButton != null)
+        {
+            execiteButton.GetComponent<Image>().sprite = exectionImage_Active;
+
+        }
     }
 
     public void EndPlayerTurn()
@@ -224,6 +241,14 @@ public class BattleManager : MonoBehaviour
         {
             DeckManager.Instance.DiscardHand();
         }
+
+        if (execiteButton != null)
+        {
+            execiteButton.GetComponent<Image>().sprite = exectionImage_Inactive;
+
+        }
+
+        ChargeUlt(10);
 
         StartNextTurn();
     }
