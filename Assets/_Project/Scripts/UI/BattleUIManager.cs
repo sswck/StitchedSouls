@@ -4,6 +4,7 @@ using TMPro;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using Unity.VisualScripting;
+using System.Reflection;
 
 public class BattleUIManager : MonoBehaviour
 {
@@ -40,6 +41,9 @@ public class BattleUIManager : MonoBehaviour
     [Header("Ultimate UI")]
     public Image ultFillImage;
     public Button ultimateButton;
+    public Sprite Ult_Active;
+    public Sprite Ult_Inactive;
+    public GameObject UltImage;
 
     [Header("Deck/Discard Count UI")]
     public TextMeshProUGUI deckCountText;
@@ -86,17 +90,9 @@ public class BattleUIManager : MonoBehaviour
             GameObject newSlot = Instantiate(cardSlotPrefab, handPanel);
 
             // 텍스트 변경 (프리팹 구조에 따라 경로가 다를 수 있음. GetComponentInChildren 사용)
-            TextMeshProUGUI text = newSlot.GetComponentInChildren<TextMeshProUGUI>();
-            if (text != null) text.text = card.cardName;
+            BindCardSlot(newSlot, card);
 
             // 🖼️ [수정] 카드 이미지 설정 (프리팹 최상단에서 직접 Image 컴포넌트 가져오기)
-            Image cardImg = newSlot.GetComponent<Image>();
-
-            if (cardImg != null && card.cardImage != null)
-            {
-                cardImg.sprite = card.cardImage;
-            }
-
             DraggableCard draggable = newSlot.GetComponent<DraggableCard>();
             if (draggable != null)
             {
@@ -126,14 +122,7 @@ public class BattleUIManager : MonoBehaviour
                 CardData card = actionSlots[i];
                 GameObject newSlot = Instantiate(cardSlotPrefab, actionSlotPanel);
 
-                TextMeshProUGUI text = newSlot.GetComponentInChildren<TextMeshProUGUI>();
-                if (text != null) text.text = card.cardName;
-
-                Image cardImg = newSlot.GetComponent<Image>();
-                if (cardImg != null && card.cardImage != null)
-                {
-                    cardImg.sprite = card.cardImage;
-                }
+                BindCardSlot(newSlot, card);
 
                 RectTransform cardRect = newSlot.GetComponent<RectTransform>();
                 if (cardRect != null)
@@ -175,6 +164,25 @@ public class BattleUIManager : MonoBehaviour
         }
     }
 
+    private void BindCardSlot(GameObject slot, CardData card)
+    {
+        DeckViewCardUI cardUI = slot.GetComponent<DeckViewCardUI>();
+        if (cardUI != null)
+        {
+            cardUI.SetCard(card);
+            return;
+        }
+
+        TextMeshProUGUI text = slot.GetComponentInChildren<TextMeshProUGUI>();
+        if (text != null) text.text = card.cardName;
+
+        Image cardImg = slot.GetComponentInChildren<Image>();
+        if (cardImg != null && card.cardImage != null)
+        {
+            cardImg.sprite = card.cardImage;
+        }
+    }
+
     /// <summary>
     /// PP바를 갱신합니다.
     /// </summary>
@@ -204,6 +212,12 @@ public class BattleUIManager : MonoBehaviour
             ultimateButton.interactable = isReady;
 
             // 여유가 되시면 여기서 버튼의 색상/이펙트를 켜고 끄는 로직을 넣어도 좋습니다!
+            if (GameManager.Instance.currentUlt >= GameManager.Instance.maxUlt)
+                UltImage.GetComponent<Image>().sprite = Ult_Active;
+            else
+                UltImage.GetComponent<Image>().sprite = Ult_Inactive;
+
+
         }
     }
 

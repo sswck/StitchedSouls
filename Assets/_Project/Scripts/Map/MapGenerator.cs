@@ -11,13 +11,13 @@ public static class MapGenerator
         Vector2 pos0 = new Vector2(-320, -240);   // Battle (좌하단)
         MapNodeData node0 = new MapNodeData(0, NodeType.Battle, pos0);
 
-        Vector2 pos1 = new Vector2(220, -80);    // Elite (우측)
+        Vector2 pos1 = new Vector2(220, -220);    // Elite (우측)
         MapNodeData node1 = new MapNodeData(1, NodeType.Elite, pos1);
 
-        Vector2 pos2 = new Vector2(10, 40);       // Shop (중앙 부근)
+        Vector2 pos2 = new Vector2(220, 40);       // Shop (중앙 부근)
         MapNodeData node2 = new MapNodeData(2, NodeType.Shop, pos2);
 
-        Vector2 pos3 = new Vector2(-400, 270);    // Boss (좌상단, Battle과 동일한 X 선상)
+        Vector2 pos3 = new Vector2(-400, 200);    // Boss (좌상단, Battle과 동일한 X 선상)
         MapNodeData node3 = new MapNodeData(3, NodeType.Boss, pos3);
 
         // --- 엣지 라우팅 구조 (정확히 원본 이미지의 선 경로를 모방) ---

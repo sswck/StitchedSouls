@@ -35,19 +35,18 @@ public class CardFanLayout : MonoBehaviour
             float x = Mathf.Sin(rad) * radius;
             float y = (Mathf.Cos(rad) * radius - radius) + heightOffset;
 
-            // 좌표 및 회전 적용
-            child.anchoredPosition = new Vector2(x, y);
-            child.localRotation = Quaternion.Euler(0, 0, -currentAngle);
-            
-            // Sibling Index에 따라 레이어 순서가 결정됨 (보통 오른쪽 카드가 위로 옴)
-        }
-
-        // ✨ 레이아웃 배치가 완료된 후, 각 카드가 돌아올 '기본 위치'를 현재 위치로 갱신합니다.
-        for (int i = 0; i < childCount; i++)
-        {
-            if (transform.GetChild(i).TryGetComponent<CardHoverEffect>(out var hover))
+            // ✨ [개선] 좌표 및 회전을 직접 설정하는 대신, 호버 효과 컴포넌트에 '기본 상태'로 전달합니다.
+            // 이렇게 하면 카드가 호버 중이더라도 배치가 변경되었을 때 돌아갈 위치를 정확히 알 수 있습니다.
+            if (child.TryGetComponent<CardHoverEffect>(out var hover))
             {
-                hover.RefreshDefaultState();
+                hover.SetDefaultState(new Vector2(x, y), Quaternion.Euler(0, 0, -currentAngle), Vector3.one, i);
+            }
+            else
+            {
+                child.anchoredPosition = new Vector2(x, y);
+                child.localRotation = Quaternion.Euler(0, 0, -currentAngle);
+                child.localScale = Vector3.one;
+                child.SetSiblingIndex(i);
             }
         }
     }
