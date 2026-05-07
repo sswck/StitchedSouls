@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using DG.Tweening;
+using System.Reflection;
 
 public class ShopManager : MonoBehaviour
 {
@@ -20,7 +21,7 @@ public class ShopManager : MonoBehaviour
     [Header("Item Description UI")]
     [SerializeField] private RectTransform itemDescriptionBox;
     [SerializeField] private Image itemImage;
-    [SerializeField] private TextMeshProUGUI itemTitle;
+    [SerializeField] private Image itemTitle;
     [SerializeField] private TextMeshProUGUI itemDescription;
     [SerializeField] private TextMeshProUGUI itemEffect;
     [SerializeField] private TextMeshProUGUI itemPrice;
@@ -30,6 +31,24 @@ public class ShopManager : MonoBehaviour
     [SerializeField] private Image purchaseButtonImage;
     [SerializeField] private Sprite activePurchaseSprite;
     [SerializeField] private Sprite inactivePurchaseSprite;
+
+    [Header("Shop Title")]
+    [SerializeField] private Image potion_HP;
+    [SerializeField] private Image potion_Movement;
+    [SerializeField] private Image potion_Anger;
+    [SerializeField] private Image potion_Blood;
+    [SerializeField] private Image relic_Needle;
+    [SerializeField] private Image relic_Necklace;
+    [SerializeField] private Image relic_Paper;
+    [SerializeField] private Sprite[] potion_HP_Sp;
+    [SerializeField] private Sprite[] potion_Movement_Sp;
+    [SerializeField] private Sprite[] potion_Anger_Sp;
+    [SerializeField] private Sprite[] potion_Blood_Sp;
+    [SerializeField] private Sprite[] relic_Needle_Sp;
+    [SerializeField] private Sprite[] relic_Necklace_Sp;
+    [SerializeField] private Sprite[] relic_Paper_Sp;
+
+
 
     private ItemData currentSelectedItem;
     private Vector2 descriptionBoxOnScreenPos;
@@ -81,7 +100,7 @@ public class ShopManager : MonoBehaviour
         }
 
         itemImage.sprite = data.icon;
-        itemTitle.text = data.itemName;
+        itemTitle.sprite = data.itemName;
         itemDescription.text = data.description;
         itemEffect.text = GetItemEffectText(data);
         itemPrice.text = $"{data.price} G";
@@ -133,14 +152,18 @@ public class ShopManager : MonoBehaviour
             // 골드 충분하고 공간 있음
             purchaseButtonImage.sprite = activePurchaseSprite;
             purchaseButton.interactable = true;
+
         }
         else
         {
             // 골드 부족하거나 공간 없음
             purchaseButtonImage.sprite = inactivePurchaseSprite;
             purchaseButton.interactable = false;
+
         }
     }
+
+
 
     /// <summary>
     /// 구매 버튼 클릭 시 호출될 함수

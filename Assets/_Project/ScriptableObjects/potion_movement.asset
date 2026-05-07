@@ -12,10 +12,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0d807b70a6c1a545b348ae60fdf1575, type: 3}
   m_Name: potion_movement
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  itemName: "\uACFC\uC790\uADF9 \uC2E0\uACBD\uC561"
+  isRelic: 0
+  itemName: {fileID: 21300000, guid: e17f896cc645c344981d2ca6ff2b9325, type: 3}
   icon: {fileID: -2061192471, guid: 8159611fe3b525d46bb561a5d66c2e77, type: 3}
   description: 
-  effect: "2\uD134 \uB3D9\uC548 \uCD5C\uB300 \uC774\uB3D9 \uD69F\uC218 +1"
   price: 10
   effectType: 3
+  effect: "2\uD134 \uB3D9\uC548 \uCD5C\uB300 \uC774\uB3D9 \uD69F\uC218 +1"
   value: 1

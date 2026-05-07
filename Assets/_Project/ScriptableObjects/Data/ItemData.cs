@@ -21,15 +21,15 @@ public class ItemData : ScriptableObject
     public bool isRelic;
 
     [Header("Info")]
-    public string itemName;
+    public Sprite itemName;
     public Sprite icon;
     [TextArea]
     public string description;
-   
+
     public int price;
 
     [Header("Effect")]
     public ItemEffectType effectType;
-     public string effect;
+    public string effect;
     public int value;
 }

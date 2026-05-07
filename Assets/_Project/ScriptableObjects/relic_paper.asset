@@ -13,9 +13,11 @@ MonoBehaviour:
   m_Name: relic_paper
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
   isRelic: 1
-  itemName: "\uC2E4\uD5D8 \uAE30\uB85D \uC870\uAC01"
+  itemName: {fileID: 21300000, guid: 54776032f7a9e2d4da969c939c109137, type: 3}
   icon: {fileID: 513537982, guid: b0526ec1d53340949b90cbeed287ee43, type: 3}
-  description: 
+  description: "\"\uCC22\uC5B4\uC9C4 \uC2E4\uD5D8 \uAE30\uB85D\uC758 \uC77C\uBD80.
+    \uC601\uD63C\uB4E4\uC758 \uD2B9\uC131 \uAE30\uB85D\uC6A9\uC774\uC5C8\uB358 \uAC83
+    \uAC19\uB2E4.\""
   price: 70
   effectType: 9
   effect: "\uACE8\uB4DC\uD68D\uB4DD\uB7C910\uC99D\uAC00"

@@ -12,12 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0d807b70a6c1a545b348ae60fdf1575, type: 3}
   m_Name: potion_HP
   m_EditorClassIdentifier: Assembly-CSharp::ItemData
-  itemName: "\uC5D0\uD14C\uB974 \uBC14\uC774\uC54C"
+  isRelic: 0
+  itemName: {fileID: 21300000, guid: 739f8cf4ae50e17438bfd6428ee851fb, type: 3}
   icon: {fileID: -1152969203, guid: 946ea66c79218e44eaab639c9460fcbd, type: 3}
   description: "\"\uC601\uD63C \uC2E4\uD5D8\uC5D0 \uC4F0\uC774\uB294 \uC5D0\uD14C\uB974
     \uCD94\uCD9C\uC561. \uD0A4\uBA54\uB77C\uC758 \uC678\uD53C\uB97C \uC77C\uC2DC\uC801\uC73C\uB85C
     \uC7AC\uC0DD\uC2DC\uD0A8\uB2E4.\""
-  effect: "\uCCB4\uB825 20 \uD68C\uBCF5"
   price: 20
   effectType: 0
+  effect: "\uCCB4\uB825 20 \uD68C\uBCF5"
   value: 20
