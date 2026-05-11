@@ -25,9 +25,17 @@ public class BattleUIManager : MonoBehaviour
     public TextMeshProUGUI damageDealText;
     public TextMeshProUGUI damageTakenText;
     public TextMeshProUGUI goldText;
+    public TextMeshProUGUI spText;
     public Button restartButton;
     public Button titleButton;
     public List<GameObject> resultImage;
+
+    [Header("Result Tooltip UI")]
+    public GameObject resultStatsIconContainer;
+    public GameObject resultTooltipBox;
+    public TextMeshProUGUI resultTooltipText;
+    public TextMeshProUGUI totalSpText;
+    public List<ResultTooltipIcon> resultTooltipIcons = new List<ResultTooltipIcon>();
 
     [Header("Turn Order UI")]
     public TurnOrderUI turnOrderUI;
@@ -62,6 +70,8 @@ public class BattleUIManager : MonoBehaviour
 
         // 시작할 땐 결과창 끄기
         if (resultPanel != null) resultPanel.SetActive(false);
+        ConfigureResultTooltipIcons();
+        SetResultTooltipVisible(false);
 
         UpdatePPUI();
         UpdateDeckAndDiscardCountUI();
@@ -255,26 +265,22 @@ public class BattleUIManager : MonoBehaviour
             // 승리 시 효과음 재생 (나중에 SoundManager 연결)
 
             // TODO_juwan: 승리 시 집계된 데이터 표시
-            if (GameManager.Instance.currentNodeType == NodeType.Boss)
+            if (GameManager.Instance != null && GameManager.Instance.currentNodeType == NodeType.Boss)
             {
-                damageDealText.gameObject.SetActive(true);
-                damageTakenText.gameObject.SetActive(true);
+                SetTextActive(damageDealText, true);
+                SetTextActive(damageTakenText, true);
 
-                goldText.gameObject.SetActive(true);
-                titleButton.gameObject.SetActive(true);
-                restartButton.gameObject.SetActive(false);
-                damageDealText.text = $"입힌 피해량: {BattleManager.Instance.totalDamageDeal}";
-                damageTakenText.text = $"입은 피해량: {BattleManager.Instance.totalDamageTaken}";
-
-                goldText.text = $"골드: {GameManager.Instance.gold}";
+                SetTextActive(goldText, true);
+                SetButtonActive(titleButton, true);
+                SetButtonActive(restartButton, false);
             }
             else
             {
-                damageDealText.gameObject.SetActive(false);
-                damageTakenText.gameObject.SetActive(false);
+                SetTextActive(damageDealText, false);
+                SetTextActive(damageTakenText, false);
 
-                goldText.gameObject.SetActive(false);
-                titleButton.gameObject.SetActive(false);
+                SetTextActive(goldText, false);
+                SetButtonActive(titleButton, false);
             }
         }
         else
@@ -282,18 +288,175 @@ public class BattleUIManager : MonoBehaviour
 
 
             //TODO_juwan: 게임 오버 시 집계된 데이터 표시
-            damageDealText.gameObject.SetActive(true);
-            damageTakenText.gameObject.SetActive(true);
+            SetTextActive(damageDealText, true);
+            SetTextActive(damageTakenText, true);
 
-            goldText.gameObject.SetActive(true);
-            titleButton.gameObject.SetActive(true);
-            restartButton.gameObject.SetActive(false);
-            damageDealText.text = $"입힌 피해량: {BattleManager.Instance.totalDamageDeal}";
+            SetTextActive(goldText, true);
+            SetButtonActive(titleButton, true);
+            SetButtonActive(restartButton, false);
+        }
 
-            damageTakenText.text = $"입은 피해량: {BattleManager.Instance.totalDamageTaken}";
+        bool shouldShowBattleStats = !isWin || (GameManager.Instance != null && GameManager.Instance.currentNodeType == NodeType.Boss);
+        ConfigureResultTooltipIcons();
+        SetResultStatsVisible(shouldShowBattleStats);
+        RefreshResultStatsUI();
+        SetResultTooltipVisible(false);
+    }
 
+    private void ConfigureResultTooltipIcons()
+    {
+        if (resultTooltipIcons == null)
+        {
+            resultTooltipIcons = new List<ResultTooltipIcon>();
+        }
 
-            goldText.text = $"골드: {GameManager.Instance.gold}";
+        resultTooltipIcons.RemoveAll(icon => icon == null);
+
+        if (resultStatsIconContainer != null)
+        {
+            ResultTooltipIcon[] iconsInContainer = resultStatsIconContainer.GetComponentsInChildren<ResultTooltipIcon>(true);
+            foreach (ResultTooltipIcon icon in iconsInContainer)
+            {
+                if (icon != null && !resultTooltipIcons.Contains(icon))
+                {
+                    resultTooltipIcons.Add(icon);
+                }
+            }
+        }
+
+        foreach (ResultTooltipIcon icon in resultTooltipIcons)
+        {
+            if (icon == null) continue;
+            icon.Configure(resultTooltipBox, resultTooltipText);
+        }
+    }
+
+    private void SetResultStatsVisible(bool isVisible)
+    {
+        if (resultStatsIconContainer != null)
+        {
+            resultStatsIconContainer.SetActive(isVisible);
+        }
+
+        bool hasTooltipIcons = resultTooltipIcons != null && resultTooltipIcons.Count > 0;
+        bool showLegacyText = isVisible && !hasTooltipIcons;
+
+        SetLegacyResultTextActive(damageDealText, showLegacyText);
+        SetLegacyResultTextActive(damageTakenText, showLegacyText);
+        SetLegacyResultTextActive(goldText, showLegacyText);
+        SetLegacyResultTextActive(spText, showLegacyText);
+
+        if (resultTooltipIcons != null)
+        {
+            foreach (ResultTooltipIcon icon in resultTooltipIcons)
+            {
+                if (icon == null) continue;
+                icon.gameObject.SetActive(isVisible);
+            }
+        }
+
+        if (!isVisible)
+        {
+            SetResultTooltipVisible(false);
+        }
+    }
+
+    private void RefreshResultStatsUI()
+    {
+        GameManager gameManager = GameManager.Instance;
+        BattleManager battleManager = BattleManager.Instance;
+
+        int totalDamageDealt = battleManager != null ? battleManager.totalDamageDeal : gameManager != null ? gameManager.runTotalDamageDealt : 0;
+        int totalDamageTaken = battleManager != null ? battleManager.totalDamageTaken : gameManager != null ? gameManager.runTotalDamageTaken : 0;
+        int totalGoldEarned = battleManager != null ? battleManager.totalGoldEarned : gameManager != null ? gameManager.runTotalGoldEarned : 0;
+        int totalSpEarned = battleManager != null ? battleManager.totalSpEarned : gameManager != null ? gameManager.runTotalSpEarned : 0;
+
+        if (damageDealText != null)
+        {
+            damageDealText.text = $"{totalDamageDealt}";
+        }
+
+        if (damageTakenText != null)
+        {
+            damageTakenText.text = $"{totalDamageTaken}";
+        }
+
+        if (goldText != null)
+        {
+            goldText.text = $"{totalGoldEarned}";
+        }
+
+        if (totalSpText != null)
+        {
+            totalSpText.text = $"{totalSpEarned}";
+        }
+
+        if (spText != null)
+        {
+            spText.text = $"{totalSpEarned}";
+        }
+
+        ConfigureResultTooltipIcons();
+        if (resultTooltipIcons != null)
+        {
+            foreach (ResultTooltipIcon icon in resultTooltipIcons)
+            {
+                if (icon == null) continue;
+                icon.SetValue(GetResultStatValue(icon.statType, totalDamageDealt, totalDamageTaken, totalGoldEarned, totalSpEarned));
+            }
+        }
+    }
+
+    private int GetResultStatValue(ResultTooltipStatType statType, int damageDealt, int damageTaken, int goldEarned, int spEarned)
+    {
+        switch (statType)
+        {
+            case ResultTooltipStatType.DamageDealt:
+                return damageDealt;
+            case ResultTooltipStatType.DamageTaken:
+                return damageTaken;
+            case ResultTooltipStatType.Gold:
+                return goldEarned;
+            case ResultTooltipStatType.Sp:
+                return spEarned;
+            default:
+                return 0;
+        }
+    }
+
+    private void SetResultTooltipVisible(bool isVisible)
+    {
+        if (resultTooltipBox != null)
+        {
+            resultTooltipBox.SetActive(isVisible);
+        }
+    }
+
+    private void SetTextActive(TextMeshProUGUI text, bool isActive)
+    {
+        if (text != null)
+        {
+            text.gameObject.SetActive(isActive);
+        }
+    }
+
+    private void SetLegacyResultTextActive(TextMeshProUGUI text, bool isActive)
+    {
+        if (text == null) return;
+
+        if (resultStatsIconContainer != null && text.transform.IsChildOf(resultStatsIconContainer.transform))
+        {
+            return;
+        }
+
+        text.gameObject.SetActive(isActive);
+    }
+
+    private void SetButtonActive(Button button, bool isActive)
+    {
+        if (button != null)
+        {
+            button.gameObject.SetActive(isActive);
         }
     }
 

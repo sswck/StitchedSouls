@@ -48,6 +48,12 @@ public class GameManager : MonoBehaviour
     [Header("Reward System")]
     public List<CardData> allAvailableCards;
 
+    [Header("Run Statistics")]
+    public int runTotalDamageDealt;
+    public int runTotalDamageTaken;
+    public int runTotalGoldEarned;
+    public int runTotalSpEarned;
+
     private void Awake()
     {
         if (Instance == null)
@@ -88,6 +94,7 @@ public class GameManager : MonoBehaviour
 
         masterDeck.Clear();
         activeRelics.Clear();
+        ResetRunStatistics();
         if (startingDeck != null)
         {
             foreach (var card in startingDeck)
@@ -102,6 +109,38 @@ public class GameManager : MonoBehaviour
         currentMapData = MapGenerator.GenerateMap();
 
         LoadScene("MapScene");
+    }
+
+    public void ResetRunStatistics()
+    {
+        runTotalDamageDealt = 0;
+        runTotalDamageTaken = 0;
+        runTotalGoldEarned = 0;
+        runTotalSpEarned = 0;
+    }
+
+    public void RecordRunDamageDealt(int amount)
+    {
+        if (amount <= 0) return;
+        runTotalDamageDealt += amount;
+    }
+
+    public void RecordRunDamageTaken(int amount)
+    {
+        if (amount <= 0) return;
+        runTotalDamageTaken += amount;
+    }
+
+    public void RecordRunGoldEarned(int amount)
+    {
+        if (amount <= 0) return;
+        runTotalGoldEarned += amount;
+    }
+
+    public void RecordRunSpEarned(int amount)
+    {
+        if (amount <= 0) return;
+        runTotalSpEarned += amount;
     }
 
     public void CompleteStage()

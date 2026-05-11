@@ -28,3 +28,4 @@ MonoBehaviour:
   ultCharge: 30
   targetPattern: []
   cardImage: {fileID: 21300000, guid: 47c430defdb62834c8c2c46174735311, type: 3}
+  attackVFXType: 2

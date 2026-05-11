@@ -16,6 +16,14 @@ public enum TargetType
     AllAllies   // 아군 전체 (힐, PP 회복)
 }
 
+public enum AttackVFXType
+{
+    Default,
+    NormalAttack,
+    AllAttack,
+    Ultimate
+}
+
 [CreateAssetMenu(fileName = "New Card", menuName = "StitchedSouls/Card Data")]
 public class CardData : ScriptableObject
 {
@@ -54,4 +62,5 @@ public class CardData : ScriptableObject
 
     [Header("Visuals")]
     public Sprite cardImage;
+    public AttackVFXType attackVFXType = AttackVFXType.Default;
 }

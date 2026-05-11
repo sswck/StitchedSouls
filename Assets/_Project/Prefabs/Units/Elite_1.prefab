@@ -70,7 +70,7 @@ MonoBehaviour:
   hpBarOffset: {x: 0, y: 2.4, z: 0}
   playerHpBarOffset: {x: 0, y: 3.2, z: 0}
   currentShield: 0
-  hitVFXPrefab: {fileID: 4021103657954561961, guid: 5c755f9bc5253ea418e919994537dcc7, type: 3}
+  hitVFXPrefab: {fileID: 1429993768825323567, guid: 295fd7d31059e414183041073bfe9ab8, type: 3}
   playerHitVFXPrefab: {fileID: 0}
   defenseVFXPrefab: {fileID: 0}
   ppRecoveryVFXPrefab: {fileID: 0}

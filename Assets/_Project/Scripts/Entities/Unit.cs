@@ -40,6 +40,10 @@ public class Unit : MonoBehaviour
     [SpineAnimation] public string idleAnimName = "Idle";
     [SpineAnimation] public string attackAnimName = "attack_standing";
 
+    [Header("Attack Timing")]
+    [SerializeField] private float attackImpactDelay = 0.3f;
+    [SerializeField] private float attackRecoveryDelay = 0.5f;
+
     [Header("UI")]
     public Sprite activeIcon;   // 턴일 때 표시될 스프라이트
     public Sprite inactiveIcon; // 턴이 아닐 때 표시될 스프라이트
@@ -54,11 +58,27 @@ public class Unit : MonoBehaviour
     [Header("VFX Prefabs")]
     public GameObject hitVFXPrefab;
     public GameObject playerHitVFXPrefab;
+    public GameObject playerNormalAttackVFXPrefab;
+    public GameObject playerAllAttackVFXPrefab;
+    public GameObject playerUltimateAttackVFXPrefab;
+    public GameObject enemyAttackVFXPrefab;
     public GameObject defenseVFXPrefab;
     public GameObject ppRecoveryVFXPrefab;
     public GameObject damageBuffVFXPrefab;
+    public GameObject moveBuffVFXPrefab;
     
     private GameObject activeBuffVFX;
+    private GameObject activeMoveBuffVFX;
+
+    [Header("Ultimate Camera Shake")]
+    [SerializeField] private bool enableUltimateCameraShake = true;
+    [SerializeField] private float ultimateCameraShakeDuration = 0.35f;
+    [SerializeField] private float ultimateCameraShakeStrength = 0.25f;
+    [SerializeField] private int ultimateCameraShakeVibrato = 18;
+    [SerializeField] private float ultimateCameraShakeRandomness = 90f;
+    private static Tween cameraShakeTween;
+    private static Vector3 cameraShakeOriginalPosition;
+    private static bool hasCameraShakeOriginalPosition;
 
     [Header("Unit SFX")]
     // public AudioClip moveSFX;
@@ -159,6 +179,126 @@ public class Unit : MonoBehaviour
     {
         if (skeletonAnimation == null || string.IsNullOrEmpty(animName)) return;
         skeletonAnimation.AnimationState.SetAnimation(0, animName, loop);
+    }
+
+    private bool IsPlayerUnit()
+    {
+        return BattleManager.Instance != null && BattleManager.Instance.playerUnit == this;
+    }
+
+    private void SetVFXSortingOrder(GameObject vfx)
+    {
+        if (vfx == null) return;
+        foreach (var r in vfx.GetComponentsInChildren<Renderer>()) r.sortingOrder = 30;
+    }
+
+    private GameObject SpawnVFX(GameObject prefab, Vector3 position, Transform parent = null, float lifetime = 1.2f)
+    {
+        if (prefab == null) return null;
+
+        GameObject vfx = parent == null
+            ? Instantiate(prefab, position, Quaternion.identity)
+            : Instantiate(prefab, position, Quaternion.identity, parent);
+
+        SetVFXSortingOrder(vfx);
+
+        if (lifetime > 0f)
+        {
+            Destroy(vfx, lifetime);
+        }
+
+        return vfx;
+    }
+
+    private AttackVFXType ResolveAttackVFXType(CardData card, bool forceUltimate)
+    {
+        if (forceUltimate) return AttackVFXType.Ultimate;
+        if (card == null) return AttackVFXType.Default;
+        if (card.attackVFXType != AttackVFXType.Default) return card.attackVFXType;
+
+        return card.targetType == TargetType.AllEnemies
+            ? AttackVFXType.AllAttack
+            : AttackVFXType.NormalAttack;
+    }
+
+    private GameObject GetAttackVFXPrefab(CardData card, bool forceUltimate)
+    {
+        if (!IsPlayerUnit()) return enemyAttackVFXPrefab;
+
+        switch (ResolveAttackVFXType(card, forceUltimate))
+        {
+            case AttackVFXType.AllAttack:
+                return playerAllAttackVFXPrefab;
+            case AttackVFXType.Ultimate:
+                return playerUltimateAttackVFXPrefab;
+            case AttackVFXType.NormalAttack:
+            case AttackVFXType.Default:
+            default:
+                return playerNormalAttackVFXPrefab;
+        }
+    }
+
+    private void PlayUltimateCameraShake()
+    {
+        if (!enableUltimateCameraShake) return;
+
+        Camera mainCamera = Camera.main;
+        if (mainCamera == null) return;
+
+        Transform cameraTransform = mainCamera.transform;
+
+        cameraShakeTween?.Kill();
+        if (hasCameraShakeOriginalPosition)
+        {
+            cameraTransform.position = cameraShakeOriginalPosition;
+        }
+
+        cameraShakeOriginalPosition = cameraTransform.position;
+        hasCameraShakeOriginalPosition = true;
+
+        cameraShakeTween = cameraTransform
+            .DOShakePosition(
+                ultimateCameraShakeDuration,
+                ultimateCameraShakeStrength,
+                ultimateCameraShakeVibrato,
+                ultimateCameraShakeRandomness,
+                false,
+                true)
+            .OnKill(() =>
+            {
+                if (cameraTransform != null && hasCameraShakeOriginalPosition)
+                {
+                    cameraTransform.position = cameraShakeOriginalPosition;
+                }
+
+                hasCameraShakeOriginalPosition = false;
+                cameraShakeTween = null;
+            });
+    }
+
+    private void PlayAttackVFX(CardData card, List<Unit> targets, bool forceUltimate = false)
+    {
+        AttackVFXType vfxType = ResolveAttackVFXType(card, forceUltimate);
+        GameObject prefab = GetAttackVFXPrefab(card, forceUltimate);
+
+        if (IsPlayerUnit() && vfxType == AttackVFXType.Ultimate)
+        {
+            PlayUltimateCameraShake();
+        }
+
+        if (prefab == null) return;
+
+        if (targets == null || targets.Count == 0)
+        {
+            SpawnVFX(prefab, transform.position + Vector3.up * 1f);
+            return;
+        }
+
+        foreach (var target in targets)
+        {
+            if (target == null || !target.gameObject.activeInHierarchy) continue;
+            SpawnVFX(prefab, target.transform.position + Vector3.up * 1f);
+        }
     }
 
     private void SetFlip(bool isLeft)
@@ -277,6 +417,11 @@ public class Unit : MonoBehaviour
             {
                 maxMovePoints -= moveBonus;
                 moveBonus = 0;
+                if (activeMoveBuffVFX != null)
+                {
+                    Destroy(activeMoveBuffVFX);
+                    activeMoveBuffVFX = null;
+                }
             }
         }
 
@@ -318,12 +463,12 @@ public class Unit : MonoBehaviour
         }
     }
 
-    public void PerformAction(CardData card, Sequence seq)
+    public void PerformAction(CardData card, Sequence seq, bool forceUltimateVFX = false)
     {
         switch (card.targetType)
         {
             case TargetType.Pattern:
-                AttackPattern(card, seq);
+                AttackPattern(card, seq, forceUltimateVFX);
                 break;
             case TargetType.Self:
                 if (seq != null)
@@ -334,12 +479,12 @@ public class Unit : MonoBehaviour
                 else ApplyEffect(this, card);
                 break;
             case TargetType.AllEnemies:
-                AttackAllEnemies(card, seq);
+                AttackAllEnemies(card, seq, forceUltimateVFX);
                 break;
         }
     }
 
-    public void AttackPattern(CardData card, Sequence seq)
+    public void AttackPattern(CardData card, Sequence seq, bool forceUltimateVFX = false)
     {
         int direction = (skeletonAnimation != null && skeletonAnimation.Skeleton.ScaleX < 0) ? -1 : 1;
         // 적 유닛은 ScaleX가 반전되어 있으므로 direction 보정이 필요할 수 있음
@@ -374,23 +519,26 @@ public class Unit : MonoBehaviour
                     SoundManager.Instance.PlaySFX(attackSFX);
                 }
             });
-            seq.AppendInterval(0.3f);
+            seq.AppendInterval(attackImpactDelay);
             seq.AppendCallback(() => 
             {
+                PlayAttackVFX(card, validTargets, forceUltimateVFX);
                 foreach (var target in validTargets)
                 {
                     ApplyEffect(target, card);
                 }
             });
-            seq.AppendInterval(0.5f);
+            seq.AppendInterval(attackRecoveryDelay);
             seq.AppendCallback(() => PlayAnim(idleAnimName, true));
         }
     }
 
-    public void AttackAllEnemies(CardData card, Sequence seq)
+    public void AttackAllEnemies(CardData card, Sequence seq, bool forceUltimateVFX = false)
     {
         if (seq != null)
         {
+            List<Unit> validTargets = new List<Unit>();
+
             seq.AppendCallback(() =>
             {
                 PlayAnim(attackAnimName, false);
@@ -399,18 +547,26 @@ public class Unit : MonoBehaviour
                     SoundManager.Instance.PlaySFX(attackSFX);
                 }
             });
-            seq.AppendInterval(0.3f);
+            seq.AppendInterval(attackImpactDelay);
             seq.AppendCallback(() => 
             {
+                validTargets.Clear();
                 foreach (var unit in BattleManager.Instance.allUnits)
                 {
                     if (unit != this && unit.gameObject.activeInHierarchy)
                     {
-                        ApplyEffect(unit, card);
+                        validTargets.Add(unit);
                     }
                 }
+
+                PlayAttackVFX(card, validTargets, forceUltimateVFX);
+
+                foreach (var unit in validTargets)
+                {
+                    ApplyEffect(unit, card);
+                }
             });
-            seq.AppendInterval(0.5f);
+            seq.AppendInterval(attackRecoveryDelay);
             seq.AppendCallback(() => PlayAnim(idleAnimName, true));
         }
     }
@@ -548,15 +704,11 @@ public class Unit : MonoBehaviour
 
         if (isPlayer && playerHitVFXPrefab != null)
         {
-            GameObject vfx = Instantiate(playerHitVFXPrefab, transform.position + Vector3.up * 1f, Quaternion.identity);
-            foreach (var r in vfx.GetComponentsInChildren<Renderer>()) r.sortingOrder = 30;
-            Destroy(vfx, 1.2f);
+            SpawnVFX(playerHitVFXPrefab, transform.position + Vector3.up * 1f);
         }
         else if (!isPlayer && hitVFXPrefab != null)
         {
-            GameObject vfx = Instantiate(hitVFXPrefab, transform.position + Vector3.up * 1f, Quaternion.identity);
-            foreach (var r in vfx.GetComponentsInChildren<Renderer>()) r.sortingOrder = 30;
-            Destroy(vfx, 1.2f);
+            SpawnVFX(hitVFXPrefab, transform.position + Vector3.up * 1f);
         }
 
         if (skeletonAnimation != null)
@@ -591,8 +743,7 @@ public class Unit : MonoBehaviour
 
         if (damageBuffVFXPrefab != null && activeBuffVFX == null)
         {
-            activeBuffVFX = Instantiate(damageBuffVFXPrefab, transform.position, Quaternion.identity, transform);
-            foreach (var r in activeBuffVFX.GetComponentsInChildren<Renderer>()) r.sortingOrder = 30;
+            activeBuffVFX = SpawnVFX(damageBuffVFXPrefab, transform.position, transform, 0f);
         }
     }
 
@@ -602,6 +753,11 @@ public class Unit : MonoBehaviour
         moveBuffDuration = duration;
         maxMovePoints += amount;
         currentMovePoints += amount;
+
+        if (moveBuffVFXPrefab != null && activeMoveBuffVFX == null)
+        {
+            activeMoveBuffVFX = SpawnVFX(moveBuffVFXPrefab, transform.position, transform, 0f);
+        }
 
         // [추가] 버프 적용 시 이동력 UI 갱신
         if (BattleManager.Instance != null && this == BattleManager.Instance.playerUnit)
@@ -665,10 +821,14 @@ public class Unit : MonoBehaviour
                 SoundManager.Instance.PlaySFX(attackSFX);
             }
 
-            DOVirtual.DelayedCall(0.3f, () => {
-                if(target != null) target.TakeDamage(7);
+            DOVirtual.DelayedCall(attackImpactDelay, () => {
+                if(target != null)
+                {
+                    PlayAttackVFX(null, new List<Unit> { target });
+                    target.TakeDamage(7);
+                }
             });
-            DOVirtual.DelayedCall(0.8f, () => PlayAnim(idleAnimName, true));
+            DOVirtual.DelayedCall(attackImpactDelay + attackRecoveryDelay, () => PlayAnim(idleAnimName, true));
         }
         else
         {

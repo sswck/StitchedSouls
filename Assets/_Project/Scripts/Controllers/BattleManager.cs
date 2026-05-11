@@ -53,6 +53,8 @@ public class BattleManager : MonoBehaviour
     public int totalDamageDeal;
     public int totalDamageTaken;
     public int totalDamageBlocked;
+    public int totalGoldEarned;
+    public int totalSpEarned;
 
     private bool isBattleEnded = false;
 
@@ -71,7 +73,7 @@ public class BattleManager : MonoBehaviour
     void Start()
     {
         state = BattleState.Start;
-        // ResetBattleStatistics();
+        ResetBattleStatistics();
 
         if (AnchorGridManager.Instance != null)
             AnchorGridManager.Instance.GenerateGrid();
@@ -649,7 +651,7 @@ public class BattleManager : MonoBehaviour
         Debug.Log($"🔥 궁극기 발동!! [{playerUnit.unitName}]의 <{playerUnit.ultimateSkillCard.cardName}>!!");
 
         Sequence ultSeq = DOTween.Sequence();
-        playerUnit.PerformAction(playerUnit.ultimateSkillCard, ultSeq);
+        playerUnit.PerformAction(playerUnit.ultimateSkillCard, ultSeq, true);
     }
 
     public void PreviewCardRange(CardData card)
@@ -737,30 +739,35 @@ public class BattleManager : MonoBehaviour
         }
 
         Debug.Log("🎉 VICTORY! 모든 적을 처치했습니다.");
+
+        if (GameManager.Instance != null)
+        {
+            int spReward;
+            if (GameManager.Instance.currentNodeType == NodeType.Elite)
+                spReward = 2;
+            else if (GameManager.Instance.currentNodeType == NodeType.Boss)
+                spReward = 3;
+            else
+                spReward = 1;
+
+            int spBeforeReward = GameManager.Instance.currentSp;
+            GameManager.Instance.currentSp = Mathf.Min(GameManager.Instance.currentSp + spReward, GameManager.Instance.maxSp);
+            RecordSpEarned(GameManager.Instance.currentSp - spBeforeReward);
+
+            goldReward = 0;
+            if (GameManager.Instance.currentNodeType == NodeType.Elite)
+                goldReward = 50; // 엘리트 전투 보상
+            else if (GameManager.Instance.currentNodeType == NodeType.Boss)
+                goldReward = 100; // 보스 전투 보상
+            else
+                goldReward = 20; // 일반 전투 보상
+
+            GameManager.Instance.gold += goldReward;
+            RecordGoldEarned(goldReward);
+        }
+
         BattleUIManager.Instance.ShowResultUI(true);
         BattleUIManager.Instance.resultImage[0].SetActive(true);
-
-        // sp 획득 로직
-        //일반: +1, 엘리트: +2, 보스: +3
-        if (GameManager.Instance.currentNodeType == NodeType.Elite)
-            GameManager.Instance.currentSp += 2;
-        else if (GameManager.Instance.currentNodeType == NodeType.Boss)
-            GameManager.Instance.currentSp += 3;
-        else
-            GameManager.Instance.currentSp += 1;
-
-        GameManager.Instance.currentSp = Mathf.Min(GameManager.Instance.currentSp, GameManager.Instance.maxSp);
-
-        // 골드 보상 로직
-        goldReward = 0;
-        if (GameManager.Instance.currentNodeType == NodeType.Elite)
-            goldReward = 50; // 엘리트 전투 보상
-        else if (GameManager.Instance.currentNodeType == NodeType.Boss)
-            goldReward = 100; // 보스 전투 보상
-        else
-            goldReward = 20; // 일반 전투 보상
-
-        GameManager.Instance.gold += goldReward;
         // [수정] 결과창의 '확인/다음' 버튼이 누를 때 CompleteStage가 실행되도록 해야 함.
         // BattleUIManager의 OnRestartButton(또는 OnNextButton)을 수정해야 합니다.
     }
@@ -784,16 +791,47 @@ public class BattleManager : MonoBehaviour
     public void RecordDamageDeal(int amount)
     {
         totalDamageDeal += amount;
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.RecordRunDamageDealt(amount);
+        }
     }
 
     public void RecordDamageTaken(int amount)
     {
         totalDamageTaken += amount;
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.RecordRunDamageTaken(amount);
+        }
     }
 
     public void RecordDamageBlocked(int amount)
     {
+        if (amount <= 0) return;
         totalDamageBlocked += amount;
+    }
+
+    public void RecordGoldEarned(int amount)
+    {
+        if (amount <= 0) return;
+
+        totalGoldEarned += amount;
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.RecordRunGoldEarned(amount);
+        }
+    }
+
+    public void RecordSpEarned(int amount)
+    {
+        if (amount <= 0) return;
+
+        totalSpEarned += amount;
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.RecordRunSpEarned(amount);
+        }
     }
 
     private void ResetBattleStatistics()
@@ -801,6 +839,8 @@ public class BattleManager : MonoBehaviour
         totalDamageDeal = 0;
         totalDamageTaken = 0;
         totalDamageBlocked = 0;
+        totalGoldEarned = 0;
+        totalSpEarned = 0;
     }
 
     public void UpdateUnitTransparencies()
