@@ -18,7 +18,15 @@ MonoBehaviour:
   cardType: 0
   targetType: 0
   ppCost: 0
+  healHP: 0
+  healPP: 0
+  nextTurnHealHP: 0
+  nextTurnHealPP: 0
+  block: 0
+  isMissingHPBlock: 0
   value: 5
+  ultCharge: 0
   targetPattern:
   - {x: 1, y: 0}
   cardImage: {fileID: 21300000, guid: 79f4f803dc26ddc4c93a0cc5a275e280, type: 3}
+  attackVFXType: 1

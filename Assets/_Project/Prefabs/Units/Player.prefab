@@ -124,10 +124,10 @@ MonoBehaviour:
   playerHpBarOffset: {x: 1, y: 8.5, z: 0}
   currentShield: 0
   hitVFXPrefab: {fileID: 0}
-  playerHitVFXPrefab: {fileID: 5880797563127281583, guid: 265d3a5ba69981a4698ceabcedf368b0, type: 3}
-  defenseVFXPrefab: {fileID: 4772634663576830964, guid: e1385af346f4e624eb313ec1ea4fcd7e, type: 3}
-  ppRecoveryVFXPrefab: {fileID: 3280519133390621005, guid: a71be3e7990efb040a07565c43cbb198, type: 3}
-  damageBuffVFXPrefab: {fileID: 2708598583397607911, guid: 6398d43fe79ea0140913dc5530c646af, type: 3}
+  playerHitVFXPrefab: {fileID: 2642749838293771946, guid: 1e4a7160d9d435b458b32b9b02ca82dd, type: 3}
+  defenseVFXPrefab: {fileID: 1212980118294100308, guid: 6d353064ae9302d41848d438378fb879, type: 3}
+  ppRecoveryVFXPrefab: {fileID: 1212980118294100308, guid: 6dd7ef69fe9522449a864b0d8e043a90, type: 3}
+  damageBuffVFXPrefab: {fileID: 2569992915501827505, guid: 6f8f4290ec1f6e04e8ec91261b1a0948, type: 3}
   attackSFX: {fileID: 8300000, guid: de8a440e2e3522b4d86a80d3d700af75, type: 3}
 --- !u!1 &4341159343127094587
 GameObject:
