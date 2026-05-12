@@ -131,6 +131,7 @@ public class SettingManager : MonoBehaviour
         if (SoundManager.Instance != null)
         {
             SoundManager.Instance.SetBGMVolume(value);
+            SoundManager.Instance.SetSFXVolume(value);  // BGM과 SFX 볼륨을 함께 조절하도록 설정(추후 분리 후 마스터 기능 추가 예정)
         }
     }
 }
