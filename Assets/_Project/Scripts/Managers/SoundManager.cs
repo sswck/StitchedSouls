@@ -57,6 +57,11 @@ public class SoundManager : MonoBehaviour
         bgmPlayer.volume = volume;
     }
 
+    public void SetSFXVolume(float volume)
+    {
+        sfxPlayer.volume = volume;
+    }
+
     public void PlayBGM(AudioClip clip)
     {
         if (clip == null) return;

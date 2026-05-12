@@ -3,7 +3,13 @@ using System.Collections.Generic;
 
 public class RelicPanelUI : MonoBehaviour
 {
-    [SerializeField] private List<ItemSlotUI> relicSlots;
+    [Header("UI Objects")]
+    public GameObject popupPanel;
+    public GameObject openButton;
+    public Transform slotContainer;
+    public GameObject relicSlotPrefab;
+
+    private List<ItemSlotUI> spawnedSlots = new List<ItemSlotUI>();
 
     private void Start()
     {
@@ -12,6 +18,8 @@ public class RelicPanelUI : MonoBehaviour
             GameManager.Instance.OnRelicChanged += UpdateAllSlots;
             UpdateAllSlots();
         }
+
+        ClosePopup();
     }
 
     private void OnDestroy()
@@ -22,21 +30,43 @@ public class RelicPanelUI : MonoBehaviour
         }
     }
 
+    public void OpenPopup()
+    {
+        if (popupPanel != null)
+        {
+            openButton.SetActive(false);
+            popupPanel.SetActive(true);
+            UpdateAllSlots();
+        }
+    }
+
+    public void ClosePopup()
+    {
+        if (popupPanel != null) {
+            popupPanel.SetActive(false);
+            openButton.SetActive(true);
+        }
+    }
+
     public void UpdateAllSlots()
     {
-        if (GameManager.Instance == null) return;
+        if (GameManager.Instance == null || slotContainer == null) return;
+
+        foreach (var slot in spawnedSlots)
+        {
+            if (slot != null) Destroy(slot.gameObject);
+        }
+        spawnedSlots.Clear();
         
         List<ItemData> relics = GameManager.Instance.activeRelics;
-        
-        for (int i = 0; i < relicSlots.Count; i++)
+        foreach (var relic in relics)
         {
-            if (i < relics.Count)
+            GameObject go = Instantiate(relicSlotPrefab, slotContainer);
+            ItemSlotUI slotUI = go.GetComponent<ItemSlotUI>();
+            if (slotUI != null)
             {
-                relicSlots[i].UpdateSlot(relics[i]);
-            }
-            else
-            {
-                relicSlots[i].UpdateSlot(null);
+                slotUI.UpdateSlot(relic);
+                spawnedSlots.Add(slotUI);
             }
         }
     }
