@@ -106,6 +106,7 @@ MonoBehaviour:
   maxMovePoints: 2
   currentMovePoints: 0
   damageBuff: 0
+  damageMultiplier: 1
   ultimateSkillCard: {fileID: 11400000, guid: b686012e5f8ac1c43bda89f9fe5bbfbb, type: 2}
   damageBuffDuration: 0
   moveBonus: 0
@@ -137,6 +138,7 @@ MonoBehaviour:
   ppRecoveryVFXPrefab: {fileID: 544098064047111422, guid: 0dd0b9a4b9d4d30449985aee6c911e17, type: 3}
   damageBuffVFXPrefab: {fileID: 1212980118294100308, guid: 627d05d2e1447394f9b37a0f9fed84dd, type: 3}
   moveBuffVFXPrefab: {fileID: 1212980118294100308, guid: 627d05d2e1447394f9b37a0f9fed84dd, type: 3}
+  increaseStrVFXPrefab: {fileID: 1212980118294100308, guid: 627d05d2e1447394f9b37a0f9fed84dd, type: 3}
   spawnAttackVFXOnAttacker: 1
   flipAttackVFXWithDirection: 1
   enableUltimateCameraShake: 1

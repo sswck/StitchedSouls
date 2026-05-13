@@ -583,9 +583,7 @@ public class BattleManager : MonoBehaviour
 
                 if (healItemVFXPrefab != null && playerUnit != null)
                 {
-                    GameObject vfx = Instantiate(healItemVFXPrefab, playerUnit.transform.position + Vector3.up * 1f, Quaternion.identity);
-                    foreach (var r in vfx.GetComponentsInChildren<Renderer>()) r.sortingOrder = 30;
-                    Destroy(vfx, 1.2f);
+                    playerUnit.SpawnVFX(healItemVFXPrefab, playerUnit.transform.position, playerUnit.transform, 1.2f);
                 }
                 break;
             case ItemEffectType.HealSP:
@@ -603,6 +601,10 @@ public class BattleManager : MonoBehaviour
                 break;
             case ItemEffectType.IncreaseStr:
                 playerUnit.damageMultiplier += 0.1f;
+                if (playerUnit.increaseStrVFXPrefab != null && playerUnit != null)
+                {
+                    playerUnit.SpawnVFX(playerUnit.increaseStrVFXPrefab, playerUnit.transform.position, playerUnit.transform, 1.2f);
+                }
                 Debug.Log($"플레이어의 공격 카드 데미지가 10% 증가합니다. (전투 종료 시까지 지속)");
                 break;
             case ItemEffectType.MaxMovePoints:
