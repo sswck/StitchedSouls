@@ -69,6 +69,7 @@ public class Unit : MonoBehaviour
     public GameObject ppRecoveryVFXPrefab;
     public GameObject damageBuffVFXPrefab;
     public GameObject moveBuffVFXPrefab;
+    public GameObject increaseStrVFXPrefab;
 
     [Header("Attack VFX Settings")]
     [Tooltip("체크하면 공격 VFX가 적 위치가 아닌 공격자(플레이어) 위치에서 한 번만 생성되어 궤적 연출에 적합합니다.")]
@@ -201,7 +202,7 @@ public class Unit : MonoBehaviour
         foreach (var r in vfx.GetComponentsInChildren<Renderer>()) r.sortingOrder = 30;
     }
 
-    private GameObject SpawnVFX(GameObject prefab, Vector3 position, Transform parent = null, float lifetime = 1.2f)
+    public GameObject SpawnVFX(GameObject prefab, Vector3 position, Transform parent = null, float lifetime = 1.2f)
     {
         if (prefab == null) return null;
 
