@@ -35,5 +35,5 @@ MonoBehaviour:
   - {x: -1, y: 0}
   - {x: -1, y: 1}
   - {x: -1, y: -1}
-  cardImage: {fileID: 21300000, guid: 79f4f803dc26ddc4c93a0cc5a275e280, type: 3}
+  cardImage: {fileID: 21300000, guid: 6920e28904b9e9546912e70f5d79efa0, type: 3}
   attackVFXType: 1

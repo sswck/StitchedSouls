@@ -29,5 +29,5 @@ MonoBehaviour:
   targetPattern:
   - {x: 1, y: 1}
   - {x: 1, y: -1}
-  cardImage: {fileID: 21300000, guid: 855dcaa5627c07d4ab28aa67077091e4, type: 3}
+  cardImage: {fileID: 21300000, guid: ea3c52b33587fe6419c8d0e98044df7d, type: 3}
   attackVFXType: 1

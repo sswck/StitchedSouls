@@ -28,5 +28,5 @@ MonoBehaviour:
   ultCharge: 0
   targetPattern:
   - {x: 1, y: 0}
-  cardImage: {fileID: 21300000, guid: 79f4f803dc26ddc4c93a0cc5a275e280, type: 3}
+  cardImage: {fileID: 21300000, guid: 37e395b8d601a2a46bcb376fdaf712d2, type: 3}
   attackVFXType: 1

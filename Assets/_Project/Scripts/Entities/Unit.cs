@@ -15,6 +15,7 @@ public class Unit : MonoBehaviour
     public int maxMovePoints = 2;
     public int currentMovePoints;
     public int damageBuff = 0;
+    public float damageMultiplier = 1.0f;
 
     [Header("Ultimate Skill")]
     public CardData ultimateSkillCard;
@@ -35,8 +36,8 @@ public class Unit : MonoBehaviour
     //[SerializeField] private float layerDepthStep = 0.1f; // sswck: 참조하는데가 없어 일단 주석처리했습니다
 
     [Header("Visual & Animation")]
-    [SerializeField] private SkeletonAnimation skeletonAnimation; 
-    
+    [SerializeField] private SkeletonAnimation skeletonAnimation;
+
     [SpineAnimation] public string idleAnimName = "Idle";
     [SpineAnimation] public string attackAnimName = "attack_standing";
 
@@ -54,6 +55,8 @@ public class Unit : MonoBehaviour
 
     [Header("Defense")]
     public int currentShield = 0;
+    public Sprite defenseImageSprite;
+    public Vector3 defenseImageRotation = Vector3.zero;
 
     [Header("VFX Prefabs")]
     public GameObject hitVFXPrefab;
@@ -66,7 +69,13 @@ public class Unit : MonoBehaviour
     public GameObject ppRecoveryVFXPrefab;
     public GameObject damageBuffVFXPrefab;
     public GameObject moveBuffVFXPrefab;
-    
+
+    [Header("Attack VFX Settings")]
+    [Tooltip("체크하면 공격 VFX가 적 위치가 아닌 공격자(플레이어) 위치에서 한 번만 생성되어 궤적 연출에 적합합니다.")]
+    public bool spawnAttackVFXOnAttacker = false;
+    [Tooltip("체크하면 플레이어가 왼쪽을 바라볼 때 공격 VFX를 좌우 반전(Y축 180도 회전)시킵니다.")]
+    public bool flipAttackVFXWithDirection = true;
+
     private GameObject activeBuffVFX;
     private GameObject activeMoveBuffVFX;
 
@@ -95,14 +104,14 @@ public class Unit : MonoBehaviour
     public void SetTransparency(float targetAlpha)
     {
         if (Mathf.Approximately(currentAlpha, targetAlpha)) return;
-        
+
         currentAlpha = targetAlpha;
 
         if (skeletonAnimation != null)
         {
             alphaTweener?.Kill();
             Color color = skeletonAnimation.skeleton.GetColor();
-            alphaTweener = DOTween.To(() => color.a, x => 
+            alphaTweener = DOTween.To(() => color.a, x =>
             {
                 color.a = x;
                 skeletonAnimation.skeleton.SetColor(color);
@@ -197,8 +206,11 @@ public class Unit : MonoBehaviour
         if (prefab == null) return null;
 
         GameObject vfx = parent == null
-            ? Instantiate(prefab, position, Quaternion.identity)
-            : Instantiate(prefab, position, Quaternion.identity, parent);
+            ? Instantiate(prefab, position, prefab.transform.rotation)
+            : Instantiate(prefab, position, prefab.transform.rotation, parent);
+
+        // [수정] 부모의 회전과 상관없이 프리팹에 설정된 '로컬 회전값'을 그대로 적용
+        vfx.transform.localRotation = prefab.transform.rotation;
 
         SetVFXSortingOrder(vfx);
 
@@ -281,23 +293,64 @@ public class Unit : MonoBehaviour
         AttackVFXType vfxType = ResolveAttackVFXType(card, forceUltimate);
         GameObject prefab = GetAttackVFXPrefab(card, forceUltimate);
 
+        int direction = 1;
+        if (skeletonAnimation != null)
+        {
+            bool isPlayer = BattleManager.Instance != null && BattleManager.Instance.playerUnit == this;
+            direction = isPlayer ? (skeletonAnimation.Skeleton.ScaleX < 0 ? -1 : 1) : (skeletonAnimation.Skeleton.ScaleX > 0 ? -1 : 1);
+        }
+
         if (IsPlayerUnit() && vfxType == AttackVFXType.Ultimate)
         {
             PlayUltimateCameraShake();
+
+            // [수정] 궁극기 VFX는 플레이어 두 칸 앞에서 한 번만 재생
+            if (prefab != null)
+            {
+                int frontX = gridX + (direction * 2);
+                int frontY = gridY;
+
+                Vector3 spawnPos;
+                if (AnchorGridManager.Instance != null)
+                {
+                    // 그리드 범위를 벗어나지 않도록 보정 (필요 시)
+                    int targetX = Mathf.Clamp(frontX, 0, AnchorGridManager.Instance.width - 1);
+                    spawnPos = AnchorGridManager.Instance.GetTileCenterPosition(targetX, frontY);
+                }
+                else
+                {
+                    spawnPos = transform.position + new Vector3(direction * 2.2f, 0, 0);
+                }
+
+                GameObject vfx = SpawnVFX(prefab, spawnPos + Vector3.up * 1f);
+                if (vfx != null && direction < 0 && flipAttackVFXWithDirection)
+                {
+                    vfx.transform.localRotation *= Quaternion.Euler(0, 180f, 0);
+                }
+            }
+            return;
         }
 
         if (prefab == null) return;
 
-        if (targets == null || targets.Count == 0)
+        if (targets == null || targets.Count == 0 || spawnAttackVFXOnAttacker)
         {
-            SpawnVFX(prefab, transform.position + Vector3.up * 1f);
+            GameObject vfx = SpawnVFX(prefab, transform.position + Vector3.up * 1f);
+            if (vfx != null && direction < 0 && flipAttackVFXWithDirection)
+            {
+                vfx.transform.localRotation *= Quaternion.Euler(0, 180f, 0);
+            }
             return;
         }
 
         foreach (var target in targets)
         {
             if (target == null || !target.gameObject.activeInHierarchy) continue;
-            SpawnVFX(prefab, target.transform.position + Vector3.up * 1f);
+            GameObject vfx = SpawnVFX(prefab, target.transform.position + Vector3.up * 1f);
+            if (vfx != null && direction < 0 && flipAttackVFXWithDirection)
+            {
+                vfx.transform.localRotation *= Quaternion.Euler(0, 180f, 0);
+            }
         }
     }
 
@@ -336,8 +389,8 @@ public class Unit : MonoBehaviour
         if (hpBar != null && GameManager.Instance != null)
         {
             bool isPlayer = BattleManager.Instance != null && BattleManager.Instance.playerUnit == this;
-            
-            hpBar.ShowPPBar(isPlayer); 
+
+            hpBar.ShowPPBar(isPlayer);
             if (isPlayer)
             {
                 hpBar.SetPP(GameManager.Instance.currentPP, GameManager.Instance.maxPP);
@@ -376,8 +429,8 @@ public class Unit : MonoBehaviour
         gridY = targetY;
         currentMovePoints--;
 
-        Vector3 targetPos = AnchorGridManager.Instance != null 
-            ? AnchorGridManager.Instance.GetTileCenterPosition(gridX, gridY) 
+        Vector3 targetPos = AnchorGridManager.Instance != null
+            ? AnchorGridManager.Instance.GetTileCenterPosition(gridX, gridY)
             : new Vector3(gridX * 1.1f, 0.5f, gridY * 1.1f);
         targetPos += tilePositionOffset;
 
@@ -449,7 +502,7 @@ public class Unit : MonoBehaviour
         {
             GameManager.Instance.currentPP = Mathf.Min(GameManager.Instance.currentPP + pendingHealPP, GameManager.Instance.maxPP);
             pendingHealPP = 0;
-            
+
             if (BattleUIManager.Instance != null) BattleUIManager.Instance.UpdatePPUI();
             UpdatePPBar();
         }
@@ -498,7 +551,7 @@ public class Unit : MonoBehaviour
             foreach (Vector2Int offset in card.targetPattern)
             {
                 int checkX = gridX + (offset.x * direction);
-                int checkY = gridY + offset.y; 
+                int checkY = gridY + offset.y;
 
                 Unit target = BattleManager.Instance.GetUnitAt(checkX, checkY);
                 if (target != null && target != this)
@@ -520,7 +573,7 @@ public class Unit : MonoBehaviour
                 }
             });
             seq.AppendInterval(attackImpactDelay);
-            seq.AppendCallback(() => 
+            seq.AppendCallback(() =>
             {
                 PlayAttackVFX(card, validTargets, forceUltimateVFX);
                 foreach (var target in validTargets)
@@ -548,7 +601,7 @@ public class Unit : MonoBehaviour
                 }
             });
             seq.AppendInterval(attackImpactDelay);
-            seq.AppendCallback(() => 
+            seq.AppendCallback(() =>
             {
                 validTargets.Clear();
                 foreach (var unit in BattleManager.Instance.allUnits)
@@ -602,10 +655,7 @@ public class Unit : MonoBehaviour
 
             if (target.ppRecoveryVFXPrefab != null)
             {
-                GameObject vfx = Instantiate(target.ppRecoveryVFXPrefab, target.transform.position, Quaternion.identity);
-                // 2D 환경에서 파티클이 캐릭터 뒤에 가려지는 현상 방지
-                foreach (var r in vfx.GetComponentsInChildren<Renderer>()) r.sortingOrder = 30;
-                Destroy(vfx, 1.2f);
+                target.SpawnVFX(target.ppRecoveryVFXPrefab, target.transform.position + Vector3.up * 1f);
             }
         }
 
@@ -628,7 +678,7 @@ public class Unit : MonoBehaviour
             target.AddShield(blockGain);
         }
     }
-    
+
     public void AddShield(int amount)
     {
         if (amount <= 0) return;
@@ -643,9 +693,29 @@ public class Unit : MonoBehaviour
 
         if (defenseVFXPrefab != null)
         {
-            GameObject vfx = Instantiate(defenseVFXPrefab, transform.position, Quaternion.identity);
-            foreach (var r in vfx.GetComponentsInChildren<Renderer>()) r.sortingOrder = 30;
-            Destroy(vfx, 1.2f);
+            SpawnVFX(defenseVFXPrefab, transform.position + Vector3.up * 1f);
+        }
+
+        if (defenseImageSprite != null)
+        {
+            GameObject effectGo = new GameObject("DefenseImageEffect");
+            effectGo.transform.position = transform.position + Vector3.up * 1f;
+            effectGo.transform.rotation = Quaternion.Euler(defenseImageRotation);
+            SpriteRenderer sr = effectGo.AddComponent<SpriteRenderer>();
+            sr.sprite = defenseImageSprite;
+            sr.sortingOrder = 50; // 다른 이펙트들보다 앞에 오도록 설정
+
+            Color startColor = Color.white;
+            startColor.a = 0f;
+            sr.color = startColor;
+
+            // 나타났다가 사라지는 연출 (크기 변화 + 페이드)
+            Sequence seq = DOTween.Sequence();
+            seq.Append(effectGo.transform.DOScale(0.7f, 0.7f).From(0.8f).SetEase(Ease.OutQuad));
+            seq.Join(sr.DOFade(0.7f, 0.2f)); // 70% 불투명도로 나타남
+            seq.AppendInterval(0.2f);
+            seq.Append(sr.DOFade(0f, 0.3f)); // 다시 투명해지며 사라짐
+            seq.OnComplete(() => Destroy(effectGo));
         }
 
         // UI 애니메이션 업데이트 호출
@@ -672,7 +742,7 @@ public class Unit : MonoBehaviour
                 // 방어도로 피해를 완벽히 막아낸 경우
                 currentShield -= finalDamage;
                 Debug.Log($"🛡️ [{unitName}] 방어도로 공격 완벽 차단! (들어온 피해: {finalDamage} / 남은 방어도: {currentShield})");
-                finalDamage = 0; 
+                finalDamage = 0;
             }
             else
             {
@@ -684,7 +754,7 @@ public class Unit : MonoBehaviour
             // 쉴드 변경 적용
             if (hpBar != null) hpBar.UpdateShieldUI(currentShield);
         }
-        
+
         if (isPlayer)
         {
             BattleManager.Instance.RecordDamageTaken(finalDamage);
@@ -718,8 +788,8 @@ public class Unit : MonoBehaviour
             Color baseColor = Color.white;
             baseColor.a = currentAlpha;
 
-            DOTween.To(() => skeletonAnimation.skeleton.GetColor(), 
-                       x => skeletonAnimation.skeleton.SetColor(x), 
+            DOTween.To(() => skeletonAnimation.skeleton.GetColor(),
+                       x => skeletonAnimation.skeleton.SetColor(x),
                        hitColor, 0.1f)
                    .SetLoops(2, LoopType.Yoyo)
                    .OnComplete(() => skeletonAnimation.skeleton.SetColor(baseColor));
@@ -735,14 +805,18 @@ public class Unit : MonoBehaviour
         UpdateHPBar();
     }
 
+
+
     public void ApplyDamageBuff(int amount, int duration)
     {
         damageBuff = amount;
         damageBuffDuration = duration;
         transform.DOScale(transform.localScale * 1.1f, 0.2f).SetLoops(2, LoopType.Yoyo);
 
-        if (damageBuffVFXPrefab != null && activeBuffVFX == null)
+        if (damageBuffVFXPrefab != null)
         {
+            if (activeBuffVFX != null) Destroy(activeBuffVFX);
+            // [수정] 프리팹 설정대로 재생
             activeBuffVFX = SpawnVFX(damageBuffVFXPrefab, transform.position, transform, 0f);
         }
     }
@@ -754,8 +828,10 @@ public class Unit : MonoBehaviour
         maxMovePoints += amount;
         currentMovePoints += amount;
 
-        if (moveBuffVFXPrefab != null && activeMoveBuffVFX == null)
+        if (moveBuffVFXPrefab != null)
         {
+            if (activeMoveBuffVFX != null) Destroy(activeMoveBuffVFX);
+            // [수정] 프리팹 설정대로 재생
             activeMoveBuffVFX = SpawnVFX(moveBuffVFXPrefab, transform.position, transform, 0f);
         }
 
@@ -776,13 +852,13 @@ public class Unit : MonoBehaviour
         if (isWallHit || obstacle != null)
         {
             transform.DOShakePosition(0.5f, 0.5f, 20, 90);
-            TakeDamage(10); 
+            TakeDamage(10);
             return;
         }
 
         gridX = nextX;
         gridY = nextY;
-        Vector3 targetPos = AnchorGridManager.Instance != null 
+        Vector3 targetPos = AnchorGridManager.Instance != null
             ? AnchorGridManager.Instance.GetTileCenterPosition(gridX, gridY)
             : new Vector3(gridX * 1.1f, 0.5f, gridY * 1.1f);
         targetPos += tilePositionOffset;
@@ -821,8 +897,9 @@ public class Unit : MonoBehaviour
                 SoundManager.Instance.PlaySFX(attackSFX);
             }
 
-            DOVirtual.DelayedCall(attackImpactDelay, () => {
-                if(target != null)
+            DOVirtual.DelayedCall(attackImpactDelay, () =>
+            {
+                if (target != null)
                 {
                     PlayAttackVFX(null, new List<Unit> { target });
                     target.TakeDamage(7);
