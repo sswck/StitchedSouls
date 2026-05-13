@@ -25,5 +25,7 @@ MonoBehaviour:
   block: 0
   isMissingHPBlock: 1
   value: 0
+  ultCharge: 0
   targetPattern: []
-  cardImage: {fileID: 21300000, guid: 226d1176a133fcf47ab7aee189e73a99, type: 3}
+  cardImage: {fileID: 21300000, guid: d196a8024a744f840a7e597b9a78f288, type: 3}
+  attackVFXType: 0

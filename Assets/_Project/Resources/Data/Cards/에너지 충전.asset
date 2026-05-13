@@ -22,6 +22,10 @@ MonoBehaviour:
   healPP: 0
   nextTurnHealHP: 2
   nextTurnHealPP: 2
+  block: 0
+  isMissingHPBlock: 0
   value: 0
+  ultCharge: 0
   targetPattern: []
-  cardImage: {fileID: 21300000, guid: a9a90890a631d48478160e92cb49ca0d, type: 3}
+  cardImage: {fileID: 21300000, guid: 0dfea62d3c5e0d049aba746e4bc3ada0, type: 3}
+  attackVFXType: 0

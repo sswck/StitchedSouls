@@ -601,6 +601,10 @@ public class BattleManager : MonoBehaviour
                 playerUnit.ApplyDamageBuff(item.value, 3);
                 Debug.Log($"플레이어의 데미지가 {item.value} 만큼 증가합니다. (3턴 지속)");
                 break;
+            case ItemEffectType.IncreaseStr:
+                playerUnit.damageMultiplier += 0.1f;
+                Debug.Log($"플레이어의 공격 카드 데미지가 10% 증가합니다. (전투 종료 시까지 지속)");
+                break;
             case ItemEffectType.MaxMovePoints:
                 playerUnit.ApplyMoveBuff(item.value, 2);
                 Debug.Log($"플레이어의 이동 횟수가 {item.value} 만큼 증가합니다. (2턴 지속)");

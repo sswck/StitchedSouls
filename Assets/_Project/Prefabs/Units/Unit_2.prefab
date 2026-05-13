@@ -219,17 +219,29 @@ MonoBehaviour:
   skeletonAnimation: {fileID: 2767940222178672164}
   idleAnimName: E_02_attack_standing
   attackAnimName: E_02_attack
+  attackImpactDelay: 0.3
+  attackRecoveryDelay: 0.5
   activeIcon: {fileID: -1474840885, guid: 0cf3099878259ec49a6e85a29c751a53, type: 3}
   inactiveIcon: {fileID: 526239568, guid: 82a20ebbe5e2b51468f483f2f4feeb20, type: 3}
   hpBarPrefab: {fileID: 98269044502590925, guid: 94cfec57033a52c4bbb6c2cc0dac6724, type: 3}
   hpBarOffset: {x: 0, y: 3, z: 0}
   playerHpBarOffset: {x: 0, y: 3.2, z: 0}
   currentShield: 0
-  hitVFXPrefab: {fileID: 4575391735044251980, guid: c4ad25b5e8edb09499b444a66694678c, type: 3}
+  hitVFXPrefab: {fileID: 4021103657954561961, guid: 5c755f9bc5253ea418e919994537dcc7, type: 3}
   playerHitVFXPrefab: {fileID: 0}
+  playerNormalAttackVFXPrefab: {fileID: 0}
+  playerAllAttackVFXPrefab: {fileID: 0}
+  playerUltimateAttackVFXPrefab: {fileID: 0}
+  enemyAttackVFXPrefab: {fileID: 4575391735044251980, guid: c4ad25b5e8edb09499b444a66694678c, type: 3}
   defenseVFXPrefab: {fileID: 0}
   ppRecoveryVFXPrefab: {fileID: 0}
   damageBuffVFXPrefab: {fileID: 0}
+  moveBuffVFXPrefab: {fileID: 0}
+  enableUltimateCameraShake: 1
+  ultimateCameraShakeDuration: 0.35
+  ultimateCameraShakeStrength: 0.25
+  ultimateCameraShakeVibrato: 18
+  ultimateCameraShakeRandomness: 90
   attackSFX: {fileID: 8300000, guid: f1f3c78202aa92d45be9017c2334312a, type: 3}
 --- !u!1 &7250430457669874228
 GameObject:

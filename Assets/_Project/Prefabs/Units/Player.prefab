@@ -117,17 +117,33 @@ MonoBehaviour:
   skeletonAnimation: {fileID: 443071380893222028}
   idleAnimName: standing
   attackAnimName: attack_01
+  attackImpactDelay: 0.3
+  attackRecoveryDelay: 0.5
   activeIcon: {fileID: -760440691, guid: 7b38bb5b750bb254a803c1f88d7f9b68, type: 3}
   inactiveIcon: {fileID: -1510594635, guid: 30ef9bf58cbc470419c45538c040e55b, type: 3}
   hpBarPrefab: {fileID: 98269044502590925, guid: 9250afce0bd9f314c814cd4001ff0db0, type: 3}
   hpBarOffset: {x: 0, y: 2.5, z: 0}
   playerHpBarOffset: {x: 1, y: 8.5, z: 0}
   currentShield: 0
+  defenseImageSprite: {fileID: 21300000, guid: f585ebc08ebb97d44b7142e2f74dd164, type: 3}
+  defenseImageRotation: {x: 40, y: 0, z: 0}
   hitVFXPrefab: {fileID: 0}
-  playerHitVFXPrefab: {fileID: 2642749838293771946, guid: 1e4a7160d9d435b458b32b9b02ca82dd, type: 3}
-  defenseVFXPrefab: {fileID: 1212980118294100308, guid: 6d353064ae9302d41848d438378fb879, type: 3}
-  ppRecoveryVFXPrefab: {fileID: 1212980118294100308, guid: 6dd7ef69fe9522449a864b0d8e043a90, type: 3}
-  damageBuffVFXPrefab: {fileID: 2569992915501827505, guid: 6f8f4290ec1f6e04e8ec91261b1a0948, type: 3}
+  playerHitVFXPrefab: {fileID: 5880797563127281583, guid: 265d3a5ba69981a4698ceabcedf368b0, type: 3}
+  playerNormalAttackVFXPrefab: {fileID: 8010427548078772200, guid: cefc2ad3a7e30fd4a9e939f8c9e69b77, type: 3}
+  playerAllAttackVFXPrefab: {fileID: 5419247265236760002, guid: 7674c434b873331489aad47dcee6be62, type: 3}
+  playerUltimateAttackVFXPrefab: {fileID: 5906528512390733978, guid: 01cb274b2b844e94cb935188143aa0e0, type: 3}
+  enemyAttackVFXPrefab: {fileID: 0}
+  defenseVFXPrefab: {fileID: 956972627074513070, guid: 5ee95e2f6d66e754faf257b6b887f266, type: 3}
+  ppRecoveryVFXPrefab: {fileID: 544098064047111422, guid: 0dd0b9a4b9d4d30449985aee6c911e17, type: 3}
+  damageBuffVFXPrefab: {fileID: 1212980118294100308, guid: 627d05d2e1447394f9b37a0f9fed84dd, type: 3}
+  moveBuffVFXPrefab: {fileID: 1212980118294100308, guid: 627d05d2e1447394f9b37a0f9fed84dd, type: 3}
+  spawnAttackVFXOnAttacker: 1
+  flipAttackVFXWithDirection: 1
+  enableUltimateCameraShake: 1
+  ultimateCameraShakeDuration: 0.35
+  ultimateCameraShakeStrength: 0.25
+  ultimateCameraShakeVibrato: 18
+  ultimateCameraShakeRandomness: 90
   attackSFX: {fileID: 8300000, guid: de8a440e2e3522b4d86a80d3d700af75, type: 3}
 --- !u!1 &4341159343127094587
 GameObject:

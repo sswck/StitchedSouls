@@ -91,7 +91,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78bd1575e501b11499c0939aa74a27ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MapNode
-  nodeIndex: 0
+  nodeId: 0
   nodeType: 0
   status: 0
   button: {fileID: 4730229593664276584}
@@ -159,7 +159,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1279804761111087208
 RectTransform:
   m_ObjectHideFlags: 0

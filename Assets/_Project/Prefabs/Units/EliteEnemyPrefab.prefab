@@ -234,7 +234,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Unit
   unitName: 
-  maxHP: 100
+  maxHP: 70
   currentHP: 0
   attackSpeed: 15
   maxMovePoints: 2
@@ -251,15 +251,31 @@ MonoBehaviour:
   skeletonAnimation: {fileID: 7524962045035121095}
   idleAnimName: Idle
   attackAnimName: attack_standing
+  attackImpactDelay: 0.3
+  attackRecoveryDelay: 0.5
   activeIcon: {fileID: -1960856277, guid: 6bc8b399e58e76f4bbcc9305e1b98c75, type: 3}
   inactiveIcon: {fileID: 1908568763, guid: 2c2aacb819b528242883cedd99ec8f7d, type: 3}
   hpBarPrefab: {fileID: 98269044502590925, guid: 94cfec57033a52c4bbb6c2cc0dac6724, type: 3}
   hpBarOffset: {x: 0, y: 2.6, z: 0}
   playerHpBarOffset: {x: 0, y: 3.2, z: 0}
   currentShield: 0
-  hitVFXPrefab: {fileID: 4575391735044251980, guid: c4ad25b5e8edb09499b444a66694678c, type: 3}
+  defenseImageSprite: {fileID: 0}
+  defenseImageRotation: {x: 0, y: 0, z: 0}
+  hitVFXPrefab: {fileID: 4021103657954561961, guid: 5c755f9bc5253ea418e919994537dcc7, type: 3}
   playerHitVFXPrefab: {fileID: 0}
+  playerNormalAttackVFXPrefab: {fileID: 0}
+  playerAllAttackVFXPrefab: {fileID: 0}
+  playerUltimateAttackVFXPrefab: {fileID: 0}
+  enemyAttackVFXPrefab: {fileID: 4575391735044251980, guid: c4ad25b5e8edb09499b444a66694678c, type: 3}
   defenseVFXPrefab: {fileID: 0}
   ppRecoveryVFXPrefab: {fileID: 0}
   damageBuffVFXPrefab: {fileID: 0}
+  moveBuffVFXPrefab: {fileID: 0}
+  spawnAttackVFXOnAttacker: 0
+  flipAttackVFXWithDirection: 1
+  enableUltimateCameraShake: 1
+  ultimateCameraShakeDuration: 0.35
+  ultimateCameraShakeStrength: 0.25
+  ultimateCameraShakeVibrato: 18
+  ultimateCameraShakeRandomness: 90
   attackSFX: {fileID: 8300000, guid: 8e92c699bb5aba74da28b6ca1d9be995, type: 3}
